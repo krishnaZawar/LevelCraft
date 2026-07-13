@@ -5,32 +5,34 @@ import (
 	"testing"
 
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
+	"github.com/krishnaZawar/LevelCraft/utils/models"
 	"github.com/stretchr/testify/assert"
 )
 
 type MockCommandFactory struct {
-	mockNewCommand func([]byte) Command
+	mockNewCommand func([]byte) models.Command
 }
 
-func (mcf *MockCommandFactory) NewCommand(details []byte) Command {
+func (mcf *MockCommandFactory) NewCommand(details []byte) models.Command {
 	return mcf.mockNewCommand(details)
 }
 
 type MockCommand struct {
 	mockGetCommandName func() string
-	mockHandle         func() []Event
+	mockHandle         func() []models.Event
 }
 
 func (mc *MockCommand) GetCommandName() string {
 	return mc.mockGetCommandName()
 }
-func (mc *MockCommand) Handle() []Event {
+func (mc *MockCommand) Handle() []models.Event {
 	return mc.mockHandle()
 }
 
 type MockEvent struct {
 	mockGetEventName   func() string
 	mockGetChannelName func() string
+	mockGetSubsribers  func() []string
 }
 
 func (me *MockEvent) GetEventName() string {
@@ -38,6 +40,9 @@ func (me *MockEvent) GetEventName() string {
 }
 func (me *MockEvent) GetChannelName() string {
 	return me.mockGetChannelName()
+}
+func (me *MockEvent) GetSubscribers() []string {
+	return me.mockGetSubsribers()
 }
 
 const (
@@ -59,26 +64,29 @@ var (
 		mockGetChannelName: func() string {
 			return channel1
 		},
+		mockGetSubsribers: func() []string {
+			return []string{}
+		},
 	}
 
 	c1 = &MockCommand{
 		mockGetCommandName: func() string {
 			return command1
 		},
-		mockHandle: func() []Event {
-			return []Event{e1}
+		mockHandle: func() []models.Event {
+			return []models.Event{e1}
 		},
 	}
 
 	cf1 = &MockCommandFactory{
-		mockNewCommand: func(b []byte) Command {
+		mockNewCommand: func(b []byte) models.Command {
 			return c1
 		},
 	}
 )
 
-func NewTestDecoder() *helper.Registry[string, CommandFactory] {
-	decoder := helper.NewRegistry[string, CommandFactory]()
+func NewTestDecoder() *helper.Registry[string, models.CommandFactory] {
+	decoder := helper.NewRegistry[string, models.CommandFactory]()
 	decoder.Register(command1, cf1)
 	return decoder
 }
@@ -89,12 +97,12 @@ func Test_NewCommandQueue(t *testing.T) {
 	assert.NotNil(t, cq)
 }
 
-func Test_Ingest(t *testing.T) {
+func Test_IngestCommand(t *testing.T) {
 	cq := NewCommandQueue(NewTestDecoder())
 
 	assert.Equal(t, 0, cq.Length())
 
-	cr := CommandRequest{
+	cr := models.CommandRequest{
 		RequestType:    command1,
 		RequestDetails: []byte{},
 	}
@@ -110,24 +118,24 @@ func Test_ConsumeCommand(t *testing.T) {
 	t.Run("consume from empty queue", func(t *testing.T) {
 		events, err := cq.ConsumeCommand()
 
-		assert.Equal(t, []Event{}, events)
+		assert.Equal(t, []models.Event{}, events)
 		assert.Equal(t, err, ErrNoCommandRequestsFound)
 	})
 
 	t.Run("consume invalid command", func(t *testing.T) {
-		invalidReq := CommandRequest{
+		invalidReq := models.CommandRequest{
 			RequestType:    invalidCommand,
 			RequestDetails: []byte{},
 		}
 		cq.Ingest(invalidReq)
 		events, err := cq.ConsumeCommand()
 
-		assert.Equal(t, []Event{}, events)
+		assert.Equal(t, []models.Event{}, events)
 		assert.Equal(t, err, ErrFactoryNotFound)
 	})
 
 	t.Run("consume valid command", func(t *testing.T) {
-		req := CommandRequest{
+		req := models.CommandRequest{
 			RequestType:    command1,
 			RequestDetails: []byte{},
 		}
@@ -138,7 +146,7 @@ func Test_ConsumeCommand(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		expectedEvents := []Event{e1}
+		expectedEvents := []models.Event{e1}
 		assert.Equal(t, expectedEvents, events)
 	})
 }
@@ -147,11 +155,11 @@ func Test_ConcurrentPushPop(t *testing.T) {
 	workers := 10
 	requests := 100
 
-	invalidReq := CommandRequest{
+	invalidReq := models.CommandRequest{
 		RequestType:    invalidCommand,
 		RequestDetails: []byte{},
 	}
-	validReq := CommandRequest{
+	validReq := models.CommandRequest{
 		RequestType:    command1,
 		RequestDetails: []byte{},
 	}
@@ -166,7 +174,7 @@ func Test_ConcurrentPushPop(t *testing.T) {
 		if i%2 == 0 {
 			req = validReq
 		}
-		go func(req CommandRequest) {
+		go func(req models.CommandRequest) {
 			defer wg.Done()
 			for i := 1; i <= requests; i++ {
 				cq.Ingest(req)

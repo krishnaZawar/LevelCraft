@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
+	"github.com/krishnaZawar/LevelCraft/utils/models"
 )
 
 var (
@@ -19,21 +20,21 @@ var (
 // Note: Every valid CommandRequest should have a Factory registered with the decoder. If not then it is treated as an invalid CommandRequest
 type CommandQueue struct {
 	rqMu         sync.RWMutex
-	requestQueue *helper.Queue[CommandRequest] // Holds all the incoming CommandRequests sequentially
+	requestQueue *helper.Queue[models.CommandRequest] // Holds all the incoming CommandRequests sequentially
 
 	// decoder is used to convert the CommandRequest -> Command
-	decoder *helper.Registry[string, CommandFactory]
+	decoder *helper.Registry[string, models.CommandFactory]
 }
 
-func NewCommandQueue(decoder *helper.Registry[string, CommandFactory]) *CommandQueue {
+func NewCommandQueue(decoder *helper.Registry[string, models.CommandFactory]) *CommandQueue {
 	return &CommandQueue{
-		requestQueue: helper.NewQueue[CommandRequest](),
+		requestQueue: helper.NewQueue[models.CommandRequest](),
 		decoder:      decoder,
 	}
 }
 
 // Ingests a CommandRequest into the queue for processing
-func (cq *CommandQueue) Ingest(req CommandRequest) {
+func (cq *CommandQueue) Ingest(req models.CommandRequest) {
 	cq.rqMu.Lock()
 	defer cq.rqMu.Unlock()
 	cq.requestQueue.Push(req)
@@ -44,19 +45,19 @@ func (cq *CommandQueue) Ingest(req CommandRequest) {
 // Return types:
 //   - []Event: all the events that the command should emit
 //   - error : returns error when unable to fetch CommandRequest or the corresponding Factory
-func (cq *CommandQueue) ConsumeCommand() ([]Event, error) {
+func (cq *CommandQueue) ConsumeCommand() ([]models.Event, error) {
 	cq.rqMu.Lock()
 	req, ok := cq.requestQueue.Pop()
 	if !ok {
 		cq.rqMu.Unlock()
-		return []Event{}, ErrNoCommandRequestsFound
+		return []models.Event{}, ErrNoCommandRequestsFound
 	}
 	cq.rqMu.Unlock()
 
 	// fetch the factory for the corresponding CommandRequest
 	factory, ok := cq.decoder.GetValue(req.RequestType)
 	if !ok {
-		return []Event{}, ErrFactoryNotFound
+		return []models.Event{}, ErrFactoryNotFound
 	}
 
 	// fetch Command with all the details
@@ -68,5 +69,7 @@ func (cq *CommandQueue) ConsumeCommand() ([]Event, error) {
 
 // Length function returns the length of the commandQueue
 func (cq *CommandQueue) Length() int {
+	cq.rqMu.RLock()
+	defer cq.rqMu.RUnlock()
 	return cq.requestQueue.Length()
 }
