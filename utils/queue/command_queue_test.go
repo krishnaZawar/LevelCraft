@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"encoding/json"
 	"sync"
 	"testing"
 
@@ -10,10 +11,10 @@ import (
 )
 
 type MockCommandFactory struct {
-	mockNewCommand func([]byte) models.Command
+	mockNewCommand func(json.RawMessage) models.Command
 }
 
-func (mcf *MockCommandFactory) NewCommand(details []byte) models.Command {
+func (mcf *MockCommandFactory) NewCommand(details json.RawMessage) models.Command {
 	return mcf.mockNewCommand(details)
 }
 
@@ -79,7 +80,7 @@ var (
 	}
 
 	cf1 = &MockCommandFactory{
-		mockNewCommand: func(b []byte) models.Command {
+		mockNewCommand: func(d json.RawMessage) models.Command {
 			return c1
 		},
 	}
