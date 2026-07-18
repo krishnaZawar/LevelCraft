@@ -61,7 +61,10 @@ func (cq *CommandQueue) ConsumeCommand() ([]models.Event, error) {
 	}
 
 	// fetch Command with all the details
-	command := factory.NewCommand(req.RequestDetails)
+	command, err := factory.NewCommand(req.RequestDetails)
+	if err != nil {
+		return nil, err
+	}
 
 	// fetch all the corresponding events to be published from the Command
 	return command.Handle(), nil

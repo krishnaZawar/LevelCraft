@@ -1,0 +1,14 @@
+[
+    {
+        "name": "AddGameobjectEvent",
+        "description": "Adds a new gameobject to the scene",
+        "dataHeld": {}
+    },
+    {
+        "name": "DeleteGameobjectEvent",
+        "description": "Deletes an existing gameobject from the scene",
+        "dataHeld": {
+            "id": "<gamobject-id>"
+        }
+    }
+]

@@ -2,6 +2,7 @@ package queue
 
 import (
 	"encoding/json"
+	"errors"
 	"sync"
 	"testing"
 
@@ -11,10 +12,10 @@ import (
 )
 
 type MockCommandFactory struct {
-	mockNewCommand func(json.RawMessage) models.Command
+	mockNewCommand func(json.RawMessage) (models.Command, error)
 }
 
-func (mcf *MockCommandFactory) NewCommand(details json.RawMessage) models.Command {
+func (mcf *MockCommandFactory) NewCommand(details json.RawMessage) (models.Command, error) {
 	return mcf.mockNewCommand(details)
 }
 
@@ -31,42 +32,26 @@ func (mc *MockCommand) Handle() []models.Event {
 }
 
 type MockEvent struct {
-	mockGetEventName   func() string
-	mockGetChannelName func() string
-	mockGetSubsribers  func() []string
+	mockGetEventName func() string
 }
 
 func (me *MockEvent) GetEventName() string {
 	return me.mockGetEventName()
 }
-func (me *MockEvent) GetChannelName() string {
-	return me.mockGetChannelName()
-}
-func (me *MockEvent) GetSubscribers() []string {
-	return me.mockGetSubsribers()
-}
 
 const (
 	event1 = "event1"
 
-	channel1 = "channel1"
-
 	command1       = "command1"
 	invalidCommand = "invalid"
 
-	commandFactory1 = "commandFactory1"
+	factoryErr = "error"
 )
 
 var (
 	e1 = &MockEvent{
 		mockGetEventName: func() string {
 			return event1
-		},
-		mockGetChannelName: func() string {
-			return channel1
-		},
-		mockGetSubsribers: func() []string {
-			return []string{}
 		},
 	}
 
@@ -80,8 +65,13 @@ var (
 	}
 
 	cf1 = &MockCommandFactory{
-		mockNewCommand: func(d json.RawMessage) models.Command {
-			return c1
+		mockNewCommand: func(d json.RawMessage) (models.Command, error) {
+			return c1, nil
+		},
+	}
+	cf2 = &MockCommandFactory{
+		mockNewCommand: func(d json.RawMessage) (models.Command, error) {
+			return nil, errors.New(factoryErr)
 		},
 	}
 )
@@ -149,6 +139,22 @@ func Test_ConsumeCommand(t *testing.T) {
 
 		expectedEvents := []models.Event{e1}
 		assert.Equal(t, expectedEvents, events)
+	})
+
+	t.Run("test error from factory", func(t *testing.T) {
+		decoder := helper.NewRegistry[string, models.CommandFactory]()
+		decoder.Register(command1, cf2)
+		cq := NewCommandQueue(decoder)
+
+		req := models.CommandRequest{
+			RequestType:    command1,
+			RequestDetails: []byte{},
+		}
+		cq.Ingest(req)
+
+		_, err := cq.ConsumeCommand()
+
+		assert.NotNil(t, err)
 	})
 }
 

@@ -23,5 +23,5 @@ type Command interface {
 
 // CommandFactory holds the implementation to convert the CommandRequest details to the Command of our choice
 type CommandFactory interface {
-	NewCommand(json.RawMessage) Command
+	NewCommand(json.RawMessage) (Command, error)
 }

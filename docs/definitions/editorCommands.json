@@ -1,0 +1,20 @@
+[
+    {
+        "name": "AddGameObjectCommand",
+        "description": "send out a request to add a gameObject to the scene",
+        "payload": {},
+        "eventsEmitted": [
+            "AddGameobjectEvent"
+        ]
+    },
+    {
+        "name": "DeleteGameObject",
+        "description": "send out a request to delete a gameObject in the scene",
+        "payload": {
+            "id": "<gameobject-id>"
+        },
+        "eventsEmitted": [
+            "DeleteGameobjectEvent"
+        ]
+    }
+]
