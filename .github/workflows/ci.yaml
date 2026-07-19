@@ -22,20 +22,29 @@ jobs:
       - name: Generate go.work
         run: |
           go work init
-
           for mod in $(find -name go.mod); do
             go work use "$(dirname "$mod")"
           done
+          echo "Generated go.work:"
+          cat go.work
 
-      - name: Test go modules
+      - name: Verify Go workspace
         run: |
-          for mod in $(find -name go.mod); do
-            dir=$(dirname $mod)
+          go env GOWORK
+
+      - name: Test Go modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mod in $(find . -name go.mod); do
+            dir=$(dirname "$mod")
+            echo "=================================="
             echo "Testing $dir"
-            cd $dir
-            go mod download
-            go vet ./...
-            go test -cover ./...
-            go build ./...
-            cd -
+            echo "=================================="
+            (
+              cd "$dir"
+              go vet ./...
+              go test -cover ./...
+              go build ./...
+            )
           done
