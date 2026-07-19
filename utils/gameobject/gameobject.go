@@ -34,6 +34,11 @@ func (g *Gameobject) AddComponent(comp component.Component) bool {
 	return true
 }
 
+// removes an existing component from the gameobject
+func (g *Gameobject) RemoveComponent(name string) {
+	delete(g.components, name)
+}
+
 // Returns the requested component
 //
 // Return values:

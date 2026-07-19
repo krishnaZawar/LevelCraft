@@ -8,7 +8,7 @@ import (
 
 // DeleteGameobjectEvent triggers the deletion of gameobject in the scene, if it exists
 type DeleteGameobjectEvent struct {
-	ID string
+	ID string // unique identifier of the gameobject to be deleted
 }
 
 func NewDeleteGameobjectEvent(id string) *DeleteGameobjectEvent {

@@ -48,4 +48,12 @@ func Test_NewSingleton(t *testing.T) {
 	handler, ok = evtManager.GetHandler(base.Event_DeleteGameobject)
 	assert.Equal(t, true, ok)
 	assert.IsType(t, &event.DeleteGameobjectEventHandler{}, handler)
+
+	handler, ok = evtManager.GetHandler(base.Event_AttachComponent)
+	assert.Equal(t, true, ok)
+	assert.IsType(t, &event.AttachComponentEventHandler{}, handler)
+
+	handler, ok = evtManager.GetHandler(base.Event_DetachComponent)
+	assert.Equal(t, true, ok)
+	assert.IsType(t, &event.DetachComponentEventHandler{}, handler)
 }

@@ -18,4 +18,12 @@ func Test_InitCommandFactoryDecoder(t *testing.T) {
 	handler, ok = decoder.GetValue(base.Command_DeleteGameobject)
 	assert.Equal(t, true, ok)
 	assert.IsType(t, &command.DeleteGameobjectCommandFactory{}, handler)
+
+	handler, ok = decoder.GetValue(base.Command_AttachComponent)
+	assert.Equal(t, true, ok)
+	assert.IsType(t, &command.AttachComponentCommandFactory{}, handler)
+
+	handler, ok = decoder.GetValue(base.Command_DetachComponent)
+	assert.Equal(t, true, ok)
+	assert.IsType(t, &command.DetachComponentCommandFactory{}, handler)
 }

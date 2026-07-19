@@ -15,6 +15,9 @@ func initCommandFactoryDecoder() *helper.Registry[string, models.CommandFactory]
 	decoder := helper.NewRegistry[string, models.CommandFactory]()
 	decoder.Register(base.Command_AddGameobject, command.NewAddGameobjectCommandFactory())
 	decoder.Register(base.Command_DeleteGameobject, command.NewDeleteGameobjectCommandFactory())
+	decoder.Register(base.Command_AttachComponent, command.NewAttachComponentCommandFactory())
+	decoder.Register(base.Command_DetachComponent, command.NewDetachComponentCommandFactory())
+	decoder.Register(base.Command_UpdateComponent, command.NewUpdateComponentCommandFactory())
 	return decoder
 }
 

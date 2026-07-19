@@ -26,6 +26,9 @@ func registerHandlers(evtManager *EventManager) {
 	gsm := gamestatemanager.Get()
 	evtManager.Register(base.Event_AddGameobject, event.NewAddGameobjectEventHandler(gsm))
 	evtManager.Register(base.Event_DeleteGameobject, event.NewDeleteGameobjectEventHandler(gsm))
+	evtManager.Register(base.Event_AttachComponent, event.NewAttachComponentEventHandler(gsm))
+	evtManager.Register(base.Event_DetachComponent, event.NewDetachComponentEventHandler(gsm))
+	evtManager.Register(base.Event_UpdateComponent, event.NewUpdateComponentEventHandler(gsm))
 }
 
 // registers a new handler for a particular event

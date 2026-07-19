@@ -67,7 +67,9 @@ func updateEditor(
 		}
 		resp := handler.Handle(event)
 
-		ls.Info().Msgf("resp received for %s is %+v", event.GetEventName(), resp)
+		if !resp.Success {
+			ls.Warn().Msgf("event failed, event: %+v, resp: %+v", event, resp)
+		}
 
 		if resp.ShouldEmit {
 			respQueue.Push(*resp)

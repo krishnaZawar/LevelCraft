@@ -10,5 +10,30 @@
         "dataHeld": {
             "id": "<gamobject-id>"
         }
+    },
+    {
+        "name": "AttachComponentEvent",
+        "description": "Adds the component, if not exists, to the specified gameobject",
+        "dataHeld": {
+            "id": "<gamobject-id>",
+            "componentName": "<component-name>"
+        }
+    },
+    {
+        "name": "DetachComponentEvent",
+        "description": "removes the component, if not exists, from the specified gameobject",
+        "dataHeld": {
+            "id": "<gamobject-id>",
+            "componentName": "<component-name>"
+        }
+    },
+    {
+        "name": "UpdateComponentEvent",
+        "description": "updates the component, if not exists, from the specified gameobject",
+        "dataHeld": {
+            "id": "<gamobject-id>",
+            "componentName": "<component-name>",
+            "data": "<updated data in json format>"
+        }
     }
 ]

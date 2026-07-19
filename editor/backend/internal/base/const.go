@@ -6,12 +6,18 @@ const ServiceName = "game-editor"
 const (
 	Command_AddGameobject    = "AddGameobjectCommand"
 	Command_DeleteGameobject = "DeleteGameobjectCommand"
+	Command_AttachComponent  = "AttachComponentCommand"
+	Command_DetachComponent  = "DetachComponentCommand"
+	Command_UpdateComponent  = "UpdateComponentCommand"
 )
 
 // holds the names of all the events used by the editor
 const (
 	Event_AddGameobject    = "AddGameobjectEvent"
 	Event_DeleteGameobject = "DeleteGameobjectEvent"
+	Event_AttachComponent  = "AttachComponentEvent"
+	Event_DetachComponent  = "DetachComponentEvent"
+	Event_UpdateComponent  = "UpdateComponentEvent"
 )
 
 const (
