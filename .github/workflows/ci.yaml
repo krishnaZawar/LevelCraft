@@ -19,6 +19,14 @@ jobs:
           go-version: "1.26.1"
           cache: true
 
+      - name: Generate go.work
+        run: |
+          go work init
+
+          for mod in $(find -name go.mod); do
+            go work use "$(dirname "$mod")"
+          done
+
       - name: Test go modules
         run: |
           for mod in $(find -name go.mod); do
