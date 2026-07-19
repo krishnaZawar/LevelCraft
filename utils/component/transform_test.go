@@ -56,3 +56,21 @@ func Test_GetTransformComponentDetails(t *testing.T) {
 	assert.Equal(t, w, data["w"].(int))
 	assert.Equal(t, h, data["h"].(int))
 }
+
+func Test_BuildFromDetails(t *testing.T) {
+	tr := newBaseTransform()
+
+	data := map[string]interface{}{
+		"x": 12,
+		"w": 10,
+	}
+
+	tr.BuildFromDetails(data)
+
+	x, y := tr.GetPosition()
+	w, h := tr.GetDimension()
+	assert.Equal(t, 12, x)
+	assert.Equal(t, defaultTransformValue, y)
+	assert.Equal(t, 10, w)
+	assert.Equal(t, defaultTransformValue, h)
+}

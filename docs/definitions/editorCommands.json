@@ -1,0 +1,54 @@
+[
+    {
+        "name": "AddGameobjectCommand",
+        "description": "send out a request to add a gameObject to the scene",
+        "payload": {},
+        "eventsEmitted": [
+            "AddGameobjectEvent"
+        ]
+    },
+    {
+        "name": "DeleteGameobjectCommand",
+        "description": "send out a request to delete a gameObject in the scene",
+        "payload": {
+            "id": "<gameobject-id>"
+        },
+        "eventsEmitted": [
+            "DeleteGameobjectEvent"
+        ]
+    },
+    {
+        "name": "AttachComponentCommand",
+        "description": "adds a component to a specific gameobject",
+        "payload": {
+            "id": "<gameobject-id>",
+            "componentName": "<component-name>"
+        },
+        "eventsEmitted": [
+            "AttachComponentEvent"
+        ]
+    },
+    {
+        "name": "DetachComponentCommand",
+        "description": "removes a component attached to a particular gameobject, if it exists",
+        "payload": {
+            "id": "<gameobject-id>",
+            "componentName": "<component-name>"
+        },
+        "eventsEmitted": [
+            "DetachComponentEvent"
+        ]
+    },
+    {
+        "name": "UpdateComponentCommand",
+        "description": "Updates a component attached to a particular gameobject, if it exists",
+        "payload": {
+            "id": "<gameobject-id>",
+            "componentName": "<component-name>",
+            "data": "<updated data in json format>"  
+        },
+        "eventsEmitted": [
+            "UpdateComponentEvent"
+        ]
+    }
+]

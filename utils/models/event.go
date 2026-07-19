@@ -6,10 +6,4 @@ type Event interface {
 	//
 	// This is the identifier for the Event
 	GetEventName() string
-
-	// Returns the name of the eventStream where the event should be published
-	GetChannelName() string
-
-	// Returns the name of all the components which should be triggered for this event
-	GetSubscribers() []string
 }

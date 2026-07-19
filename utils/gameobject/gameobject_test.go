@@ -13,6 +13,7 @@ const (
 type MockComponent struct {
 	mockGetComponentName    func() string
 	mockGetComponentDetails func() map[string]interface{}
+	mockBuildFromDetails    func(map[string]interface{})
 }
 
 func (mc *MockComponent) GetComponentName() string {
@@ -20,6 +21,9 @@ func (mc *MockComponent) GetComponentName() string {
 }
 func (mc *MockComponent) GetComponentDetails() map[string]interface{} {
 	return mc.mockGetComponentDetails()
+}
+func (mc *MockComponent) BuildFromDetails(data map[string]interface{}) {
+	mc.mockBuildFromDetails(data)
 }
 
 var (
@@ -34,6 +38,9 @@ var (
 					"field": "val",
 				},
 			}
+		},
+		mockBuildFromDetails: func(m map[string]interface{}) {
+			// pass
 		},
 	}
 )
@@ -64,6 +71,22 @@ func Test_AddComponent(t *testing.T) {
 
 	t.Run("when component exists", func(t *testing.T) {
 		ok := obj.AddComponent(comp)
+		assert.Equal(t, false, ok)
+	})
+}
+
+func Test_RemoveComponent(t *testing.T) {
+	obj := NewGameobject()
+	obj.AddComponent(comp)
+	t.Run("delete non existent component", func(t *testing.T) {
+		obj.RemoveComponent("")
+		val, ok := obj.GetComponent(comp.GetComponentName())
+		assert.Equal(t, true, ok)
+		assert.Equal(t, comp, val)
+	})
+	t.Run("delete existing component", func(t *testing.T) {
+		obj.RemoveComponent(comp.GetComponentName())
+		_, ok := obj.GetComponent(comp.GetComponentName())
 		assert.Equal(t, false, ok)
 	})
 }
