@@ -1,0 +1,37 @@
+name: LevelCraft CI
+
+on:
+  push
+
+jobs:
+  go-services:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Cloning Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.1"
+          cache: true
+
+      - name: Test Go modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mod in $(find . -name go.mod); do
+            dir=$(dirname "$mod")
+            echo "=================================="
+            echo "Testing $dir"
+            echo "=================================="
+            (
+              cd "$dir"
+              go vet ./...
+              go test -cover ./...
+              go build ./...
+            )
+          done
