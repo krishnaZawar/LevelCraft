@@ -19,19 +19,6 @@ jobs:
           go-version: "1.26.1"
           cache: true
 
-      - name: Generate go.work
-        run: |
-          go work init
-          for mod in $(find -name go.mod); do
-            go work use "$(dirname "$mod")"
-          done
-          echo "Generated go.work:"
-          cat go.work
-
-      - name: Verify Go workspace
-        run: |
-          go env GOWORK
-
       - name: Test Go modules
         shell: bash
         run: |
