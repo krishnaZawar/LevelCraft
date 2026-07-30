@@ -40,7 +40,7 @@ func NewUpdateComponentEventHandler(gsm *gamestatemanager.GameStateManager) *Upd
 }
 
 // update the game scene according to the event
-func (uch *UpdateComponentEventHandler) Handle(event models.Event) *EventResponse {
+func (uch *UpdateComponentEventHandler) Handle(event models.Event) *models.EventResponse {
 	evt, ok := event.(*UpdateComponentEvent)
 	if !ok {
 		return NewEmittableResponse(false, base.ErrIncorrectEventDataFound, nil)
@@ -62,4 +62,4 @@ func (uch *UpdateComponentEventHandler) Handle(event models.Event) *EventRespons
 }
 
 var _ models.Event = &UpdateComponentEvent{}
-var _ EventHandler = &UpdateComponentEventHandler{}
+var _ models.EventHandler = &UpdateComponentEventHandler{}

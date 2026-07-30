@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/base"
-	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/event"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/eventmanager"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/gamestatemanager"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/queue"
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
+	"github.com/krishnaZawar/LevelCraft/utils/models"
 	utilqueue "github.com/krishnaZawar/LevelCraft/utils/queue"
 )
 
@@ -24,7 +24,7 @@ func EditorLoop() {
 
 	for range ticker.C {
 		updateEditor(cmdQueue, evtQueue, respQueue, evtManager)
-		resp := event.EventResponse{
+		resp := models.EventResponse{
 			Success: true,
 			Msg:     "gameState",
 			Data:    gamestatemanager.Get().GetGameState(),
@@ -37,7 +37,7 @@ func EditorLoop() {
 func updateEditor(
 	cmdQueue *utilqueue.CommandQueue,
 	evtQueue *utilqueue.EventQueue,
-	respQueue *helper.Queue[event.EventResponse],
+	respQueue *helper.Queue[models.EventResponse],
 	evtManager *eventmanager.EventManager,
 ) {
 	// process commands and emit out relevant events

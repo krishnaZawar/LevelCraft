@@ -41,7 +41,7 @@ func NewAttachComponentEventHandler(gsm *gamestatemanager.GameStateManager) *Att
 }
 
 // update the game scene according to the event
-func (ach *AttachComponentEventHandler) Handle(event models.Event) *EventResponse {
+func (ach *AttachComponentEventHandler) Handle(event models.Event) *models.EventResponse {
 	evt, ok := event.(*AttachComponentEvent)
 	if !ok {
 		return NewEmittableResponse(false, base.ErrIncorrectEventDataFound, nil)
@@ -66,4 +66,4 @@ func (ach *AttachComponentEventHandler) Handle(event models.Event) *EventRespons
 }
 
 var _ models.Event = &AttachComponentEvent{}
-var _ EventHandler = &AttachComponentEventHandler{}
+var _ models.EventHandler = &AttachComponentEventHandler{}

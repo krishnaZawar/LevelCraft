@@ -34,7 +34,7 @@ func NewDeleteGameobjectEventHandler(gsm *gamestatemanager.GameStateManager) *De
 }
 
 // update the game scene according to the event
-func (dgh *DeleteGameobjectEventHandler) Handle(event models.Event) *EventResponse {
+func (dgh *DeleteGameobjectEventHandler) Handle(event models.Event) *models.EventResponse {
 	evt, ok := event.(*DeleteGameobjectEvent)
 	if !ok {
 		return NewEmittableResponse(false, base.ErrIncorrectEventDataFound, nil)
@@ -46,4 +46,4 @@ func (dgh *DeleteGameobjectEventHandler) Handle(event models.Event) *EventRespon
 }
 
 var _ models.Event = &DeleteGameobjectEvent{}
-var _ EventHandler = &DeleteGameobjectEventHandler{}
+var _ models.EventHandler = &DeleteGameobjectEventHandler{}

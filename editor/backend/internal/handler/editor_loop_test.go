@@ -41,10 +41,10 @@ func (me *MockEvent) GetEventName() string {
 }
 
 type MockEventHandler struct {
-	mockHandle func(models.Event) *event.EventResponse
+	mockHandle func(models.Event) *models.EventResponse
 }
 
-func (meh *MockEventHandler) Handle(evt models.Event) *event.EventResponse {
+func (meh *MockEventHandler) Handle(evt models.Event) *models.EventResponse {
 	return meh.mockHandle(evt)
 }
 
@@ -101,20 +101,20 @@ var (
 	}
 
 	evtHandler = &MockEventHandler{
-		mockHandle: func(e models.Event) *event.EventResponse {
+		mockHandle: func(e models.Event) *models.EventResponse {
 			return event.NewEmittableResponse(true, "success", nil)
 		},
 	}
 )
 
-func MockLoopData() (*queue.CommandQueue, *queue.EventQueue, *helper.Queue[event.EventResponse], *eventmanager.EventManager) {
+func MockLoopData() (*queue.CommandQueue, *queue.EventQueue, *helper.Queue[models.EventResponse], *eventmanager.EventManager) {
 	decoder := helper.NewRegistry[string, models.CommandFactory]()
 	decoder.Register(commandName, cmdFactory)
 	decoder.Register(invalidEventCommandName, invalidEventCmdFactory)
 
 	cmdQueue := queue.NewCommandQueue(decoder)
 	evtQueue := queue.NewEventQueue()
-	respQueue := helper.NewQueue[event.EventResponse]()
+	respQueue := helper.NewQueue[models.EventResponse]()
 
 	evtManager := eventmanager.NewEventManager()
 	evtManager.Register(eventName, evtHandler)
