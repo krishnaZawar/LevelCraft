@@ -3,7 +3,6 @@ package queue
 import (
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/base"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/command"
-	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/event"
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
 	"github.com/krishnaZawar/LevelCraft/utils/models"
 	"github.com/krishnaZawar/LevelCraft/utils/queue"
@@ -25,7 +24,7 @@ var cmdQueue = queue.NewCommandQueue(initCommandFactoryDecoder())
 
 var evtQueue = queue.NewEventQueue()
 
-var respQueue = helper.NewQueue[event.EventResponse]()
+var respQueue = helper.NewQueue[models.EventResponse]()
 
 func GetCommandQueue() *queue.CommandQueue {
 	return cmdQueue
@@ -35,6 +34,6 @@ func GetEventQueue() *queue.EventQueue {
 	return evtQueue
 }
 
-func GetRespQueue() *helper.Queue[event.EventResponse] {
+func GetRespQueue() *helper.Queue[models.EventResponse] {
 	return respQueue
 }

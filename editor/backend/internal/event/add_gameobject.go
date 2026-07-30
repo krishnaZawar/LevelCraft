@@ -31,7 +31,7 @@ func NewAddGameobjectEventHandler(gsm *gamestatemanager.GameStateManager) *AddGa
 }
 
 // update the game scene according to the event
-func (agh *AddGameobjectEventHandler) Handle(event models.Event) *EventResponse {
+func (agh *AddGameobjectEventHandler) Handle(event models.Event) *models.EventResponse {
 	_, ok := event.(*AddGameobjectEvent)
 
 	if !ok {
@@ -46,4 +46,4 @@ func (agh *AddGameobjectEventHandler) Handle(event models.Event) *EventResponse 
 }
 
 var _ models.Event = &AddGameobjectEvent{}
-var _ EventHandler = &AddGameobjectEventHandler{}
+var _ models.EventHandler = &AddGameobjectEventHandler{}

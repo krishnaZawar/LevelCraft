@@ -38,7 +38,7 @@ func NewDetachComponentEventHandler(gsm *gamestatemanager.GameStateManager) *Det
 }
 
 // update the game scene according to the event
-func (dch *DetachComponentEventHandler) Handle(event models.Event) *EventResponse {
+func (dch *DetachComponentEventHandler) Handle(event models.Event) *models.EventResponse {
 	evt, ok := event.(*DetachComponentEvent)
 	if !ok {
 		return NewEmittableResponse(false, base.ErrIncorrectEventDataFound, nil)
@@ -55,4 +55,4 @@ func (dch *DetachComponentEventHandler) Handle(event models.Event) *EventRespons
 }
 
 var _ models.Event = &DetachComponentEvent{}
-var _ EventHandler = &DetachComponentEventHandler{}
+var _ models.EventHandler = &DetachComponentEventHandler{}

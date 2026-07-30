@@ -10,10 +10,10 @@ import (
 )
 
 type MockEventHandler struct {
-	mockHandle func(models.Event) *event.EventResponse
+	mockHandle func(models.Event) *models.EventResponse
 }
 
-func (meh *MockEventHandler) Handle(evt models.Event) *event.EventResponse {
+func (meh *MockEventHandler) Handle(evt models.Event) *models.EventResponse {
 	return meh.mockHandle(evt)
 }
 
@@ -22,7 +22,7 @@ func Test_EventManager(t *testing.T) {
 
 	name := "temp"
 	handler := &MockEventHandler{
-		mockHandle: func(e models.Event) *event.EventResponse {
+		mockHandle: func(e models.Event) *models.EventResponse {
 			return event.NewEmittableResponse(true, "dummy resp", nil)
 		},
 	}
@@ -38,7 +38,7 @@ func Test_NewSingleton(t *testing.T) {
 
 	assert.NotNil(t, evtManager)
 
-	var handler event.EventHandler
+	var handler models.EventHandler
 	var ok bool
 
 	handler, ok = evtManager.GetHandler(base.Event_AddGameobject)

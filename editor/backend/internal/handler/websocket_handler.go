@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/gofiber/contrib/websocket"
-	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/event"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/logger"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/queue"
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
@@ -89,7 +88,7 @@ func writeLoop(c *websocket.Conn, errCh chan<- error) {
 // returns error on write failures only.
 // Marshalling is ignored as a failure because
 // this is due to a faulty response, not a connection issue
-func writeLoopIter(c *websocket.Conn, respQueue *helper.Queue[event.EventResponse]) error {
+func writeLoopIter(c *websocket.Conn, respQueue *helper.Queue[models.EventResponse]) error {
 	resp, ok := respQueue.Pop()
 	if !ok {
 		return nil
