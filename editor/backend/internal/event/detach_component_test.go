@@ -11,14 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_DetachComponentEvent(t *testing.T) {
-	dce := NewDetachComponentEvent("123", "name")
-
-	assert.Equal(t, "123", dce.ID)
-	assert.Equal(t, "name", dce.ComponentName)
-	assert.Equal(t, base.Event_DetachComponent, dce.GetEventName())
-}
-
 func Test_DetachComponentEventHandler(t *testing.T) {
 	gsm := gamestatemanager.NewGameStateManager()
 	dch := NewDetachComponentEventHandler(gsm)

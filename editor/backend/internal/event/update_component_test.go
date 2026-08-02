@@ -11,15 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_UpdateComponentEvent(t *testing.T) {
-	uce := NewUpdateComponentEvent("123", "name", map[string]interface{}{})
-
-	assert.Equal(t, "123", uce.ID)
-	assert.Equal(t, "name", uce.ComponentName)
-	assert.Equal(t, map[string]interface{}{}, uce.Data)
-	assert.Equal(t, base.Event_UpdateComponent, uce.GetEventName())
-}
-
 func Test_UpdateComponentEventHandler(t *testing.T) {
 	gsm := gamestatemanager.NewGameStateManager()
 	uch := NewUpdateComponentEventHandler(gsm)

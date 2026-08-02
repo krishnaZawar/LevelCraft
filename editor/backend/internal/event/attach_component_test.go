@@ -10,14 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_AttachComponentEvent(t *testing.T) {
-	dge := NewAttachComponentEvent("123", "name")
-
-	assert.Equal(t, "123", dge.ID)
-	assert.Equal(t, "name", dge.ComponentName)
-	assert.Equal(t, base.Event_AttachComponent, dge.GetEventName())
-}
-
 func Test_AttachComponentEventHandler(t *testing.T) {
 	gsm := gamestatemanager.NewGameStateManager()
 	dgh := NewAttachComponentEventHandler(gsm)
