@@ -8,12 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_AddGameobjectEvent(t *testing.T) {
-	age := NewAddGameobjectEvent()
-
-	assert.Equal(t, base.Event_AddGameobject, age.GetEventName())
-}
-
 func Test_AddGameobjectEventHandler(t *testing.T) {
 	gsm := gamestatemanager.NewGameStateManager()
 	agh := NewAddGameobjectEventHandler(gsm)

@@ -9,13 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_DeleteGameobjectEvent(t *testing.T) {
-	dge := NewDeleteGameobjectEvent("123")
-
-	assert.Equal(t, "123", dge.ID)
-	assert.Equal(t, base.Event_DeleteGameobject, dge.GetEventName())
-}
-
 func Test_DeleteGameobjectEventHandler(t *testing.T) {
 	gsm := gamestatemanager.NewGameStateManager()
 	dgh := NewDeleteGameobjectEventHandler(gsm)

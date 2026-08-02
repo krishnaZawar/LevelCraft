@@ -15,4 +15,5 @@ func CreateRoutes(app *fiber.App) {
 		})
 	})
 	app.Get("/requests", websocket.New(handler.HandleCommandRequests))
+	app.Post("/game/save", handler.HandleSaveGame)
 }
