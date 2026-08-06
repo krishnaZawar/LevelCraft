@@ -14,6 +14,8 @@ github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2
 github.com/klauspost/compress v1.17.9/go.mod h1:Di0epgTjJY877eYKx5yC51cX2A2Vl2ibi7bDH9ttBbw=
 github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260730141608-56f8844c5294 h1:PVvfWHME+kuVRPpWhHokaiw8lKtMPbSleasNZvaclMQ=
 github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260730141608-56f8844c5294/go.mod h1:ncRmSuQuVOE8HqFrbK1rfE5HVIF6nF9UsNSuEWIW90Q=
+github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260806144024-bec5304249c4 h1:C7Cpp+t8jpLKrby/1mtrxZaFeMDos0yOJB5mWWA1T2E=
+github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260806144024-bec5304249c4/go.mod h1:ncRmSuQuVOE8HqFrbK1rfE5HVIF6nF9UsNSuEWIW90Q=
 github.com/krishnaZawar/distributed-logger/logger-sdk v0.0.0-20260604170103-09a3e7e26c78 h1:MpHw5In37Of0BWnmjc4xRA893jvjQLyfDNKLuz3U6GM=
 github.com/krishnaZawar/distributed-logger/logger-sdk v0.0.0-20260604170103-09a3e7e26c78/go.mod h1:R9osdqblFGTEX3TqYuI4dBHszV9l+co9KYvAF27xF4U=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=
