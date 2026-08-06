@@ -38,6 +38,7 @@ func newComponentRegistry() *ComponentRegistry {
 func NewComponentRegistry() *ComponentRegistry {
 	compRegistry := newComponentRegistry()
 	compRegistry.register(base.ComponentName_Transform, newBaseTransform())
+	compRegistry.register(base.ComponentName_Color, newBaseColor())
 
 	return compRegistry
 }
