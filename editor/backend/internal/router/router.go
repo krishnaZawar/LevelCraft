@@ -3,7 +3,6 @@ package router
 import (
 	"net/http"
 
-	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/handler"
 )
@@ -14,6 +13,17 @@ func CreateRoutes(app *fiber.App) {
 			"data": "pong.",
 		})
 	})
-	app.Get("/requests", websocket.New(handler.HandleCommandRequests))
-	app.Post("/game/save", handler.HandleSaveGame)
+
+	game := app.Group("/game")
+	game.Post("/save", handler.HandleSaveGame)
+	game.Get("/state", handler.GetGameState)
+
+	gameobjects := app.Group("/gameobjects")
+	gameobjects.Post("/", handler.AddGameobject)
+	gameobjects.Delete("/:objectID", handler.DeleteGameobject)
+
+	components := gameobjects.Group("/:objectID/components")
+	components.Post("/:componentName", handler.AddComponent)
+	components.Delete("/:componentName", handler.DeleteComponent)
+	components.Put("/:componentName", handler.UpdateComponent)
 }
