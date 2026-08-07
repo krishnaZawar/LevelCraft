@@ -18,7 +18,7 @@ type Component interface {
 	GetComponentDetails() map[string]interface{}
 
 	// Builds the component from the data it is provided
-	BuildFromDetails(map[string]interface{})
+	BuildFromDetails(map[string]interface{}) error
 }
 
 // Creates a new component based on the component name

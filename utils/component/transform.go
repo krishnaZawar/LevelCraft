@@ -1,6 +1,8 @@
 package component
 
-import "github.com/krishnaZawar/LevelCraft/utils/component/base"
+import (
+	"github.com/krishnaZawar/LevelCraft/utils/component/base"
+)
 
 const (
 	// default value of each attribute for the base transform object
@@ -74,42 +76,55 @@ func (t *Transform) GetComponentDetails() map[string]interface{} {
 }
 
 // Build component from provided details
-func (t *Transform) BuildFromDetails(data map[string]interface{}) {
+func (t *Transform) BuildFromDetails(data map[string]interface{}) error {
+	temp := *t
 	if v, ok := data["x"]; ok {
 		switch n := v.(type) {
 		case int:
-			t.x = n
+			temp.x = n
 		case float64:
-			t.x = int(n)
+			temp.x = int(n)
+		default:
+			return base.ErrExpectedInteger
 		}
 	}
 
 	if v, ok := data["y"]; ok {
 		switch n := v.(type) {
 		case int:
-			t.y = n
+			temp.y = n
 		case float64:
-			t.y = int(n)
+			temp.y = int(n)
+		default:
+			return base.ErrExpectedInteger
 		}
 	}
 
 	if v, ok := data["w"]; ok {
 		switch n := v.(type) {
 		case int:
-			t.w = n
+			temp.w = n
 		case float64:
-			t.w = int(n)
+			temp.w = int(n)
+		default:
+			return base.ErrExpectedInteger
 		}
 	}
 
 	if v, ok := data["h"]; ok {
 		switch n := v.(type) {
 		case int:
-			t.h = n
+			temp.h = n
 		case float64:
-			t.h = int(n)
+			temp.h = int(n)
+		default:
+			return base.ErrExpectedInteger
 		}
 	}
+
+	*t = temp
+
+	return nil
 }
 
 var _ Component = &Transform{}

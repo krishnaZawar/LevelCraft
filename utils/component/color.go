@@ -45,10 +45,10 @@ func (c *Color) Get() (int, int, int, int) {
 
 // set the shade and transparency
 func (c *Color) Set(r int, g int, b int, a int) {
-	c.r = r
-	c.g = g
-	c.b = b
-	c.a = a
+	c.r = min(base.ColorValueRangeMax, max(r, base.ColorValueRangeMin))
+	c.g = min(base.ColorValueRangeMax, max(g, base.ColorValueRangeMin))
+	c.b = min(base.ColorValueRangeMax, max(b, base.ColorValueRangeMin))
+	c.a = min(base.ColorValueRangeMax, max(a, base.ColorValueRangeMin))
 }
 
 // Returns the name of the component
@@ -67,42 +67,67 @@ func (c *Color) GetComponentDetails() map[string]interface{} {
 }
 
 // Build component from provided details
-func (c *Color) BuildFromDetails(data map[string]interface{}) {
+func (c *Color) BuildFromDetails(data map[string]interface{}) error {
+	temp := *c
 	if v, ok := data["r"]; ok {
 		switch n := v.(type) {
 		case int:
-			c.r = n
+			temp.r = n
 		case float64:
-			c.r = int(n)
+			temp.r = int(n)
+		default:
+			return base.ErrExpectedInteger
+		}
+		if temp.r < base.ColorValueRangeMin || temp.r > base.ColorValueRangeMax {
+			return base.ErrColorValueRangeOutOfBounds
 		}
 	}
 
 	if v, ok := data["g"]; ok {
 		switch n := v.(type) {
 		case int:
-			c.g = n
+			temp.g = n
 		case float64:
-			c.g = int(n)
+			temp.g = int(n)
+		default:
+			return base.ErrExpectedInteger
+		}
+		if temp.g < base.ColorValueRangeMin || temp.g > base.ColorValueRangeMax {
+			return base.ErrColorValueRangeOutOfBounds
 		}
 	}
 
 	if v, ok := data["b"]; ok {
 		switch n := v.(type) {
 		case int:
-			c.b = n
+			temp.b = n
 		case float64:
-			c.b = int(n)
+			temp.b = int(n)
+		default:
+			return base.ErrExpectedInteger
+		}
+		if temp.b < base.ColorValueRangeMin || temp.b > base.ColorValueRangeMax {
+			return base.ErrColorValueRangeOutOfBounds
 		}
 	}
 
 	if v, ok := data["a"]; ok {
 		switch n := v.(type) {
 		case int:
-			c.a = n
+			temp.a = n
 		case float64:
-			c.a = int(n)
+			temp.a = int(n)
+		default:
+			return base.ErrExpectedInteger
+		}
+		if temp.a < base.ColorValueRangeMin || temp.a > base.ColorValueRangeMax {
+			return base.ErrColorValueRangeOutOfBounds
 		}
 	}
+
+	*c = temp
+
+	return nil
 }
 
 var _ Component = &Color{}

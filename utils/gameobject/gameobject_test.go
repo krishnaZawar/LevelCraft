@@ -13,7 +13,7 @@ const (
 type MockComponent struct {
 	mockGetComponentName    func() string
 	mockGetComponentDetails func() map[string]interface{}
-	mockBuildFromDetails    func(map[string]interface{})
+	mockBuildFromDetails    func(map[string]interface{}) error
 }
 
 func (mc *MockComponent) GetComponentName() string {
@@ -22,8 +22,8 @@ func (mc *MockComponent) GetComponentName() string {
 func (mc *MockComponent) GetComponentDetails() map[string]interface{} {
 	return mc.mockGetComponentDetails()
 }
-func (mc *MockComponent) BuildFromDetails(data map[string]interface{}) {
-	mc.mockBuildFromDetails(data)
+func (mc *MockComponent) BuildFromDetails(data map[string]interface{}) error {
+	return mc.mockBuildFromDetails(data)
 }
 
 var (
@@ -39,8 +39,8 @@ var (
 				},
 			}
 		},
-		mockBuildFromDetails: func(m map[string]interface{}) {
-			// pass
+		mockBuildFromDetails: func(m map[string]interface{}) error {
+			return nil
 		},
 	}
 )

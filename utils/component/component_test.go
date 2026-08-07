@@ -10,7 +10,7 @@ import (
 type MockComponent struct {
 	mockGetComponentName    func() string
 	mockGetComponentDetails func() map[string]interface{}
-	mockBuildFromDetails    func(map[string]interface{})
+	mockBuildFromDetails    func(map[string]interface{}) error
 }
 
 func (mc *MockComponent) GetComponentName() string {
@@ -19,8 +19,8 @@ func (mc *MockComponent) GetComponentName() string {
 func (mc *MockComponent) GetComponentDetails() map[string]interface{} {
 	return mc.mockGetComponentDetails()
 }
-func (mc *MockComponent) BuildFromDetails(data map[string]interface{}) {
-	mc.mockBuildFromDetails(data)
+func (mc *MockComponent) BuildFromDetails(data map[string]interface{}) error {
+	return mc.mockBuildFromDetails(data)
 }
 
 func Test_RegisterAndFetch(t *testing.T) {
@@ -38,8 +38,8 @@ func Test_RegisterAndFetch(t *testing.T) {
 			mockGetComponentDetails: func() map[string]interface{} {
 				return map[string]interface{}{}
 			},
-			mockBuildFromDetails: func(m map[string]interface{}) {
-				// pass
+			mockBuildFromDetails: func(m map[string]interface{}) error {
+				return nil
 			},
 		}
 	)
@@ -115,26 +115,219 @@ func Test_GetComponentDetails(t *testing.T) {
 
 func Test_BuildFromDetails(t *testing.T) {
 	tests := []struct {
-		comp         Component
-		buildDetails map[string]interface{}
+		name                string
+		comp                Component
+		buildDetails        map[string]interface{}
+		expectedDetails     map[string]interface{}
+		expectedReturnValue error
 	}{
 		{
+			name: "TransformTest - all values correct",
 			comp: newBaseTransform(),
 			buildDetails: map[string]interface{}{
 				"x": 0, "y": 0, "w": 0, "h": 0,
 			},
+			expectedDetails: map[string]interface{}{
+				"x": 0, "y": 0, "w": 0, "h": 0,
+			},
+			expectedReturnValue: nil,
 		},
 		{
+			name: "TransformTest - x is not integer",
+			comp: NewTransform(0, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"x": "a", "y": 0, "w": 0, "h": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"x": 0, "y": 0, "w": 0, "h": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "TransformTest - y is not integer",
+			comp: NewTransform(0, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"x": 0, "y": "a", "w": 0, "h": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"x": 0, "y": 0, "w": 0, "h": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "TransformTest - w is not integer",
+			comp: NewTransform(0, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"x": 0, "y": 0, "w": "w", "h": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"x": 0, "y": 0, "w": 0, "h": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "TransformTest - h is not integer",
+			comp: NewTransform(0, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"x": 0, "y": 0, "w": 0, "h": "h",
+			},
+			expectedDetails: map[string]interface{}{
+				"x": 0, "y": 0, "w": 0, "h": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "ColorTest - all values correct",
 			comp: newBaseColor(),
 			buildDetails: map[string]interface{}{
 				"r": 0, "g": 0, "b": 0, "a": 0,
 			},
+			expectedDetails: map[string]interface{}{
+				"r": 0, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: nil,
+		},
+		{
+			name: "ColorTest - r is not integer",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": "0", "g": 0, "b": 0, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "ColorTest - r is below range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": -1, "g": 0, "b": 0, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
+		},
+		{
+			name: "ColorTest - r is above range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 256, "g": 0, "b": 0, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
+		},
+		{
+			name: "ColorTest - g is not integer",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": "0", "b": 0, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "ColorTest - g is below range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": -1, "b": 0, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
+		},
+		{
+			name: "ColorTest - g is above range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": 256, "b": 0, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
+		},
+		{
+			name: "ColorTest - b is not integer",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": 0, "b": "0", "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "ColorTest - b is below range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": 0, "b": -1, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
+		},
+		{
+			name: "ColorTest - b is above range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": 0, "b": 256, "a": 0,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
+		},
+		{
+			name: "ColorTest - a is not integer",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": 0, "b": 0, "a": "0",
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrExpectedInteger,
+		},
+		{
+			name: "ColorTest - a is below range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": 0, "b": 0, "a": -1,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
+		},
+		{
+			name: "ColorTest - a is above range",
+			comp: NewColor(10, 0, 0, 0),
+			buildDetails: map[string]interface{}{
+				"r": 0, "g": 0, "b": 255, "a": 256,
+			},
+			expectedDetails: map[string]interface{}{
+				"r": 10, "g": 0, "b": 0, "a": 0,
+			},
+			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
 	}
 
 	for _, tt := range tests {
-		tt.comp.BuildFromDetails(tt.buildDetails)
+		testName := map[string]interface{}{
+			"name": tt.name,
+		}
+		err := tt.comp.BuildFromDetails(tt.buildDetails)
+		assert.Equal(t, tt.expectedReturnValue, err, testName)
 		details := tt.comp.GetComponentDetails()
-		assert.Equal(t, tt.buildDetails, details)
+		assert.Equal(t, tt.expectedDetails, details, testName)
 	}
 }
