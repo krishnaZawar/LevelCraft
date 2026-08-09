@@ -1,0 +1,386 @@
+{
+  "keyboard": [
+    {
+      "name": "KEY_A",
+      "code": 65,
+      "label": "A"
+    },
+    {
+      "name": "KEY_B",
+      "code": 66,
+      "label": "B"
+    },
+    {
+      "name": "KEY_C",
+      "code": 67,
+      "label": "C"
+    },
+    {
+      "name": "KEY_D",
+      "code": 68,
+      "label": "D"
+    },
+    {
+      "name": "KEY_E",
+      "code": 69,
+      "label": "E"
+    },
+    {
+      "name": "KEY_F",
+      "code": 70,
+      "label": "F"
+    },
+    {
+      "name": "KEY_G",
+      "code": 71,
+      "label": "G"
+    },
+    {
+      "name": "KEY_H",
+      "code": 72,
+      "label": "H"
+    },
+    {
+      "name": "KEY_I",
+      "code": 73,
+      "label": "I"
+    },
+    {
+      "name": "KEY_J",
+      "code": 74,
+      "label": "J"
+    },
+    {
+      "name": "KEY_K",
+      "code": 75,
+      "label": "K"
+    },
+    {
+      "name": "KEY_L",
+      "code": 76,
+      "label": "L"
+    },
+    {
+      "name": "KEY_M",
+      "code": 77,
+      "label": "M"
+    },
+    {
+      "name": "KEY_N",
+      "code": 78,
+      "label": "N"
+    },
+    {
+      "name": "KEY_O",
+      "code": 79,
+      "label": "O"
+    },
+    {
+      "name": "KEY_P",
+      "code": 80,
+      "label": "P"
+    },
+    {
+      "name": "KEY_Q",
+      "code": 81,
+      "label": "Q"
+    },
+    {
+      "name": "KEY_R",
+      "code": 82,
+      "label": "R"
+    },
+    {
+      "name": "KEY_S",
+      "code": 83,
+      "label": "S"
+    },
+    {
+      "name": "KEY_T",
+      "code": 84,
+      "label": "T"
+    },
+    {
+      "name": "KEY_U",
+      "code": 85,
+      "label": "U"
+    },
+    {
+      "name": "KEY_V",
+      "code": 86,
+      "label": "V"
+    },
+    {
+      "name": "KEY_W",
+      "code": 87,
+      "label": "W"
+    },
+    {
+      "name": "KEY_X",
+      "code": 88,
+      "label": "X"
+    },
+    {
+      "name": "KEY_Y",
+      "code": 89,
+      "label": "Y"
+    },
+    {
+      "name": "KEY_Z",
+      "code": 90,
+      "label": "Z"
+    },
+    {
+      "name": "KEY_0",
+      "code": 48,
+      "label": "0"
+    },
+    {
+      "name": "KEY_1",
+      "code": 49,
+      "label": "1"
+    },
+    {
+      "name": "KEY_2",
+      "code": 50,
+      "label": "2"
+    },
+    {
+      "name": "KEY_3",
+      "code": 51,
+      "label": "3"
+    },
+    {
+      "name": "KEY_4",
+      "code": 52,
+      "label": "4"
+    },
+    {
+      "name": "KEY_5",
+      "code": 53,
+      "label": "5"
+    },
+    {
+      "name": "KEY_6",
+      "code": 54,
+      "label": "6"
+    },
+    {
+      "name": "KEY_7",
+      "code": 55,
+      "label": "7"
+    },
+    {
+      "name": "KEY_8",
+      "code": 56,
+      "label": "8"
+    },
+    {
+      "name": "KEY_9",
+      "code": 57,
+      "label": "9"
+    },
+    {
+      "name": "KEY_SPACE",
+      "code": 32,
+      "label": "Space"
+    },
+    {
+      "name": "KEY_ESCAPE",
+      "code": 256,
+      "label": "Escape"
+    },
+    {
+      "name": "KEY_ENTER",
+      "code": 257,
+      "label": "Enter"
+    },
+    {
+      "name": "KEY_TAB",
+      "code": 258,
+      "label": "Tab"
+    },
+    {
+      "name": "KEY_BACKSPACE",
+      "code": 259,
+      "label": "Backspace"
+    },
+    {
+      "name": "KEY_INSERT",
+      "code": 260,
+      "label": "Insert"
+    },
+    {
+      "name": "KEY_DELETE",
+      "code": 261,
+      "label": "Delete"
+    },
+    {
+      "name": "KEY_RIGHT",
+      "code": 262,
+      "label": "Right Arrow"
+    },
+    {
+      "name": "KEY_LEFT",
+      "code": 263,
+      "label": "Left Arrow"
+    },
+    {
+      "name": "KEY_DOWN",
+      "code": 264,
+      "label": "Down Arrow"
+    },
+    {
+      "name": "KEY_UP",
+      "code": 265,
+      "label": "Up Arrow"
+    },
+    {
+      "name": "KEY_PAGE_UP",
+      "code": 266,
+      "label": "Page Up"
+    },
+    {
+      "name": "KEY_PAGE_DOWN",
+      "code": 267,
+      "label": "Page Down"
+    },
+    {
+      "name": "KEY_HOME",
+      "code": 268,
+      "label": "Home"
+    },
+    {
+      "name": "KEY_END",
+      "code": 269,
+      "label": "End"
+    },
+    {
+      "name": "KEY_LEFT_SHIFT",
+      "code": 340,
+      "label": "Left Shift"
+    },
+    {
+      "name": "KEY_LEFT_CONTROL",
+      "code": 341,
+      "label": "Left Control"
+    },
+    {
+      "name": "KEY_LEFT_ALT",
+      "code": 342,
+      "label": "Left Alt"
+    },
+    {
+      "name": "KEY_LEFT_SUPER",
+      "code": 343,
+      "label": "Left Meta"
+    },
+    {
+      "name": "KEY_RIGHT_SHIFT",
+      "code": 344,
+      "label": "Right Shift"
+    },
+    {
+      "name": "KEY_RIGHT_CONTROL",
+      "code": 345,
+      "label": "Right Control"
+    },
+    {
+      "name": "KEY_RIGHT_ALT",
+      "code": 346,
+      "label": "Right Alt"
+    },
+    {
+      "name": "KEY_RIGHT_SUPER",
+      "code": 347,
+      "label": "Right Meta"
+    },
+    {
+      "name": "KEY_F1",
+      "code": 290,
+      "label": "F1"
+    },
+    {
+      "name": "KEY_F2",
+      "code": 291,
+      "label": "F2"
+    },
+    {
+      "name": "KEY_F3",
+      "code": 292,
+      "label": "F3"
+    },
+    {
+      "name": "KEY_F4",
+      "code": 293,
+      "label": "F4"
+    },
+    {
+      "name": "KEY_F5",
+      "code": 294,
+      "label": "F5"
+    },
+    {
+      "name": "KEY_F6",
+      "code": 295,
+      "label": "F6"
+    },
+    {
+      "name": "KEY_F7",
+      "code": 296,
+      "label": "F7"
+    },
+    {
+      "name": "KEY_F8",
+      "code": 297,
+      "label": "F8"
+    },
+    {
+      "name": "KEY_F9",
+      "code": 298,
+      "label": "F9"
+    },
+    {
+      "name": "KEY_F10",
+      "code": 299,
+      "label": "F10"
+    },
+    {
+      "name": "KEY_F11",
+      "code": 300,
+      "label": "F11"
+    },
+    {
+      "name": "KEY_F12",
+      "code": 301,
+      "label": "F12"
+    }
+  ],
+  "mouse": [
+    {
+      "name": "MOUSE_LEFT",
+      "code": 400,
+      "label": "Left Mouse Button"
+    },
+    {
+      "name": "MOUSE_RIGHT",
+      "code": 401,
+      "label": "Right Mouse Button"
+    },
+    {
+      "name": "MOUSE_MIDDLE",
+      "code": 402,
+      "label": "Middle Mouse Button"
+    },
+    {
+      "name": "MOUSE_BACK",
+      "code": 403,
+      "label": "Mouse Back Button"
+    },
+    {
+      "name": "MOUSE_FORWARD",
+      "code": 404,
+      "label": "Mouse Forward Button"
+    }
+  ]
+}
