@@ -28,5 +28,14 @@ export default defineConfig(
       ...eslintPluginReactRefresh.configs.vite.rules
     }
   },
+  {
+    // shadcn/ui components are vendored via `npx shadcn add` and regenerated
+    // on update, so they aren't held to this project's stricter conventions.
+    files: ['src/renderer/src/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      'react-refresh/only-export-components': 'off'
+    }
+  },
   eslintConfigPrettier
 )
