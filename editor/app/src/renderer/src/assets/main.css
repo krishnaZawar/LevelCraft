@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+body {
+  @apply overflow-hidden select-none;
+}
