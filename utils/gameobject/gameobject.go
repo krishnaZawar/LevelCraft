@@ -1,8 +1,36 @@
 package gameobject
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/krishnaZawar/LevelCraft/utils/component"
+)
+
+var (
+	ErrExpectedString               = errors.New("GameobjectError: Expected string value")
+	ErrComponentsStructureIncorrect = errors.New("GamobjectError: Components structure was incorrect")
+	ErrExpectedMapStringInterface   = errors.New("GameobjectError: Expected map string interface")
+	ErrComponentNotFound            = errors.New("GameobjectError: Component not found")
+	ErrObjectIDCorrupted            = errors.New("GameobjectError: ObjectID was corrupted")
+)
+
+// Used to define the labels used for marshalling and unmarshalling
+// defined as []string to provide backward compatibility in future
+var (
+	gameobject_LabelsID         = []string{"id"}
+	gameobject_LabelsName       = []string{"name"}
+	gameobject_LabelsGroup      = []string{"group"}
+	gameobject_LabelsComponents = []string{"components"}
+)
+
+// current value used for unmarshalling
+// should be added to the labels slice
+const (
+	Gameobject_CurLabelID         = "id"
+	Gameobject_CurLabelName       = "name"
+	Gameobject_CurLabelGroup      = "group"
+	Gameobject_CurLabelComponents = "components"
 )
 
 // Gameobject is the container that represents an object in the scene.
@@ -13,12 +41,23 @@ type Gameobject struct {
 	name       string                         // name of the gameobject
 	group      string                         // the group that the gameobject belongs to
 	components map[string]component.Component // collection of all the Components held by the gameobject
+
+	registry *component.ComponentRegistry // injected to build the gameobject from details provided
 }
 
 func NewGameobject() *Gameobject {
 	return &Gameobject{
 		id:         uuid.NewString(),
 		components: make(map[string]component.Component),
+		registry:   component.NewComponentRegistry(),
+	}
+}
+
+func NewGameobjectWithID(id string) *Gameobject {
+	return &Gameobject{
+		id:         id,
+		components: make(map[string]component.Component),
+		registry:   component.NewComponentRegistry(),
 	}
 }
 
@@ -56,11 +95,83 @@ func (g *Gameobject) GetGameobjectDetails() map[string]interface{} {
 		componentsData[componentName] = g.components[componentName].GetComponentDetails()
 	}
 	return map[string]interface{}{
-		"id":         g.id,
-		"name":       g.name,
-		"group":      g.group,
-		"components": componentsData,
+		Gameobject_CurLabelID:         g.id,
+		Gameobject_CurLabelName:       g.name,
+		Gameobject_CurLabelGroup:      g.group,
+		Gameobject_CurLabelComponents: componentsData,
 	}
+}
+
+// Build gameobject from provided details
+func (g *Gameobject) BuildFromDetails(data map[string]interface{}) error {
+	temp := *g
+	for _, val := range gameobject_LabelsID {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case string:
+				if temp.id != n {
+					return ErrObjectIDCorrupted
+				}
+			default:
+				return ErrExpectedString
+			}
+			break
+		}
+	}
+
+	for _, val := range gameobject_LabelsName {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case string:
+				temp.name = n
+			default:
+				return ErrExpectedString
+			}
+			break
+		}
+	}
+
+	for _, val := range gameobject_LabelsGroup {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case string:
+				temp.group = n
+			default:
+				return ErrExpectedString
+			}
+			break
+		}
+	}
+
+	for _, val := range gameobject_LabelsComponents {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case map[string]interface{}:
+				for compName, data := range n {
+					comp, found := temp.registry.GetComponent(compName)
+					if !found {
+						return ErrComponentNotFound
+					}
+					compData, ok := data.(map[string]interface{})
+					if !ok {
+						return ErrComponentsStructureIncorrect
+					}
+					err := comp.BuildFromDetails(compData)
+					if err != nil {
+						return err
+					}
+					temp.components[compName] = comp
+				}
+			default:
+				return ErrExpectedMapStringInterface
+			}
+			break
+		}
+	}
+
+	*g = temp
+
+	return nil
 }
 
 // Updates the group of the gameobject

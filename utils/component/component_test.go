@@ -96,13 +96,13 @@ func Test_GetComponentDetails(t *testing.T) {
 		{
 			comp: NewTransform(100, 100, 100, 100),
 			expectedDetails: map[string]interface{}{
-				"x": 100, "y": 100, "w": 100, "h": 100,
+				Transform_CurLabelX: 100, Transform_CurLabelY: 100, Transform_CurLabelW: 100, Transform_CurLabelH: 100,
 			},
 		},
 		{
 			comp: NewColor(0, 0, 0, 255),
 			expectedDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": 0, "a": 255,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 255,
 			},
 		},
 	}
@@ -125,10 +125,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "TransformTest - all values correct",
 			comp: newBaseTransform(),
 			buildDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": 0, "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": 0, "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedReturnValue: nil,
 		},
@@ -136,10 +136,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "TransformTest - x is not integer",
 			comp: NewTransform(0, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"x": "a", "y": 0, "w": 0, "h": 0,
+				Transform_CurLabelX: "a", Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": 0, "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -147,10 +147,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "TransformTest - y is not integer",
 			comp: NewTransform(0, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"x": 0, "y": "a", "w": 0, "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: "a", Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": 0, "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -158,10 +158,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "TransformTest - w is not integer",
 			comp: NewTransform(0, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": "w", "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: "a", Transform_CurLabelH: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": 0, "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -169,10 +169,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "TransformTest - h is not integer",
 			comp: NewTransform(0, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": 0, "h": "h",
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: "a",
 			},
 			expectedDetails: map[string]interface{}{
-				"x": 0, "y": 0, "w": 0, "h": 0,
+				Transform_CurLabelX: 0, Transform_CurLabelY: 0, Transform_CurLabelW: 0, Transform_CurLabelH: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -180,10 +180,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - all values correct",
 			comp: newBaseColor(),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: nil,
 		},
@@ -191,10 +191,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - r is not integer",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": "0", "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: "0", Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -202,10 +202,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - r is below range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": -1, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: -1, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
@@ -213,10 +213,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - r is above range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 256, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 256, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
@@ -224,10 +224,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - g is not integer",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": "0", "b": 0, "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: "0", Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -235,10 +235,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - g is below range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": -1, "b": 0, "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: -1, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
@@ -246,10 +246,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - g is above range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 256, "b": 0, "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: 256, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
@@ -257,10 +257,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - b is not integer",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": "0", "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: "0", Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -268,10 +268,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - b is below range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": -1, "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: -1, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
@@ -279,10 +279,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - b is above range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": 256, "a": 0,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: 256, Color_CurLabelA: 0,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
@@ -290,10 +290,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - a is not integer",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": 0, "a": "0",
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: "0",
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrExpectedInteger,
 		},
@@ -301,10 +301,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - a is below range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": 0, "a": -1,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: -1,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
@@ -312,10 +312,10 @@ func Test_BuildFromDetails(t *testing.T) {
 			name: "ColorTest - a is above range",
 			comp: NewColor(10, 0, 0, 0),
 			buildDetails: map[string]interface{}{
-				"r": 0, "g": 0, "b": 255, "a": 256,
+				Color_CurLabelR: 0, Color_CurLabelG: 0, Color_CurLabelB: 255, Color_CurLabelA: 256,
 			},
 			expectedDetails: map[string]interface{}{
-				"r": 10, "g": 0, "b": 0, "a": 0,
+				Color_CurLabelR: 10, Color_CurLabelG: 0, Color_CurLabelB: 0, Color_CurLabelA: 0,
 			},
 			expectedReturnValue: base.ErrColorValueRangeOutOfBounds,
 		},
