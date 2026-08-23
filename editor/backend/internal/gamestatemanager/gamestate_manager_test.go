@@ -63,10 +63,10 @@ func Test_GetGameState(t *testing.T) {
 	*/
 	expectState := map[string]interface{}{
 		obj.GetID(): map[string]interface{}{
-			"components": map[string]interface{}{},
-			"id":         obj.GetID(),
-			"name":       "",
-			"group":      "",
+			gameobject.Gameobject_CurLabelComponents: map[string]interface{}{},
+			gameobject.Gameobject_CurLabelID:         obj.GetID(),
+			gameobject.Gameobject_CurLabelName:       "",
+			gameobject.Gameobject_CurLabelGroup:      "",
 		},
 	}
 

@@ -1,0 +1,16 @@
+[
+    {
+        "name": "KeyDown",
+        "description": "keyboard key pressed down",
+        "payload": {
+            "keyName": "<name of the key>"
+        }
+    },
+    {
+        "name": "KeyUp",
+        "description": "keyboard key released",
+        "payload": {
+            "keyName": "<name of the key>"
+        }
+    }
+]
