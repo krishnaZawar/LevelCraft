@@ -10,6 +10,24 @@ const (
 	defaultAlphaValue = 255
 )
 
+// Used to define the labels used for marshalling and unmarshalling
+// defined as []string to provide backward compatibility in future
+var (
+	color_LabelsR = []string{"r"}
+	color_LabelsG = []string{"g"}
+	color_LabelsB = []string{"b"}
+	color_LabelsA = []string{"a"}
+)
+
+// current value used for unmarshalling
+// should be added to the labels slice
+const (
+	Color_CurLabelR = "r"
+	Color_CurLabelG = "g"
+	Color_CurLabelB = "b"
+	Color_CurLabelA = "a"
+)
+
 // Color is used to define the color of the component.
 // It is based off the RGBA attributes
 type Color struct {
@@ -59,69 +77,81 @@ func (c *Color) GetComponentName() string {
 // Returns a snapshot of the complete data stored in the component
 func (c *Color) GetComponentDetails() map[string]interface{} {
 	return map[string]interface{}{
-		"r": c.r,
-		"g": c.g,
-		"b": c.b,
-		"a": c.a,
+		Color_CurLabelR: c.r,
+		Color_CurLabelG: c.g,
+		Color_CurLabelB: c.b,
+		Color_CurLabelA: c.a,
 	}
 }
 
 // Build component from provided details
 func (c *Color) BuildFromDetails(data map[string]interface{}) error {
 	temp := *c
-	if v, ok := data["r"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.r = n
-		case float64:
-			temp.r = int(n)
-		default:
-			return base.ErrExpectedInteger
-		}
-		if temp.r < base.ColorValueRangeMin || temp.r > base.ColorValueRangeMax {
-			return base.ErrColorValueRangeOutOfBounds
-		}
-	}
-
-	if v, ok := data["g"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.g = n
-		case float64:
-			temp.g = int(n)
-		default:
-			return base.ErrExpectedInteger
-		}
-		if temp.g < base.ColorValueRangeMin || temp.g > base.ColorValueRangeMax {
-			return base.ErrColorValueRangeOutOfBounds
+	for _, val := range color_LabelsR {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.r = n
+			case float64:
+				temp.r = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			if temp.r < base.ColorValueRangeMin || temp.r > base.ColorValueRangeMax {
+				return base.ErrColorValueRangeOutOfBounds
+			}
+			break
 		}
 	}
 
-	if v, ok := data["b"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.b = n
-		case float64:
-			temp.b = int(n)
-		default:
-			return base.ErrExpectedInteger
-		}
-		if temp.b < base.ColorValueRangeMin || temp.b > base.ColorValueRangeMax {
-			return base.ErrColorValueRangeOutOfBounds
+	for _, val := range color_LabelsG {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.g = n
+			case float64:
+				temp.g = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			if temp.g < base.ColorValueRangeMin || temp.g > base.ColorValueRangeMax {
+				return base.ErrColorValueRangeOutOfBounds
+			}
+			break
 		}
 	}
 
-	if v, ok := data["a"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.a = n
-		case float64:
-			temp.a = int(n)
-		default:
-			return base.ErrExpectedInteger
+	for _, val := range color_LabelsB {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.b = n
+			case float64:
+				temp.b = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			if temp.b < base.ColorValueRangeMin || temp.b > base.ColorValueRangeMax {
+				return base.ErrColorValueRangeOutOfBounds
+			}
+			break
 		}
-		if temp.a < base.ColorValueRangeMin || temp.a > base.ColorValueRangeMax {
-			return base.ErrColorValueRangeOutOfBounds
+	}
+
+	for _, val := range color_LabelsA {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.a = n
+			case float64:
+				temp.a = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			if temp.a < base.ColorValueRangeMin || temp.a > base.ColorValueRangeMax {
+				return base.ErrColorValueRangeOutOfBounds
+			}
+			break
 		}
 	}
 

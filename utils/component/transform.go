@@ -9,6 +9,24 @@ const (
 	defaultTransformValue = 100
 )
 
+// Used to define the labels used for marshalling and unmarshalling
+// defined as []string to provide backward compatibility in future
+var (
+	transform_LabelsX = []string{"x"}
+	transform_LabelsY = []string{"y"}
+	transform_LabelsW = []string{"w"}
+	transform_LabelsH = []string{"h"}
+)
+
+// current value used for unmarshalling
+// should be added to the labels slice
+const (
+	Transform_CurLabelX = "x"
+	Transform_CurLabelY = "y"
+	Transform_CurLabelW = "w"
+	Transform_CurLabelH = "h"
+)
+
 // Transform is used to determine the position and dimension of any object in the game scene
 type Transform struct {
 	x int // x coordinate of the object
@@ -68,57 +86,69 @@ func (t *Transform) GetComponentName() string {
 // Returns a snapshot of the complete data stored in the component
 func (t *Transform) GetComponentDetails() map[string]interface{} {
 	return map[string]interface{}{
-		"x": t.x,
-		"y": t.y,
-		"w": t.w,
-		"h": t.h,
+		Transform_CurLabelX: t.x,
+		Transform_CurLabelY: t.y,
+		Transform_CurLabelW: t.w,
+		Transform_CurLabelH: t.h,
 	}
 }
 
 // Build component from provided details
 func (t *Transform) BuildFromDetails(data map[string]interface{}) error {
 	temp := *t
-	if v, ok := data["x"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.x = n
-		case float64:
-			temp.x = int(n)
-		default:
-			return base.ErrExpectedInteger
+	for _, val := range transform_LabelsX {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.x = n
+			case float64:
+				temp.x = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			break
 		}
 	}
 
-	if v, ok := data["y"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.y = n
-		case float64:
-			temp.y = int(n)
-		default:
-			return base.ErrExpectedInteger
+	for _, val := range transform_LabelsY {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.y = n
+			case float64:
+				temp.y = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			break
 		}
 	}
 
-	if v, ok := data["w"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.w = n
-		case float64:
-			temp.w = int(n)
-		default:
-			return base.ErrExpectedInteger
+	for _, val := range transform_LabelsW {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.w = n
+			case float64:
+				temp.w = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			break
 		}
 	}
 
-	if v, ok := data["h"]; ok {
-		switch n := v.(type) {
-		case int:
-			temp.h = n
-		case float64:
-			temp.h = int(n)
-		default:
-			return base.ErrExpectedInteger
+	for _, val := range transform_LabelsH {
+		if v, ok := data[val]; ok {
+			switch n := v.(type) {
+			case int:
+				temp.h = n
+			case float64:
+				temp.h = int(n)
+			default:
+				return base.ErrExpectedInteger
+			}
+			break
 		}
 	}
 

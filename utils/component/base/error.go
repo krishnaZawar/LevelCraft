@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	ErrExpectedInteger = errors.New("error: Expected integer value")
+	ErrExpectedInteger = errors.New("ComponentError: Expected integer value")
 )
 
 var (
-	ErrColorValueRangeOutOfBounds = fmt.Errorf("error: Color values should be in the range of %d to %d", ColorValueRangeMin, ColorValueRangeMax)
+	ErrColorValueRangeOutOfBounds = fmt.Errorf("ComponentError: Color values should be in the range of %d to %d", ColorValueRangeMin, ColorValueRangeMax)
 )
