@@ -5,6 +5,14 @@ import (
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
 )
 
+// holds the list of all the components that will be used by the editor to display all the components available
+var (
+	ComponentList = []string{
+		base.ComponentName_Transform,
+		base.ComponentName_Color,
+	}
+)
+
 // Component is a modular unit of data and functions attached to the object
 //
 // It models the behaviour of the object in the scene
