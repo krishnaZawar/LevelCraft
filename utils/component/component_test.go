@@ -23,6 +23,14 @@ func (mc *MockComponent) BuildFromDetails(data map[string]interface{}) error {
 	return mc.mockBuildFromDetails(data)
 }
 
+func Test_ComponentList(t *testing.T) {
+	listLen := 2
+	assert.Equal(t, listLen, len(ComponentList))
+
+	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Transform))
+	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Color))
+}
+
 func Test_RegisterAndFetch(t *testing.T) {
 	compRegistry := newComponentRegistry()
 
