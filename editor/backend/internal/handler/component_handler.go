@@ -9,6 +9,12 @@ import (
 	"github.com/krishnaZawar/LevelCraft/utils/component"
 )
 
+func GetComponents(ctx *fiber.Ctx) error {
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"components": component.ComponentList,
+	})
+}
+
 func AddComponent(ctx *fiber.Ctx) error {
 	gameobjectID := ctx.Params("objectID")
 	componentName := ctx.Params("componentName")

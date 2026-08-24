@@ -18,12 +18,15 @@ func CreateRoutes(app *fiber.App) {
 	game.Post("/save", handler.HandleSaveGame)
 	game.Get("/state", handler.GetGameState)
 
+	components := app.Group("/components")
+	components.Get("/", handler.GetComponents)
+
 	gameobjects := app.Group("/gameobjects")
 	gameobjects.Post("/", handler.AddGameobject)
 	gameobjects.Delete("/:objectID", handler.DeleteGameobject)
 
-	components := gameobjects.Group("/:objectID/components")
-	components.Post("/:componentName", handler.AddComponent)
-	components.Delete("/:componentName", handler.DeleteComponent)
-	components.Put("/:componentName", handler.UpdateComponent)
+	objComponents := gameobjects.Group("/:objectID/components")
+	objComponents.Post("/:componentName", handler.AddComponent)
+	objComponents.Delete("/:componentName", handler.DeleteComponent)
+	objComponents.Put("/:componentName", handler.UpdateComponent)
 }
