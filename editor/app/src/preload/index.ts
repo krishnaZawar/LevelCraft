@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { LevelCraftApi } from '../shared/project'
+import { LevelCraftApi, MenuAction } from '../shared/project'
 
 const api: LevelCraftApi = {
   platform: process.platform,
@@ -15,6 +15,12 @@ const api: LevelCraftApi = {
   window: {
     maximize: () => ipcRenderer.send('window:maximize'),
     unmaximize: () => ipcRenderer.send('window:unmaximize')
+  },
+  menu: {
+    onAction: (callback) => {
+      ipcRenderer.on('menu:action', (_event, action: MenuAction) => callback(action))
+    },
+    notifyProjectOpen: (isOpen) => ipcRenderer.send('menu:project-state', isOpen)
   }
 }
 

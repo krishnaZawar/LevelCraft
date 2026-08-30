@@ -28,6 +28,11 @@ export type ProjectApiResult =
   | { ok: true; project: ProjectSummary }
   | { ok: false; error: ProjectOperationError; message: string }
 
+// Actions the native File menu (and its keyboard accelerators) can
+// trigger. The menu only knows "an action happened" — the renderer owns
+// what each one actually does, via menuBridge.ts.
+export type MenuAction = 'new-project' | 'open-project' | 'close-project' | 'save-project'
+
 export interface LevelCraftApi {
   platform: NodeJS.Platform
   project: {
@@ -41,5 +46,9 @@ export interface LevelCraftApi {
   window: {
     maximize: () => void
     unmaximize: () => void
+  }
+  menu: {
+    onAction: (callback: (action: MenuAction) => void) => void
+    notifyProjectOpen: (isOpen: boolean) => void
   }
 }

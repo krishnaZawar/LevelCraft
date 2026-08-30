@@ -82,8 +82,9 @@ function ProjectRow({ project }: { project: ProjectSummary }): React.JSX.Element
 }
 
 function NewProjectDialog(): React.JSX.Element {
-  const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
+  const open = useProjectStore((state) => state.isNewProjectDialogOpen)
+  const setOpen = useProjectStore((state) => state.setNewProjectDialogOpen)
   const isLoading = useProjectStore((state) => state.isLoading)
   const error = useProjectStore((state) => state.error)
   const createProject = useProjectStore((state) => state.createProject)

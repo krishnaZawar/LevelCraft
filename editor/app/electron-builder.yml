@@ -11,6 +11,13 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+# The compiled editor/backend binary (built by scripts/build-backend.mjs,
+# run via the build:backend npm script before packaging) — read by
+# src/main/backend.ts at process.resourcesPath/backend/<binary>. Kept
+# outside the asar entirely since asar-packed files can't be executed.
+extraResources:
+  - from: resources/bin
+    to: backend
 win:
   executableName: LevelCraft
 nsis:
