@@ -19,6 +19,25 @@ interface LoadGameResponse {
   gameState: GameState
 }
 
+interface GetGameStateResponse {
+  success: boolean
+  gameState: GameState
+}
+
+interface GetComponentsResponse {
+  components: string[]
+}
+
+interface GameObjectResponse {
+  success: boolean
+  objectDetails: GameObjectDetails
+}
+
+interface DeleteGameobjectResponse {
+  success: boolean
+  message: string
+}
+
 interface ErrorResponse {
   success: false
   message: string
@@ -33,13 +52,13 @@ interface ErrorResponse {
 export const BACKEND_UNREACHABLE_MESSAGE =
   "Couldn't reach the LevelCraft backend. Make sure editor/backend is running, then try again."
 
-async function postJson<T>(path: string, body: unknown): Promise<T> {
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   let res: Response
   try {
     res = await fetch(`${EDITOR_BACKEND_BASE_URL}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      method,
+      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body)
     })
   } catch {
     throw new Error(BACKEND_UNREACHABLE_MESSAGE)
@@ -51,12 +70,61 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return data as T
 }
 
+function encodePathSegment(value: string): string {
+  return encodeURIComponent(value)
+}
+
+export function getGameState(): Promise<GetGameStateResponse> {
+  return request<GetGameStateResponse>('GET', '/game/state')
+}
+
 export function saveGame(filepath: string): Promise<SaveGameResponse> {
-  return postJson<SaveGameResponse>('/game/save', { filepath })
+  return request<SaveGameResponse>('POST', '/game/save', { filepath })
 }
 
 export function loadGame(filepath: string): Promise<LoadGameResponse> {
-  return postJson<LoadGameResponse>('/game/load', { filepath })
+  return request<LoadGameResponse>('POST', '/game/load', { filepath })
+}
+
+export function getComponents(): Promise<GetComponentsResponse> {
+  return request<GetComponentsResponse>('GET', '/components/')
+}
+
+export function addGameobject(): Promise<GameObjectResponse> {
+  return request<GameObjectResponse>('POST', '/gameobjects/')
+}
+
+export function deleteGameobject(objectId: string): Promise<DeleteGameobjectResponse> {
+  return request<DeleteGameobjectResponse>('DELETE', `/gameobjects/${encodePathSegment(objectId)}`)
+}
+
+export function addComponent(objectId: string, componentName: string): Promise<GameObjectResponse> {
+  return request<GameObjectResponse>(
+    'POST',
+    `/gameobjects/${encodePathSegment(objectId)}/components/${encodePathSegment(componentName)}`
+  )
+}
+
+export function deleteComponent(
+  objectId: string,
+  componentName: string
+): Promise<GameObjectResponse> {
+  return request<GameObjectResponse>(
+    'DELETE',
+    `/gameobjects/${encodePathSegment(objectId)}/components/${encodePathSegment(componentName)}`
+  )
+}
+
+export function updateComponent(
+  objectId: string,
+  componentName: string,
+  details: Record<string, unknown>
+): Promise<GameObjectResponse> {
+  return request<GameObjectResponse>(
+    'PUT',
+    `/gameobjects/${encodePathSegment(objectId)}/components/${encodePathSegment(componentName)}`,
+    { details }
+  )
 }
 
 export async function isBackendReachable(): Promise<boolean> {
