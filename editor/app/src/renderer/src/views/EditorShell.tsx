@@ -1,7 +1,9 @@
+import { useEffect } from 'react'
 import { LayoutGrid, ListTree, SlidersHorizontal, X } from 'lucide-react'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useEditorStore } from '@/store/editorStore'
 import { useProjectStore } from '@/store/projectStore'
 
 function PanelHeading({
@@ -62,6 +64,12 @@ function Workspace(): React.JSX.Element {
 }
 
 function EditorShell(): React.JSX.Element {
+  const fetchGameState = useEditorStore((state) => state.fetchGameState)
+
+  useEffect(() => {
+    fetchGameState()
+  }, [fetchGameState])
+
   return (
     <div className="bg-background text-foreground flex h-screen flex-col">
       <TopBar />
