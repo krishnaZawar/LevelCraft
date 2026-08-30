@@ -70,3 +70,51 @@ func saveGame(gsm *gamestatemanager.GameStateManager, filepath string) error {
 	}
 	return nil
 }
+
+func HandleLoadGame(ctx *fiber.Ctx) error {
+	var req entity.LoadGameRequest
+
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		ls.ErrorWith(err).Msg("Failed to parse request body")
+		return ctx.Status(http.StatusBadRequest).JSON(entity.NewErrorResponse("failed to parse body"))
+	}
+	// Enforce .json extension
+	if filepath.Ext(req.Filepath) != ".json" {
+		ls.Error().Msg("The filepath does not point to json file")
+		return ctx.Status(http.StatusBadRequest).JSON(entity.NewErrorResponse("game state can only be loaded from json files"))
+	}
+
+	gameState, err := loadGame(gamestatemanager.Get(), req.Filepath)
+	if err != nil {
+		ls.ErrorWith(err).Msg("Failed to load game")
+		return ctx.Status(http.StatusInternalServerError).JSON(entity.NewErrorResponse("internal server error"))
+	}
+
+	resp := entity.LoadGameResponse{
+		Success:   true,
+		GameState: gameState,
+	}
+
+	ls.Info().Msgf("game state loaded successfully from file: %s", req.Filepath)
+
+	return ctx.Status(http.StatusOK).JSON(resp)
+}
+
+func loadGame(gsm *gamestatemanager.GameStateManager, filepath string) (map[string]interface{}, error) {
+	fileData, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	var sceneData map[string]interface{}
+	if err := json.Unmarshal(fileData, &sceneData); err != nil {
+		return nil, err
+	}
+
+	if err := gsm.BuildFromDetails(sceneData); err != nil {
+		return nil, err
+	}
+
+	return gsm.GetGameState(), nil
+}

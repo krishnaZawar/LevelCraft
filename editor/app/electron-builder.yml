@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: app
+appId: com.levelcraft.editor
+productName: LevelCraft
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: app
+  executableName: LevelCraft
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -33,7 +33,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: LevelCraft
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}

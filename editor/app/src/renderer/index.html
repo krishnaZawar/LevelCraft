@@ -2,11 +2,14 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Electron</title>
+    <title>LevelCraft</title>
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- connect-src allows the editor/backend REST API (localhost:3000). The
+         builder/backend WebSocket (localhost:8000, see docs/client/approach.md §4)
+         will need ws://localhost:8000 added here once Play mode is built. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:3000"
     />
   </head>
 

@@ -1,8 +1,22 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { LevelCraftApi } from '../shared/project'
 
-// Custom APIs for renderer
-const api = {}
+const api: LevelCraftApi = {
+  platform: process.platform,
+  project: {
+    getRoot: () => ipcRenderer.invoke('project:getRoot'),
+    list: () => ipcRenderer.invoke('project:list'),
+    create: (name) => ipcRenderer.invoke('project:create', name),
+    openFromPath: (path) => ipcRenderer.invoke('project:openFromPath', path),
+    getRecentPaths: () => ipcRenderer.invoke('project:getRecentPaths'),
+    browseForFolder: () => ipcRenderer.invoke('project:browseForFolder')
+  },
+  window: {
+    maximize: () => ipcRenderer.send('window:maximize'),
+    unmaximize: () => ipcRenderer.send('window:unmaximize')
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

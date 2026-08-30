@@ -16,6 +16,7 @@ func CreateRoutes(app *fiber.App) {
 
 	game := app.Group("/game")
 	game.Post("/save", handler.HandleSaveGame)
+	game.Post("/load", handler.HandleLoadGame)
 	game.Get("/state", handler.GetGameState)
 
 	components := app.Group("/components")

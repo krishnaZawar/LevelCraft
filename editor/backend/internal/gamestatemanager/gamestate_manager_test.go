@@ -74,3 +74,45 @@ func Test_GetGameState(t *testing.T) {
 
 	assert.Equal(t, expectState, state)
 }
+
+func Test_Reset(t *testing.T) {
+	gsm := NewGameStateManager()
+	gsm.AddGameobject(gameobject.NewGameobject())
+	gsm.AddGameobject(gameobject.NewGameobject())
+
+	gsm.Reset()
+
+	assert.Equal(t, 0, len(gsm.GetGameState()))
+}
+
+func Test_BuildFromDetails(t *testing.T) {
+	t.Run("replaces the existing scene rather than merging", func(t *testing.T) {
+		gsm := NewGameStateManager()
+		gsm.AddGameobject(gameobject.NewGameobject())
+
+		err := gsm.BuildFromDetails(map[string]interface{}{
+			"obj1": map[string]interface{}{
+				gameobject.Gameobject_CurLabelName:  "player",
+				gameobject.Gameobject_CurLabelGroup: "",
+			},
+		})
+
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(gsm.GetGameState()))
+
+		obj, found := gsm.GetGameobject("obj1")
+		assert.Equal(t, true, found)
+		assert.Equal(t, "player", obj.GetName())
+	})
+
+	t.Run("invalid scene shape returns an error and does not partially apply", func(t *testing.T) {
+		gsm := NewGameStateManager()
+
+		err := gsm.BuildFromDetails(map[string]interface{}{
+			"obj1": "not-a-map",
+		})
+
+		assert.Equal(t, ErrExpectedMapStringInterface, err)
+		assert.Equal(t, 0, len(gsm.GetGameState()))
+	})
+}
