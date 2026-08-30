@@ -14,6 +14,7 @@ function App(): React.JSX.Element {
     } else {
       window.api.window.unmaximize()
     }
+    window.api.menu.notifyProjectOpen(isProjectOpen)
   }, [isProjectOpen])
 
   return (

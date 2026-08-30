@@ -11,6 +11,9 @@ interface ProjectStoreState {
   /** Set by createProject/openProject — scoped to that one action. */
   error: string | null
   backendReachable: boolean | null
+  // Lifted out of the dialog component so the native File menu (and its
+  // Cmd+N accelerator) can open it too, not just its own trigger button.
+  isNewProjectDialogOpen: boolean
 
   checkBackend: () => Promise<void>
   refreshProjects: () => Promise<void>
@@ -18,6 +21,7 @@ interface ProjectStoreState {
   openProject: (project: ProjectSummary) => Promise<boolean>
   openProjectFromPath: (path: string) => Promise<boolean>
   closeProject: () => void
+  setNewProjectDialogOpen: (open: boolean) => void
 }
 
 export const useProjectStore = create<ProjectStoreState>((set, get) => ({
@@ -27,6 +31,7 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
   listError: null,
   error: null,
   backendReachable: null,
+  isNewProjectDialogOpen: false,
 
   checkBackend: async () => {
     const reachable = await isBackendReachable()
@@ -88,5 +93,7 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
     return true
   },
 
-  closeProject: () => set({ activeProject: null, error: null })
+  closeProject: () => set({ activeProject: null, error: null }),
+
+  setNewProjectDialogOpen: (open) => set({ isNewProjectDialogOpen: open })
 }))

@@ -1,8 +1,10 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, dialog, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerProjectIpcHandlers } from './ipc'
+import { ensureEditorBackendRunning, stopEditorBackend } from './backend'
+import { registerMenuIpcHandlers, setApplicationMenu } from './menu'
 
 // Overrides the macOS menu bar name in dev mode (unpackaged builds
 // otherwise default to "Electron" until a real app bundle exists).
@@ -55,7 +57,7 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.levelcraft.editor')
 
@@ -67,12 +69,25 @@ app.whenReady().then(() => {
   })
 
   registerProjectIpcHandlers()
+  registerMenuIpcHandlers()
+  setApplicationMenu(false)
 
   // Opening a project fills the screen (editor shell wants the room);
   // closing back to the project picker restores the normal window size
   // rather than leaving a mostly-empty maximized picker screen.
   ipcMain.on('window:maximize', () => mainWindow?.maximize())
   ipcMain.on('window:unmaximize', () => mainWindow?.unmaximize())
+
+  try {
+    await ensureEditorBackendRunning()
+  } catch (err) {
+    dialog.showErrorBox(
+      'LevelCraft',
+      `Couldn't start the LevelCraft backend.\n\n${(err as Error).message}`
+    )
+    app.quit()
+    return
+  }
 
   createWindow()
 
@@ -90,6 +105,14 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+// Only stop editor/backend if this app instance actually spawned it —
+// see backend.ts. Runs on real app quit, not just window close, so it
+// doesn't kill the backend every time a macOS window closes while the
+// app (and its menu bar) stays alive.
+app.on('will-quit', () => {
+  stopEditorBackend()
 })
 
 // In this file you can include the rest of your app's specific main process
