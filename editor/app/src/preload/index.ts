@@ -16,6 +16,9 @@ const api: LevelCraftApi = {
     maximize: () => ipcRenderer.send('window:maximize'),
     unmaximize: () => ipcRenderer.send('window:unmaximize')
   },
+  backend: {
+    getBaseUrl: () => ipcRenderer.sendSync('backend:getBaseUrlSync')
+  },
   menu: {
     onAction: (callback) => {
       ipcRenderer.on('menu:action', (_event, action: MenuAction) => callback(action))
