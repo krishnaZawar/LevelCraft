@@ -1,6 +1,9 @@
 package main
 
 import (
+	"flag"
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/router"
@@ -8,6 +11,10 @@ import (
 
 func main() {
 	app := fiber.New()
+
+	port := flag.Int("port", 3000, "the value of the port on which the service starts")
+
+	flag.Parse()
 
 	// The only consumer of this API is our own Electron client running
 	// locally (dev server origin or a file:// packaged build), never a
@@ -19,5 +26,8 @@ func main() {
 
 	router.CreateRoutes(app)
 
-	app.Listen(":3000")
+	err := app.Listen(":" + strconv.Itoa(*port))
+	if err != nil {
+		panic(err)
+	}
 }
