@@ -126,8 +126,8 @@ func (o *Orchestrator) exitProcesses(processNames []string) {
 
 		if err := process.Stop(); err != nil {
 			ls.ErrorWith(err).Msgf("failed to exit from process %s", name)
-			delete(o.processes, name)
 			continue
 		}
+		delete(o.processes, name)
 	}
 }
