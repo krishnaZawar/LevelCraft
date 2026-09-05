@@ -1,4 +1,8 @@
-const EDITOR_BACKEND_BASE_URL = 'http://localhost:3000'
+// Resolved by the main process (see main/backend.ts) since editor/backend
+// no longer binds to a fixed port — the orchestrator (and this app, when
+// self-spawning it in dev) assigns it a dynamic one. Falls back to the
+// backend's own default port for non-Electron contexts (e.g. unit tests).
+const EDITOR_BACKEND_BASE_URL = window.api?.backend.getBaseUrl() ?? 'http://localhost:3000'
 
 export interface GameObjectDetails {
   id: string
