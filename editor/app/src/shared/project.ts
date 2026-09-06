@@ -47,6 +47,13 @@ export interface LevelCraftApi {
     maximize: () => void
     unmaximize: () => void
   }
+  backend: {
+    // Synchronous IPC on purpose: main resolves editor/backend's base URL
+    // (see main/backend.ts) before creating the window, so it's always
+    // available by the time the renderer's module graph evaluates —
+    // no async bootstrap needed before the API client can be used.
+    getBaseUrl: () => string
+  }
   menu: {
     onAction: (callback: (action: MenuAction) => void) => void
     notifyProjectOpen: (isOpen: boolean) => void

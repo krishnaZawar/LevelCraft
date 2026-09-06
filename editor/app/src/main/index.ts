@@ -3,8 +3,9 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerProjectIpcHandlers } from './ipc'
-import { ensureEditorBackendRunning, stopEditorBackend } from './backend'
+import { ensureEditorBackendRunning, getEditorBackendBaseUrl, stopEditorBackend } from './backend'
 import { registerMenuIpcHandlers, setApplicationMenu } from './menu'
+import { startPingServer, stopPingServer } from './ping'
 
 // Overrides the macOS menu bar name in dev mode (unpackaged builds
 // otherwise default to "Electron" until a real app bundle exists).
@@ -77,6 +78,11 @@ app.whenReady().then(async () => {
   // rather than leaving a mostly-empty maximized picker screen.
   ipcMain.on('window:maximize', () => mainWindow?.maximize())
   ipcMain.on('window:unmaximize', () => mainWindow?.unmaximize())
+  ipcMain.on('backend:getBaseUrlSync', (event) => {
+    event.returnValue = getEditorBackendBaseUrl()
+  })
+
+  await startPingServer()
 
   try {
     await ensureEditorBackendRunning()
@@ -113,6 +119,7 @@ app.on('window-all-closed', () => {
 // app (and its menu bar) stays alive.
 app.on('will-quit', () => {
   stopEditorBackend()
+  stopPingServer()
 })
 
 // In this file you can include the rest of your app's specific main process
