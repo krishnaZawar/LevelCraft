@@ -46,10 +46,25 @@ export interface LevelCraftApi {
   window: {
     maximize: () => void
     unmaximize: () => void
+    minimize: () => void
+    reload: () => void
+    toggleDevTools: () => void
+    toggleFullscreen: () => void
   }
   backend: {
     // Sync IPC: main already resolved this before creating the window.
     getBaseUrl: () => string
+  }
+  builder: {
+    // Spawns builder/backend for the given scene, waits for /ping, and
+    // (on success) opens the separate Play window.
+    launch: (scenePath: string) => Promise<{ ok: boolean; message?: string }>
+    // Closes the Play window, which kills the backend process as a result.
+    stop: () => void
+    // Fires when the Play window closes for any reason (Stop button or the
+    // user closing it directly), so the main window can reset its Run
+    // button state.
+    onStopped: (callback: () => void) => void
   }
   menu: {
     onAction: (callback: (action: MenuAction) => void) => void
