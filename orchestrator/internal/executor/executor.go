@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"time"
 
 	"github.com/krishnaZawar/LevelCraft/orchestrator/internal/base"
 	"github.com/krishnaZawar/LevelCraft/orchestrator/internal/entity"
@@ -44,6 +45,10 @@ func buildAndRunProcess(processName string, comm *entity.CommandConfig) (*entity
 	cmd := exec.Command(comm.Name, comm.Args...)
 	cmd.Dir = comm.Pwd
 	cmd.Stdout = os.Stdout
+	if len(comm.Env) > 0 {
+		cmd.Env = append(os.Environ(), comm.Env...)
+	}
+	setProcessGroup(cmd)
 
 	if err := cmd.Start(); err != nil {
 		return nil, err
@@ -54,4 +59,49 @@ func buildAndRunProcess(processName string, comm *entity.CommandConfig) (*entity
 		Cmd:              cmd,
 		CommunicationURI: "http://localhost:" + comm.Port,
 	}, nil
+}
+
+// polls /ping until it succeeds or timeout elapses
+func waitForHealthy(baseUrl string, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if err := CheckProcessHealth(baseUrl); err == nil {
+			return true
+		}
+		time.Sleep(base.PingPollInterval)
+	}
+	return false
+}
+
+// spawns a process via buildComm and waits for it to become healthy, retrying up to base.MaxStartAttempts times
+func startAndWaitHealthy(
+	processName string,
+	buildComm func() entity.CommandConfig,
+	startupTimeout time.Duration,
+) (*entity.Process, error) {
+	var lastErr error
+	for attempt := 1; attempt <= base.MaxStartAttempts; attempt++ {
+		ls.Info().Msgf("starting with attempt %d of starting %s", attempt, processName)
+
+		comm := buildComm()
+		process, err := buildAndRunProcess(processName, &comm)
+		if err != nil {
+			lastErr = err
+			ls.ErrorWith(err).Msgf("failed to start %s", processName)
+			continue
+		}
+
+		if waitForHealthy(process.CommunicationURI, startupTimeout) {
+			ls.Info().Msgf("%s started... PID: %d", processName, process.Cmd.Process.Pid)
+			return process, nil
+		}
+
+		lastErr = fmt.Errorf("%s did not become healthy within %s", processName, startupTimeout)
+		ls.Warn().Msgf("%s failed to become healthy within %s, stopping and retrying", processName, startupTimeout)
+		if stopErr := process.Stop(); stopErr != nil {
+			ls.ErrorWith(stopErr).Msgf("failed to stop unhealthy %s process: %d", processName, process.Cmd.Process.Pid)
+		}
+	}
+
+	return nil, fmt.Errorf("failed to start %s after %d attempts: %w", processName, base.MaxStartAttempts, lastErr)
 }

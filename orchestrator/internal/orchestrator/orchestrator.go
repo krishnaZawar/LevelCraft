@@ -71,10 +71,17 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 
 // starts the application in order
 func (o *Orchestrator) start() error {
-	err := o.runProcess(executor.StartEditorBackend)
-	if err != nil {
+	if err := o.runProcess(executor.StartEditorBackend); err != nil {
 		return err
 	}
+
+	editorBackend := o.processes[base.Process_EditorBackend]
+	if err := o.runProcess(func() (*entity.Process, error) {
+		return executor.StartEditorFrontend(editorBackend.CommunicationURI)
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -85,7 +92,7 @@ func (o *Orchestrator) monitor() applicationState {
 		if err != nil {
 			ls.ErrorWith(err).Msgf("failed to get response from process %s", name)
 			switch name {
-			case base.Process_EditorBackend:
+			case base.Process_EditorBackend, base.Process_EditorFrontend:
 				return applicationState_editorExit
 			}
 		}
@@ -105,8 +112,9 @@ func (o *Orchestrator) runProcess(fn func() (*entity.Process, error)) error {
 
 // exits the application in the intended order or graceful process cleanup
 func (o *Orchestrator) exitApplication() {
-	// holds the order of how the cleanup should occur, from first to last
+	// stop order: frontend before backend, since frontend depends on it
 	processes := []string{
+		base.Process_EditorFrontend,
 		base.Process_EditorBackend,
 	}
 	o.exitProcesses(processes)

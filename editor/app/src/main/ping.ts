@@ -1,12 +1,13 @@
 import { createServer, Server } from 'http'
 
-// Lets external process managers (the orchestrator's `editorFrontend`
-// process type, see orchestrator/internal/base/const.go) health-check this
-// Electron app the same way editor/backend is checked: GET /ping -> 200.
+// Lets the orchestrator health-check this app: GET /ping -> 200.
 let server: Server | null = null
 let baseUrl = ''
 
 export function startPingServer(): Promise<string> {
+  // Bind to the orchestrator-assigned port if given, else pick a free one.
+  const requestedPort = Number(process.env.LEVELCRAFT_PING_PORT) || 0
+
   return new Promise((resolve, reject) => {
     const s = createServer((req, res) => {
       if (req.url === '/ping') {
@@ -18,7 +19,7 @@ export function startPingServer(): Promise<string> {
       res.end()
     })
     s.on('error', reject)
-    s.listen(0, () => {
+    s.listen(requestedPort, () => {
       const address = s.address()
       if (address === null || typeof address === 'string') {
         s.close()
