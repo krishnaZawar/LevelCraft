@@ -7,6 +7,8 @@ let server: Server | null = null
 let baseUrl = ''
 
 export function startPingServer(): Promise<string> {
+  const requestedPort = Number(process.env.LEVELCRAFT_PING_PORT) || 0
+
   return new Promise((resolve, reject) => {
     const s = createServer((req, res) => {
       if (req.url === '/ping') {
@@ -18,7 +20,7 @@ export function startPingServer(): Promise<string> {
       res.end()
     })
     s.on('error', reject)
-    s.listen(0, () => {
+    s.listen(requestedPort, () => {
       const address = s.address()
       if (address === null || typeof address === 'string') {
         s.close()
