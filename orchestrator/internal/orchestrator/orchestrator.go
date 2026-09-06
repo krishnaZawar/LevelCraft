@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/krishnaZawar/LevelCraft/orchestrator/internal/base"
@@ -75,7 +76,10 @@ func (o *Orchestrator) start() error {
 		return err
 	}
 
-	editorBackend := o.processes[base.Process_EditorBackend]
+	editorBackend, ok := o.processes[base.Process_EditorBackend]
+	if !ok {
+		return errors.New("editor backend process not found. Stopping...")
+	}
 	if err := o.runProcess(func() (*entity.Process, error) {
 		return executor.StartEditorFrontend(editorBackend.CommunicationURI)
 	}); err != nil {
