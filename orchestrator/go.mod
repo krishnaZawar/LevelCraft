@@ -3,7 +3,7 @@ module github.com/krishnaZawar/LevelCraft/orchestrator
 go 1.26.1
 
 require (
-	github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260830120208-d4653f30795b
+	github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260906132906-e7610acf7cd1
 	github.com/stretchr/testify v1.11.1
 )
 
