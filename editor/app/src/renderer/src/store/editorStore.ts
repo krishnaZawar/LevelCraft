@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import {
   addComponent as apiAddComponent,
   addGameobject as apiAddGameobject,
@@ -25,13 +26,12 @@ interface EditorStoreState {
   gameObjects: GameState
   objectOrder: string[]
   isLoading: boolean
-  // Set only by fetchGameState — "the scene itself failed to load."
-  // Scoped separately from actionError so a failed field edit doesn't
-  // blow away the Hierarchy/Workspace with a full load-failure state.
+  // Set only by fetchGameState — "the scene itself failed to load," shown
+  // as a persistent inline banner with a retry action. Mutation failures
+  // (add/delete/update) are transient instead, surfaced as toasts (see
+  // below) so they don't blow away the Hierarchy/Workspace with a
+  // full load-failure state over what's usually a one-off blip.
   loadError: string | null
-  // Set by component/gameobject mutations — surfaced near where the
-  // action happened instead of replacing an entire panel.
-  actionError: string | null
   selectedObjectId: string | null
   availableComponents: string[]
 
@@ -59,7 +59,6 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
   objectOrder: [],
   isLoading: false,
   loadError: null,
-  actionError: null,
   selectedObjectId: null,
   availableComponents: [],
 
@@ -115,7 +114,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
         selectedObjectId: objectDetails.id
       }))
     } catch (err) {
-      set({ actionError: (err as Error).message })
+      toast.error("Couldn't add object", { description: (err as Error).message })
     }
   },
 
@@ -132,7 +131,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
         }
       })
     } catch (err) {
-      set({ actionError: (err as Error).message })
+      toast.error("Couldn't delete object", { description: (err as Error).message })
     }
   },
 
@@ -141,7 +140,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       const { objectDetails } = await apiAddComponent(objectId, componentName)
       set((state) => ({ gameObjects: { ...state.gameObjects, [objectId]: objectDetails } }))
     } catch (err) {
-      set({ actionError: (err as Error).message })
+      toast.error(`Couldn't add ${componentName}`, { description: (err as Error).message })
     }
   },
 
@@ -150,22 +149,37 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       const { objectDetails } = await apiDeleteComponent(objectId, componentName)
       set((state) => ({ gameObjects: { ...state.gameObjects, [objectId]: objectDetails } }))
     } catch (err) {
-      set({ actionError: (err as Error).message })
+      toast.error(`Couldn't remove ${componentName}`, { description: (err as Error).message })
     }
   },
 
   updateComponent: async (objectId, componentName, details) => {
-    // Optimistic: keeps typed values responsive; reconciled with the
-    // server's response right after, or reverted via actionError on failure.
+    // Genuinely optimistic: applied to local state immediately, before the
+    // network round-trip resolves — not just before/after bookkeeping.
+    // Waiting for the server's response first (even if fast) leaves a gap
+    // where the UI still shows the old value, which for canvas transforms
+    // shows up as a visible flash back to the pre-edit state. Reconciled
+    // with the server's response once it arrives, or reverted on failure.
     const previous = get().gameObjects[objectId]
+    if (previous) {
+      set((state) => ({
+        gameObjects: {
+          ...state.gameObjects,
+          [objectId]: {
+            ...previous,
+            components: { ...previous.components, [componentName]: details }
+          }
+        }
+      }))
+    }
     try {
       const { objectDetails } = await apiUpdateComponent(objectId, componentName, details)
       set((state) => ({ gameObjects: { ...state.gameObjects, [objectId]: objectDetails } }))
     } catch (err) {
       set((state) => ({
-        actionError: (err as Error).message,
         gameObjects: previous ? { ...state.gameObjects, [objectId]: previous } : state.gameObjects
       }))
+      toast.error(`Couldn't update ${componentName}`, { description: (err as Error).message })
     }
   },
 
@@ -175,7 +189,6 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       objectOrder: [],
       isLoading: false,
       loadError: null,
-      actionError: null,
       selectedObjectId: null,
       availableComponents: []
     })

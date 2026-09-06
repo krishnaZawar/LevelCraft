@@ -14,10 +14,21 @@ const api: LevelCraftApi = {
   },
   window: {
     maximize: () => ipcRenderer.send('window:maximize'),
-    unmaximize: () => ipcRenderer.send('window:unmaximize')
+    unmaximize: () => ipcRenderer.send('window:unmaximize'),
+    minimize: () => ipcRenderer.send('window:minimize'),
+    reload: () => ipcRenderer.send('window:reload'),
+    toggleDevTools: () => ipcRenderer.send('window:toggleDevTools'),
+    toggleFullscreen: () => ipcRenderer.send('window:toggleFullscreen')
   },
   backend: {
     getBaseUrl: () => ipcRenderer.sendSync('backend:getBaseUrlSync')
+  },
+  builder: {
+    launch: (scenePath) => ipcRenderer.invoke('builder:launch', scenePath),
+    stop: () => ipcRenderer.send('builder:stop'),
+    onStopped: (callback) => {
+      ipcRenderer.on('builder:stopped', () => callback())
+    }
   },
   menu: {
     onAction: (callback) => {

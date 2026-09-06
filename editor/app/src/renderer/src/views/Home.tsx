@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, FolderOpen, FolderPlus, Plus } from 'lucide-react'
+import AppMenu from '@/AppMenu'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -219,7 +220,13 @@ function Home(): React.JSX.Element {
         )}
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
-        <span className="text-sm font-semibold tracking-tight">LevelCraft</span>
+        <div
+          className="flex items-center gap-2"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        >
+          <AppMenu />
+          <span className="text-sm font-semibold tracking-tight">LevelCraft</span>
+        </div>
         <div className="flex gap-2" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           <Button variant="outline" size="sm" onClick={handleBrowse} disabled={isLoading}>
             Open Existing

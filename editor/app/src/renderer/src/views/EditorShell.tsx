@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Group, Layer, Rect, Stage, Transformer } from 'react-konva'
 import type Konva from 'konva'
+import AppMenu from '@/AppMenu'
 import {
   AlertCircle,
   Box,
   Copy,
   LayoutGrid,
   ListTree,
+  Loader2,
   Play,
   Plus,
   Save,
@@ -26,8 +28,10 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { toast } from 'sonner'
 import { saveGame } from '@/api/gameApi'
 import { cn } from '@/lib/utils'
+import { computeFrameLayout, SCREEN_HEIGHT, SCREEN_WIDTH } from '@/scene/frameLayout'
 import { renderGrid, renderScene, SELECTED_STROKE } from '@/scene/renderScene'
 import { useEditorStore } from '@/store/editorStore'
 import { useProjectStore } from '@/store/projectStore'
@@ -47,12 +51,6 @@ const COMPONENT_FIELD_RANGE: Record<string, Record<string, [number, number]>> = 
   Color: { r: [0, 255], g: [0, 255], b: [0, 255], a: [0, 255] }
 }
 
-// Default game screen size the Workspace frames as an artboard, matching a
-// standard 16:9 HD canvas. No pan/zoom yet (not called for by the current
-// phase) — the frame just zoom-to-fits the panel each time it resizes.
-const SCREEN_WIDTH = 1280
-const SCREEN_HEIGHT = 720
-const SCREEN_PADDING = 48
 const FRAME_FILL = 'oklch(0.145 0 0)'
 const FRAME_STROKE = 'oklch(1 0 0 / 10%)'
 const GRID_CELL_SIZE = 64
@@ -84,7 +82,13 @@ function TopBar(): React.JSX.Element {
       )}
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
     >
-      <span className="text-sm font-medium">{activeProject?.name}</span>
+      <div
+        className="flex items-center gap-2"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      >
+        <AppMenu />
+        <span className="text-sm font-medium">{activeProject?.name}</span>
+      </div>
       <Button
         variant="ghost"
         size="sm"
@@ -126,7 +130,16 @@ function HierarchyPanel(): React.JSX.Element {
     )
   }
 
-  if (!isLoading && objects.length === 0) {
+  if (isLoading && objects.length === 0) {
+    return (
+      <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-xs">
+        <Loader2 className="size-4 animate-spin" aria-hidden />
+        <p>Loading scene…</p>
+      </div>
+    )
+  }
+
+  if (objects.length === 0) {
     return (
       <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center text-xs">
         <Box className="size-5" aria-hidden />
@@ -295,7 +308,6 @@ function AttributesPanel(): React.JSX.Element {
   const gameObjects = useEditorStore((state) => state.gameObjects)
   const selectedObjectId = useEditorStore((state) => state.selectedObjectId)
   const availableComponents = useEditorStore((state) => state.availableComponents)
-  const actionError = useEditorStore((state) => state.actionError)
   const fetchAvailableComponents = useEditorStore((state) => state.fetchAvailableComponents)
   const addComponent = useEditorStore((state) => state.addComponent)
 
@@ -341,10 +353,6 @@ function AttributesPanel(): React.JSX.Element {
         </div>
       </ScrollArea>
 
-      {actionError && (
-        <p className="text-destructive border-border border-t px-3 py-2 text-xs">{actionError}</p>
-      )}
-
       {addableComponents.length > 0 && (
         <div className="border-border border-t p-2">
           <Select value="" onValueChange={(name) => addComponent(selected.id, name)}>
@@ -371,7 +379,16 @@ function UtilityPanel(): React.JSX.Element {
   const deleteGameobject = useEditorStore((state) => state.deleteGameobject)
   const activeProject = useProjectStore((state) => state.activeProject)
 
-  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+  // Play mode runs in its own pop-out window/process (see main/index.ts's
+  // createPlayWindow), not inline here — this just tracks whether one is
+  // open, so Run stays disabled for its whole duration (the backend port
+  // is fixed, so a second launch would collide with it).
+  const [isRunning, setIsRunning] = useState(false)
+
+  useEffect(() => {
+    window.api.builder.onStopped(() => setIsRunning(false))
+  }, [])
 
   async function handleSave(): Promise<void> {
     if (!activeProject) return
@@ -380,8 +397,29 @@ function UtilityPanel(): React.JSX.Element {
       await saveGame(activeProject.scenePath)
       setSaveState('saved')
       setTimeout(() => setSaveState('idle'), 1500)
-    } catch {
-      setSaveState('error')
+    } catch (err) {
+      setSaveState('idle')
+      toast.error("Couldn't save the scene", { description: (err as Error).message })
+    }
+  }
+
+  // Per docs/client/phases.md Phase 7: save the current scene to the
+  // project's real scene file (no separate scratch path needed now that
+  // one exists), then hand that same path to builder/backend.
+  async function handleRun(): Promise<void> {
+    if (!activeProject || isRunning) return
+    setIsRunning(true)
+    try {
+      await saveGame(activeProject.scenePath)
+    } catch (err) {
+      setIsRunning(false)
+      toast.error("Couldn't save the scene", { description: (err as Error).message })
+      return
+    }
+    const result = await window.api.builder.launch(activeProject.scenePath)
+    if (!result.ok) {
+      setIsRunning(false)
+      toast.error("Couldn't start builder/backend", { description: result.message })
     }
   }
 
@@ -426,21 +464,10 @@ function UtilityPanel(): React.JSX.Element {
         </Button>
       </div>
 
-      {saveState === 'error' && (
-        <p className="text-destructive text-xs">Couldn&apos;t save the scene.</p>
-      )}
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span>
-            <Button className="w-full" disabled>
-              <Play aria-hidden />
-              Run
-            </Button>
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>Pending implementation</TooltipContent>
-      </Tooltip>
+      <Button className="w-full" onClick={handleRun} disabled={!activeProject || isRunning}>
+        <Play aria-hidden />
+        {isRunning ? 'Running…' : 'Run'}
+      </Button>
     </div>
   )
 }
@@ -493,18 +520,18 @@ function Workspace(): React.JSX.Element {
     // Transformer resizes via scale, not width/height directly — bake the
     // scale into width/height and reset it, so Transform.w/h stay the
     // source of truth instead of drifting out of sync with a lingering scale.
-    const scaleX = node.scaleX()
-    const scaleY = node.scaleY()
-    node.scaleX(1)
-    node.scaleY(1)
+    const x = Math.round(node.x())
+    const y = Math.round(node.y())
+    const width = Math.max(1, Math.round(node.width() * node.scaleX()))
+    const height = Math.max(1, Math.round(node.height() * node.scaleY()))
 
-    updateComponent(objectId, 'Transform', {
-      ...transform,
-      x: Math.round(node.x()),
-      y: Math.round(node.y()),
-      w: Math.max(1, Math.round(node.width() * scaleX)),
-      h: Math.max(1, Math.round(node.height() * scaleY))
-    })
+    // Applying these as separate node.scaleX(1)/scaleY(1) calls (before
+    // width/height ever change) makes Konva redraw the node at its old
+    // size for one frame first — a visible flash back to the pre-resize
+    // shape. setAttrs applies all of them atomically in the same redraw.
+    node.setAttrs({ x, y, width, height, scaleX: 1, scaleY: 1 })
+
+    updateComponent(objectId, 'Transform', { ...transform, x, y, w: width, h: height })
   }
 
   function handleStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>): void {
@@ -513,19 +540,7 @@ function Workspace(): React.JSX.Element {
   }
 
   const hasSize = size.width > 0 && size.height > 0
-  // Zoom-to-fit the screen frame into the available panel, never scaling
-  // up past 1:1 so a large panel doesn't blow the frame up unrealistically.
-  const scale = hasSize
-    ? Math.min(
-        (size.width - SCREEN_PADDING * 2) / SCREEN_WIDTH,
-        (size.height - SCREEN_PADDING * 2) / SCREEN_HEIGHT,
-        1
-      )
-    : 1
-  const frameWidth = SCREEN_WIDTH * scale
-  const frameHeight = SCREEN_HEIGHT * scale
-  const offsetX = (size.width - frameWidth) / 2
-  const offsetY = (size.height - frameHeight) / 2
+  const { scale, offsetX, offsetY } = computeFrameLayout(size.width, size.height)
 
   return (
     <div ref={containerRef} className="bg-workspace relative h-full overflow-hidden">
