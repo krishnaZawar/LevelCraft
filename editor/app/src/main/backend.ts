@@ -82,6 +82,7 @@ export function getEditorBackendBaseUrl(): string {
 
 // Starts editor/backend if it isn't already reachable, and waits until it
 // responds to /ping before resolving. Throws if it never comes up.
+// If LEVELCRAFT_BACKEND_URL is set (orchestrator-managed), uses that instead.
 export async function ensureEditorBackendRunning(): Promise<void> {
   const defaultUrl = `http://localhost:${DEFAULT_BACKEND_PORT}`
   if (await pingBackend(defaultUrl)) {
