@@ -4,8 +4,11 @@ import { join } from 'path'
 import { app } from 'electron'
 import { is } from '@electron-toolkit/utils'
 
-// Default port for a manually-started editor/backend; instances we spawn
-// ourselves get a dynamic free port instead.
+// The port a manually-started (e.g. by a developer) editor/backend defaults
+// to, per editor/backend/cmd/main.go's `--port` flag default. Used only as
+// a first guess so we don't spawn a duplicate instance in that case — any
+// instance *we* spawn gets a dynamically chosen free port instead, matching
+// how the orchestrator spawns editor/backend (see orchestrator/internal/executor).
 const DEFAULT_BACKEND_PORT = 3000
 const HEALTH_CHECK_TIMEOUT_MS = 15_000
 const HEALTH_CHECK_INTERVAL_MS = 300
@@ -25,7 +28,10 @@ async function pingBackend(baseUrl: string): Promise<boolean> {
   }
 }
 
-// Asks the OS for a free port and releases it immediately for the backend to bind.
+// Asks the OS for an ephemeral port, then immediately releases it. Good
+// enough for our purposes: the gap between release and the backend binding
+// it is a well-known, accepted TOCTOU (the orchestrator's executor has the
+// same retry-on-bind-failure fallback for exactly this reason).
 function getFreePort(): Promise<number> {
   return new Promise((resolve, reject) => {
     const server = createServer()
@@ -68,7 +74,8 @@ async function waitUntilReachable(baseUrl: string, timeoutMs: number): Promise<b
   return false
 }
 
-// Base URL of the editor/backend this app is using, set after ensureEditorBackendRunning() resolves.
+// Returns the base URL of the editor/backend instance this app is using —
+// only meaningful after ensureEditorBackendRunning() has resolved.
 export function getEditorBackendBaseUrl(): string {
   return backendBaseUrl
 }
@@ -77,13 +84,6 @@ export function getEditorBackendBaseUrl(): string {
 // responds to /ping before resolving. Throws if it never comes up.
 // If LEVELCRAFT_BACKEND_URL is set (orchestrator-managed), uses that instead.
 export async function ensureEditorBackendRunning(): Promise<void> {
-  const orchestratedUrl = process.env.LEVELCRAFT_BACKEND_URL
-  if (orchestratedUrl) {
-    console.log('[backend] using orchestrator-provided editor/backend at', orchestratedUrl)
-    backendBaseUrl = orchestratedUrl
-    return
-  }
-
   const defaultUrl = `http://localhost:${DEFAULT_BACKEND_PORT}`
   if (await pingBackend(defaultUrl)) {
     console.log('[backend] editor/backend already reachable, not spawning a new instance')
