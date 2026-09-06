@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/gamestatemanager"
@@ -16,15 +18,17 @@ import (
 func main() {
 	app := fiber.New()
 
-	fileName, ok := getFilenameForArgs()
-	if fileName == "" {
-		panic("game file should be provided to run the game")
-	}
-	if !ok {
-		panic("game file provided should be json")
+	port := flag.Int("port", 3000, "the value of the port on which the service starts")
+	fileName := flag.String("file-name", "", "name of the game file (should be json)")
+
+	flag.Parse()
+
+	err := verifyFilename(*fileName)
+	if err != nil {
+		panic(err)
 	}
 
-	err := initGameScene(fileName)
+	err = initGameScene(*fileName)
 	if err != nil {
 		panic(fmt.Sprintf("failed to load game scene due to %+v", err))
 	}
@@ -33,24 +37,23 @@ func main() {
 
 	go handler.GameLoop()
 
-	app.Listen(":8000")
+	err = app.Listen(":" + strconv.Itoa(*port))
+	if err != nil {
+		panic(err)
+	}
 }
 
 // reads the CLI args passed and enforces whether the file was passed and was it a json
 // program panics on failure
-func getFilenameForArgs() (string, bool) {
-	fileName := flag.String("file-name", "", "name of the game file (should be json)")
-
-	flag.Parse()
-
-	if *fileName == "" {
-		return "", false
+func verifyFilename(fileName string) error {
+	if fileName == "" {
+		return errors.New("game file should be provided to run the game")
 	}
 
-	if filepath.Ext(*fileName) != ".json" {
-		return *fileName, false
+	if filepath.Ext(fileName) != ".json" {
+		return errors.New("game file provided should be json")
 	}
-	return *fileName, true
+	return nil
 }
 
 // reads the file and initializes the game scene
