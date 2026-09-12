@@ -1,0 +1,32 @@
+appId: com.levelcraft.builder
+productName: LevelCraft Player
+directories:
+  buildResources: build
+# No backend binary is bundled here: the orchestrator ships and spawns both
+# backends, and this app is purely the player's UI.
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+win:
+  executableName: LevelCraftPlayer
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  notarize: false
+dmg:
+  artifactName: ${name}-${version}.${ext}
+linux:
+  target:
+    - AppImage
+  maintainer: LevelCraft
+  category: Game
+appImage:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false

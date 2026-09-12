@@ -23,12 +23,12 @@ const api: LevelCraftApi = {
   backend: {
     getBaseUrl: () => ipcRenderer.sendSync('backend:getBaseUrlSync')
   },
-  builder: {
-    launch: (scenePath) => ipcRenderer.invoke('builder:launch', scenePath),
-    stop: () => ipcRenderer.send('builder:stop'),
-    onStopped: (callback) => {
-      ipcRenderer.on('builder:stopped', () => callback())
-    }
+  orchestrator: {
+    getBaseUrl: () => ipcRenderer.sendSync('orchestrator:getBaseUrlSync')
+  },
+  game: {
+    createTempScene: (sourceName) => ipcRenderer.invoke('game:createTempScene', sourceName),
+    clearTempScene: () => ipcRenderer.invoke('game:clearTempScene')
   },
   menu: {
     onAction: (callback) => {

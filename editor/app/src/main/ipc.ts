@@ -1,6 +1,8 @@
 import { dialog, ipcMain } from 'electron'
 import {
+  clearTempScene,
   createProject,
+  createTempScene,
   getProjectsRoot,
   getRecentProjectPaths,
   listProjects,
@@ -35,4 +37,14 @@ export function registerProjectIpcHandlers(): void {
     if (result.canceled || result.filePaths.length === 0) return null
     return result.filePaths[0]
   })
+}
+
+// The temporary project a game run is played from. Creating and clearing it is
+// filesystem work; deciding when a run starts and ends is the orchestrator's.
+export function registerGameIpcHandlers(): void {
+  ipcMain.handle('game:createTempScene', (_event, sourceName: string) =>
+    createTempScene(sourceName)
+  )
+
+  ipcMain.handle('game:clearTempScene', () => clearTempScene())
 }

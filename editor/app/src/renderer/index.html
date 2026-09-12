@@ -4,13 +4,11 @@
     <meta charset="UTF-8" />
     <title>LevelCraft</title>
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <!-- connect-src allows the editor/backend REST API on any localhost port
-         (it binds dynamically, see main/backend.ts) and the builder/backend
-         WebSocket at ws://localhost:8000/requests (fixed port, see
-         docs/client/approach.md §4.4). -->
+    <!-- connect-src allows the editor/backend REST API and the orchestrator's
+         control API on any localhost port, since both bind dynamically. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:*"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*"
     />
   </head>
 

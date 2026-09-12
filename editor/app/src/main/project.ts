@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { randomUUID } from 'crypto'
 import { existsSync } from 'fs'
-import { mkdir, readdir, readFile, writeFile } from 'fs/promises'
+import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
 import { join } from 'path'
 import {
   PROJECT_SCHEMA_VERSION,
@@ -183,4 +183,50 @@ export async function rememberRecentProject(projectPath: string): Promise<void> 
   const existing = await getRecentProjectPaths()
   const next = [projectPath, ...existing.filter((p) => p !== projectPath)].slice(0, 10)
   await writeFile(recentProjectsFilePath(), JSON.stringify(next, null, 2), 'utf-8')
+}
+
+// A run plays a throwaway copy, so running is never an implicit save. Laid out
+// as a real project folder, so the builder sees nothing special-cased.
+const TEMP_PROJECT_DIR = 'levelcraft-play'
+
+export interface TempScene {
+  path: string
+  scenePath: string
+}
+
+let activeTempScene: TempScene | null = null
+
+export async function createTempScene(sourceName: string): Promise<TempScene> {
+  // Cleared first: a crashed run leaves one behind, which would accumulate.
+  await clearTempScene()
+
+  const projectPath = join(app.getPath('temp'), TEMP_PROJECT_DIR, randomUUID())
+  await mkdir(projectPath, { recursive: true })
+
+  const now = new Date().toISOString()
+  const manifest: ProjectManifest = {
+    id: randomUUID(),
+    name: sourceName,
+    schemaVersion: PROJECT_SCHEMA_VERSION,
+    createdAt: now,
+    lastOpenedAt: now
+  }
+  await writeManifest(projectPath, manifest)
+  await writeFile(join(projectPath, SCENE_FILE), '{}', 'utf-8')
+
+  activeTempScene = { path: projectPath, scenePath: join(projectPath, SCENE_FILE) }
+  return activeTempScene
+}
+
+export async function clearTempScene(): Promise<void> {
+  if (!activeTempScene) return
+  const { path } = activeTempScene
+  // Cleared before the delete, so a failed removal can't leave the app
+  // pointed at a folder it already tried to discard.
+  activeTempScene = null
+  try {
+    await rm(path, { recursive: true, force: true })
+  } catch (err) {
+    console.error('[project] failed to clear the temporary game project:', (err as Error).message)
+  }
 }

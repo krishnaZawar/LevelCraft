@@ -1,3 +1,6 @@
 *.exe
 .env
 *.out
+
+# packaged output (scripts/package.mjs)
+dist

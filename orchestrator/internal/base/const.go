@@ -8,8 +8,10 @@ const (
 
 // holds the process names that will start for the application to run
 const (
-	Process_EditorBackend  = "editorBackend"
-	Process_EditorFrontend = "editorFrontend"
+	Process_EditorBackend   = "editorBackend"
+	Process_EditorFrontend  = "editorFrontend"
+	Process_BuilderBackend  = "builderBackend"
+	Process_BuilderFrontend = "builderFrontend"
 )
 
 const (
@@ -17,7 +19,7 @@ const (
 	PingTimeout      = 2 * time.Second        // the http client timeout for performing the ping function
 	PingPollInterval = 300 * time.Millisecond // how often the orchestrator polls /ping while waiting for a process to come up
 
-	MonitorInterval = 5 * time.Second // time interval after which the orchestrator monitors the health of all the services
+	MonitorInterval = 2 * time.Second // time interval after which the orchestrator monitors the health of all the services
 )
 
 // how long a single start attempt waits for /ping before retrying
@@ -35,4 +37,14 @@ const (
 const (
 	EnvEditorBackendURL = "LEVELCRAFT_BACKEND_URL"
 	EnvEditorPingPort   = "LEVELCRAFT_PING_PORT"
+
+	// the orchestrator's control API, so the editor can request game runs
+	// instead of spawning builder processes itself
+	EnvOrchestratorURL = "LEVELCRAFT_ORCHESTRATOR_URL"
+)
+
+// env vars passed to the builder frontend process
+const (
+	EnvBuilderBackendURL = "LEVELCRAFT_BUILDER_BACKEND_URL"
+	EnvBuilderPingPort   = "LEVELCRAFT_PING_PORT"
 )

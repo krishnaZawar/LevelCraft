@@ -2,9 +2,8 @@ import { Line, Rect } from 'react-konva'
 import type Konva from 'konva'
 import type { GameState } from '@/api/gameApi'
 
-// Deliberately independent of editorStore: Phase 7 (Play mode) feeds this
-// the same shape from the builder's WebSocket snapshots instead, and
-// shouldn't need this logic rewritten to do so.
+// Deliberately independent of editorStore: what it needs is the scene shape,
+// not the store that happens to hold it.
 interface RenderSceneOptions {
   selectedObjectId?: string | null
   onSelect?: (id: string) => void

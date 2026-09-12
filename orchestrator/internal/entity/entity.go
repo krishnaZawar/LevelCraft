@@ -18,13 +18,15 @@ func (p *Process) Stop() error {
 		return nil
 	}
 
-	if err := killProcessTree(p); err != nil {
-		if !errors.Is(err, os.ErrProcessDone) {
-			return err
-		}
-	}
+	killErr := killProcessTree(p)
 
+	// Waited for unconditionally, even when the kill reported a failure: a
+	// process that already exited on its own stays a zombie until it is reaped.
 	_ = p.Cmd.Wait()
+
+	if killErr != nil && !errors.Is(killErr, os.ErrProcessDone) {
+		return killErr
+	}
 	return nil
 }
 
