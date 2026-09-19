@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useEditorStore } from '@/store/editorStore'
 import { useProjectStore } from '@/store/projectStore'
+import { useRunStore } from '@/store/runStore'
 import EditorShell from '@/views/EditorShell'
 import Home from '@/views/Home'
 
@@ -10,6 +11,7 @@ function App(): React.JSX.Element {
   const activeProject = useProjectStore((state) => state.activeProject)
   const isProjectOpen = Boolean(activeProject)
   const resetEditorState = useEditorStore((state) => state.reset)
+  const stopGame = useRunStore((state) => state.stop)
 
   useEffect(() => {
     if (isProjectOpen) {
@@ -19,12 +21,11 @@ function App(): React.JSX.Element {
       // Clear any previous project's scene state so it can't linger and
       // briefly flash once a different project is opened next.
       resetEditorState()
-      // Closing the project while the Play window is open would otherwise
-      // leave it (and builder/backend) running with no way back to it.
-      window.api.builder.stop()
+      // The run belongs to the project just closed, with no way back to it.
+      void stopGame()
     }
     window.api.menu.notifyProjectOpen(isProjectOpen)
-  }, [isProjectOpen, resetEditorState])
+  }, [isProjectOpen, resetEditorState, stopGame])
 
   return (
     <TooltipProvider delayDuration={200}>

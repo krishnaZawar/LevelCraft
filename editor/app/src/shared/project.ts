@@ -31,6 +31,11 @@ export type ProjectApiResult =
 // Actions the native File menu (and its keyboard accelerators) can
 // trigger. The menu only knows "an action happened" — the renderer owns
 // what each one actually does, via menuBridge.ts.
+export interface TempSceneInfo {
+  path: string
+  scenePath: string
+}
+
 export type MenuAction = 'new-project' | 'open-project' | 'close-project' | 'save-project'
 
 export interface LevelCraftApi {
@@ -55,16 +60,17 @@ export interface LevelCraftApi {
     // Sync IPC: main already resolved this before creating the window.
     getBaseUrl: () => string
   }
-  builder: {
-    // Spawns builder/backend for the given scene, waits for /ping, and
-    // (on success) opens the separate Play window.
-    launch: (scenePath: string) => Promise<{ ok: boolean; message?: string }>
-    // Closes the Play window, which kills the backend process as a result.
-    stop: () => void
-    // Fires when the Play window closes for any reason (Stop button or the
-    // user closing it directly), so the main window can reset its Run
-    // button state.
-    onStopped: (callback: () => void) => void
+  orchestrator: {
+    // Sync IPC: main resolved this before the window. Empty when the app was
+    // started outside the orchestrator, so no game can be run.
+    getBaseUrl: () => string
+  }
+  game: {
+    // Creates the throwaway project a run is played from. The scene itself
+    // is written by the backend's save endpoint, into the returned scenePath.
+    createTempScene: (sourceName: string) => Promise<TempSceneInfo>
+    // Removes that folder once the run is over.
+    clearTempScene: () => Promise<void>
   }
   menu: {
     onAction: (callback: (action: MenuAction) => void) => void

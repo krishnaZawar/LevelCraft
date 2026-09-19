@@ -1,6 +1,5 @@
-// Shared by Workspace (Edit mode) and PlayView (Play mode) so both frame
-// the same "Main Screen" artboard identically — same size, same zoom-to-fit
-// behavior — regardless of which one is currently rendering it.
+// Frames the "Main Screen" artboard the Workspace panel authors against.
+// builder/app keeps its own matching copy: the two apps agree, not share.
 
 // Default game screen size, matching a standard 16:9 HD canvas. No pan/zoom
 // yet (not called for by the current phase) — the frame just zoom-to-fits

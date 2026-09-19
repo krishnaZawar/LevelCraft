@@ -1,7 +1,5 @@
-// Resolved by the main process (see main/backend.ts) since editor/backend
-// no longer binds to a fixed port — the orchestrator (and this app, when
-// self-spawning it in dev) assigns it a dynamic one. Falls back to the
-// backend's own default port for non-Electron contexts (e.g. unit tests).
+// Resolved by the main process from the environment the orchestrator spawned
+// this app with; the fallback only covers non-Electron contexts like tests.
 const EDITOR_BACKEND_BASE_URL = window.api?.backend.getBaseUrl() ?? 'http://localhost:3000'
 
 export interface GameObjectDetails {
@@ -47,14 +45,10 @@ interface ErrorResponse {
   message: string
 }
 
-// fetch() throws a plain TypeError ("Failed to fetch") when it can't reach
-// the server at all (backend not running, wrong port) — indistinguishable
-// from other TypeErrors by type alone, but this is the only place we call
-// fetch, so treating any thrown non-HTTP error as "backend unreachable"
-// is accurate here and lets callers show something actionable instead of
-// the raw browser error string.
+// fetch() throws a plain TypeError when it can't reach the server at all. This
+// is the only place we call fetch, so treating any throw that way is accurate.
 export const BACKEND_UNREACHABLE_MESSAGE =
-  "Couldn't reach the LevelCraft backend. Make sure editor/backend is running, then try again."
+  "Couldn't reach the LevelCraft backend. It may have stopped running."
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   let res: Response

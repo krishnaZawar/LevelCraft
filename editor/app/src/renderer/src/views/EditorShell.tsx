@@ -13,6 +13,7 @@ import {
   Plus,
   Save,
   SlidersHorizontal,
+  Square,
   Trash2,
   X
 } from 'lucide-react'
@@ -30,11 +31,14 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from 'sonner'
 import { saveGame } from '@/api/gameApi'
+import { isOrchestratorAvailable, ORCHESTRATOR_UNAVAILABLE_MESSAGE } from '@/api/orchestratorApi'
 import { cn } from '@/lib/utils'
 import { computeFrameLayout, SCREEN_HEIGHT, SCREEN_WIDTH } from '@/scene/frameLayout'
 import { renderGrid, renderScene, SELECTED_STROKE } from '@/scene/renderScene'
 import { useEditorStore } from '@/store/editorStore'
 import { useProjectStore } from '@/store/projectStore'
+import { RunStatus, useRunStore } from '@/store/runStore'
+import { ProjectSummary } from '../../../shared/project'
 
 // Keeps field order stable and predictable instead of relying on JSON key
 // order. Falls back to whatever keys the component actually has, so a
@@ -373,22 +377,74 @@ function AttributesPanel(): React.JSX.Element {
   )
 }
 
+// One slot, since only one of Run/Stop is ever meaningful. The editor starts
+// nothing here, so what this tracks is a request's progress, not a process.
+function RunButton({
+  canRunGames,
+  activeProject,
+  status,
+  onRun,
+  onStop
+}: {
+  canRunGames: boolean
+  activeProject: ProjectSummary | null
+  status: RunStatus
+  onRun: (project: ProjectSummary) => void
+  onStop: () => void
+}): React.JSX.Element {
+  const isBusy = status === 'starting' || status === 'stopping'
+
+  const button =
+    status === 'idle' ? (
+      <Button
+        className="w-full"
+        disabled={!activeProject || !canRunGames}
+        onClick={() => activeProject && onRun(activeProject)}
+      >
+        <Play aria-hidden />
+        Run
+      </Button>
+    ) : (
+      <Button
+        className="w-full"
+        variant={status === 'running' ? 'destructive' : 'secondary'}
+        disabled={isBusy}
+        onClick={onStop}
+      >
+        {isBusy ? <Loader2 className="animate-spin" aria-hidden /> : <Square aria-hidden />}
+        {status === 'starting' ? 'Starting…' : status === 'stopping' ? 'Stopping…' : 'Stop'}
+      </Button>
+    )
+
+  // Explain rather than leave a dead button: the reason is how the app was
+  // launched, which isn't visible from in here.
+  if (!canRunGames) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="w-full">{button}</span>
+        </TooltipTrigger>
+        <TooltipContent>{ORCHESTRATOR_UNAVAILABLE_MESSAGE}</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return button
+}
+
 function UtilityPanel(): React.JSX.Element {
   const selectedObjectId = useEditorStore((state) => state.selectedObjectId)
   const addGameobject = useEditorStore((state) => state.addGameobject)
   const deleteGameobject = useEditorStore((state) => state.deleteGameobject)
   const activeProject = useProjectStore((state) => state.activeProject)
 
-  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
-  // Play mode runs in its own pop-out window/process (see main/index.ts's
-  // createPlayWindow), not inline here — this just tracks whether one is
-  // open, so Run stays disabled for its whole duration (the backend port
-  // is fixed, so a second launch would collide with it).
-  const [isRunning, setIsRunning] = useState(false)
+  const runStatus = useRunStore((state) => state.status)
+  const runGame = useRunStore((state) => state.run)
+  const stopGame = useRunStore((state) => state.stop)
 
-  useEffect(() => {
-    window.api.builder.onStopped(() => setIsRunning(false))
-  }, [])
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+
+  const canRunGames = isOrchestratorAvailable()
 
   async function handleSave(): Promise<void> {
     if (!activeProject) return
@@ -400,26 +456,6 @@ function UtilityPanel(): React.JSX.Element {
     } catch (err) {
       setSaveState('idle')
       toast.error("Couldn't save the scene", { description: (err as Error).message })
-    }
-  }
-
-  // Per docs/client/phases.md Phase 7: save the current scene to the
-  // project's real scene file (no separate scratch path needed now that
-  // one exists), then hand that same path to builder/backend.
-  async function handleRun(): Promise<void> {
-    if (!activeProject || isRunning) return
-    setIsRunning(true)
-    try {
-      await saveGame(activeProject.scenePath)
-    } catch (err) {
-      setIsRunning(false)
-      toast.error("Couldn't save the scene", { description: (err as Error).message })
-      return
-    }
-    const result = await window.api.builder.launch(activeProject.scenePath)
-    if (!result.ok) {
-      setIsRunning(false)
-      toast.error("Couldn't start builder/backend", { description: result.message })
     }
   }
 
@@ -464,10 +500,13 @@ function UtilityPanel(): React.JSX.Element {
         </Button>
       </div>
 
-      <Button className="w-full" onClick={handleRun} disabled={!activeProject || isRunning}>
-        <Play aria-hidden />
-        {isRunning ? 'Running…' : 'Run'}
-      </Button>
+      <RunButton
+        canRunGames={canRunGames}
+        activeProject={activeProject}
+        status={runStatus}
+        onRun={runGame}
+        onStop={stopGame}
+      />
     </div>
   )
 }

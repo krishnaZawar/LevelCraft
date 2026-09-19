@@ -1,0 +1,134 @@
+/* Chrome-light by intent: the game screen is the interface. Hand-written
+   rather than shared with the editor, whose coupling this app exists to undo. */
+
+:root {
+  --background: #0a0a0a;
+  --surface: #121212;
+  --foreground: #fafafa;
+  --muted-foreground: #a1a1a1;
+  --border: rgba(255, 255, 255, 0.1);
+  --danger: #f87171;
+  --success: #34d399;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+  /* The game reads keyboard input; selection from stray drags is noise */
+  user-select: none;
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.player__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.player__title {
+  font-weight: 500;
+}
+
+.player__status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.player__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+}
+
+.player__dot--connected {
+  background: var(--success);
+}
+
+.player__dot--error {
+  background: var(--danger);
+}
+
+.player__stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.player__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(10, 10, 10, 0.85);
+}
+
+.player__overlay-title {
+  font-weight: 500;
+  color: var(--danger);
+}
+
+.player__overlay-body {
+  max-width: 32rem;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+.player__button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.player__button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
