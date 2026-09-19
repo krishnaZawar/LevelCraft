@@ -3,13 +3,12 @@ package executor
 import (
 	"github.com/krishnaZawar/LevelCraft/orchestrator/internal/base"
 	"github.com/krishnaZawar/LevelCraft/orchestrator/internal/entity"
-	"github.com/krishnaZawar/LevelCraft/orchestrator/internal/layout"
 )
 
 // starts the editor backend
 func StartEditorBackend() (*entity.Process, error) {
 	return startAndWaitHealthy(base.Process_EditorBackend, func() entity.CommandConfig {
-		return editorBackendConfig(layout.Get(), getRandomPort())
+		return editorBackendConfig(getRandomPort())
 	}, base.BackendStartupTimeout)
 }
 
@@ -18,7 +17,7 @@ func StartEditorBackend() (*entity.Process, error) {
 func StartEditorFrontend(backendURI string, orchestratorURI string) (*entity.Process, error) {
 	return startAndWaitHealthy(base.Process_EditorFrontend, func() entity.CommandConfig {
 		port := getRandomPort()
-		comm := editorFrontendConfig(layout.Get(), port)
+		comm := editorFrontendConfig(port)
 		comm.Env = []string{
 			base.EnvEditorBackendURL + "=" + backendURI,
 			base.EnvEditorPingPort + "=" + port,
@@ -28,14 +27,7 @@ func StartEditorFrontend(backendURI string, orchestratorURI string) (*entity.Pro
 	}, base.FrontendStartupTimeout)
 }
 
-func editorBackendConfig(l *layout.Layout, port string) entity.CommandConfig {
-	if l.IsPackaged() {
-		return entity.CommandConfig{
-			Name: l.Path(l.EditorBackend),
-			Args: []string{"--port", port},
-			Port: port,
-		}
-	}
+func editorBackendConfig(port string) entity.CommandConfig {
 	return entity.CommandConfig{
 		Pwd:  "../editor/backend",
 		Name: "go",
@@ -44,13 +36,7 @@ func editorBackendConfig(l *layout.Layout, port string) entity.CommandConfig {
 	}
 }
 
-func editorFrontendConfig(l *layout.Layout, port string) entity.CommandConfig {
-	if l.IsPackaged() {
-		return entity.CommandConfig{
-			Name: l.Path(l.EditorApp),
-			Port: port,
-		}
-	}
+func editorFrontendConfig(port string) entity.CommandConfig {
 	return entity.CommandConfig{
 		Pwd:  "../editor/app",
 		Name: "npm",
