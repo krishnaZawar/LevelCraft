@@ -92,6 +92,24 @@ export function addGameobject(): Promise<GameObjectResponse> {
   return request<GameObjectResponse>('POST', '/gameobjects/')
 }
 
+// Only the fields actually edited are sent: the backend leaves out anything
+// omitted, so a rename can't blank the group as a side effect.
+export function updateGameobject(
+  objectId: string,
+  metadata: { name?: string; group?: string }
+): Promise<GameObjectResponse> {
+  return request<GameObjectResponse>('PUT', `/gameobjects/${encodePathSegment(objectId)}`, metadata)
+}
+
+// The copy is named by the backend, which is what can see the rest of the
+// scene and so what can pick a name nothing else is using.
+export function duplicateGameobject(objectId: string): Promise<GameObjectResponse> {
+  return request<GameObjectResponse>(
+    'POST',
+    `/gameobjects/${encodePathSegment(objectId)}/duplicate`
+  )
+}
+
 export function deleteGameobject(objectId: string): Promise<DeleteGameobjectResponse> {
   return request<DeleteGameobjectResponse>('DELETE', `/gameobjects/${encodePathSegment(objectId)}`)
 }

@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
-import { Group, Layer, Rect, Stage, Transformer } from 'react-konva'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Layer, Rect, Stage, Transformer } from 'react-konva'
 import type Konva from 'konva'
 import AppMenu from '@/AppMenu'
 import {
   AlertCircle,
   Box,
+  ChevronRight,
   Copy,
-  LayoutGrid,
+  GripVertical,
   ListTree,
   Loader2,
+  Maximize2,
   Play,
   Plus,
   Save,
@@ -35,7 +37,7 @@ import { isOrchestratorAvailable, ORCHESTRATOR_UNAVAILABLE_MESSAGE } from '@/api
 import { cn } from '@/lib/utils'
 import { computeFrameLayout, SCREEN_HEIGHT, SCREEN_WIDTH } from '@/scene/frameLayout'
 import { renderGrid, renderScene, SELECTED_STROKE } from '@/scene/renderScene'
-import { useEditorStore } from '@/store/editorStore'
+import { componentNamesInOrder, useEditorStore } from '@/store/editorStore'
 import { useProjectStore } from '@/store/projectStore'
 import { RunStatus, useRunStore } from '@/store/runStore'
 import { ProjectSummary } from '../../../shared/project'
@@ -56,7 +58,10 @@ const COMPONENT_FIELD_RANGE: Record<string, Record<string, [number, number]>> = 
 }
 
 const FRAME_FILL = 'oklch(0.145 0 0)'
-const FRAME_STROKE = 'oklch(1 0 0 / 10%)'
+// A solid white edge, so the game screen reads as a definite boundary on an
+// otherwise unbounded canvas rather than as one more faint panel edge.
+const SCREEN_STROKE = 'oklch(1 0 0 / 85%)'
+const SCREEN_NODE_NAME = 'game-screen'
 const GRID_CELL_SIZE = 64
 
 function PanelHeading({
@@ -157,7 +162,6 @@ function HierarchyPanel(): React.JSX.Element {
       <ul className="p-1">
         {objects.map((object) => {
           const isSelected = selectedObjectId === object.id
-          const color = object.components.Color
 
           return (
             <li key={object.id}>
@@ -193,15 +197,6 @@ function HierarchyPanel(): React.JSX.Element {
                   aria-hidden
                 />
                 <span className="truncate">{object.name || 'GameObject'}</span>
-                {color && (
-                  <span
-                    className="border-border ml-auto size-2.5 shrink-0 rounded-[2px] border"
-                    style={{
-                      backgroundColor: `rgba(${Number(color.r ?? 0)}, ${Number(color.g ?? 0)}, ${Number(color.b ?? 0)}, ${Number(color.a ?? 255) / 255})`
-                    }}
-                    aria-hidden
-                  />
-                )}
               </button>
             </li>
           )
@@ -263,24 +258,111 @@ function NumberField({
   )
 }
 
+function TextField({
+  label,
+  value,
+  placeholder,
+  onCommit
+}: {
+  label: string
+  value: string
+  placeholder: string
+  onCommit: (value: string) => void
+}): React.JSX.Element {
+  // Same remount-on-external-change approach NumberField uses, rather than
+  // syncing with an effect.
+  const [text, setText] = useState(value)
+
+  function commit(): void {
+    const next = text.trim()
+    if (next === value) return
+    onCommit(next)
+  }
+
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-muted-foreground text-[10px] tracking-wide uppercase">{label}</span>
+      <Input
+        value={text}
+        placeholder={placeholder}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') e.currentTarget.blur()
+          // Abandoning the edit restores what was there, so a half-typed name
+          // is never committed by clicking away afterwards.
+          if (e.key === 'Escape') {
+            setText(value)
+            e.currentTarget.blur()
+          }
+        }}
+        className="h-7 text-xs"
+      />
+    </label>
+  )
+}
+
 function ComponentCard({
   objectId,
   name,
-  details
+  details,
+  isDragging,
+  onDragStart,
+  onDragEnd,
+  onDrop
 }: {
   objectId: string
   name: string
   details: Record<string, unknown>
+  isDragging: boolean
+  onDragStart: (name: string) => void
+  onDragEnd: () => void
+  onDrop: (sourceName: string, targetName: string) => void
 }): React.JSX.Element {
   const updateComponent = useEditorStore((state) => state.updateComponent)
   const deleteComponent = useEditorStore((state) => state.deleteComponent)
+  const isCollapsed = useEditorStore((state) => state.collapsedComponents.includes(name))
+  const toggleCollapsed = useEditorStore((state) => state.toggleComponentCollapsed)
 
   const fields = COMPONENT_FIELD_ORDER[name] ?? Object.keys(details)
 
   return (
-    <div className="border-border space-y-2 rounded-md border p-2.5">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold">{name}</span>
+    <div
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/plain', name)
+        onDragStart(name)
+      }}
+      onDragEnd={onDragEnd}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault()
+        // The dragged name comes back out of dataTransfer rather than from the
+        // isDragging state, which isn't guaranteed to have flushed by the time
+        // this fires — the same reason the Hierarchy reads it this way.
+        const sourceName = e.dataTransfer.getData('text/plain')
+        if (sourceName) onDrop(sourceName, name)
+        onDragEnd()
+      }}
+      className={cn(
+        'border-border rounded-md border transition-opacity',
+        isDragging && 'opacity-40'
+      )}
+    >
+      <div className="flex items-center gap-1 p-1.5 pl-2">
+        <GripVertical className="text-muted-foreground size-3.5 shrink-0 cursor-grab" aria-hidden />
+        <button
+          type="button"
+          onClick={() => toggleCollapsed(name)}
+          aria-expanded={!isCollapsed}
+          className="flex flex-1 items-center gap-1 text-left text-xs font-semibold"
+        >
+          <ChevronRight
+            className={cn('size-3.5 transition-transform', !isCollapsed && 'rotate-90')}
+            aria-hidden
+          />
+          {name}
+        </button>
         <Button
           variant="ghost"
           size="icon"
@@ -290,20 +372,23 @@ function ComponentCard({
           <Trash2 className="size-3.5" aria-hidden />
         </Button>
       </div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-        {fields.map((field) => {
-          const value = Number(details[field] ?? 0)
-          return (
-            <NumberField
-              key={`${objectId}:${field}:${value}`}
-              label={field}
-              value={value}
-              range={COMPONENT_FIELD_RANGE[name]?.[field]}
-              onCommit={(next) => updateComponent(objectId, name, { ...details, [field]: next })}
-            />
-          )
-        })}
-      </div>
+
+      {!isCollapsed && (
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 px-2.5 pt-0.5 pb-2.5">
+          {fields.map((field) => {
+            const value = Number(details[field] ?? 0)
+            return (
+              <NumberField
+                key={`${objectId}:${field}:${value}`}
+                label={field}
+                value={value}
+                range={COMPONENT_FIELD_RANGE[name]?.[field]}
+                onCommit={(next) => updateComponent(objectId, name, { ...details, [field]: next })}
+              />
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -314,6 +399,11 @@ function AttributesPanel(): React.JSX.Element {
   const availableComponents = useEditorStore((state) => state.availableComponents)
   const fetchAvailableComponents = useEditorStore((state) => state.fetchAvailableComponents)
   const addComponent = useEditorStore((state) => state.addComponent)
+  const componentOrder = useEditorStore((state) => state.componentOrder)
+  const reorderComponents = useEditorStore((state) => state.reorderComponents)
+  const updateMetadata = useEditorStore((state) => state.updateGameobjectMetadata)
+
+  const [draggedComponent, setDraggedComponent] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAvailableComponents()
@@ -330,14 +420,31 @@ function AttributesPanel(): React.JSX.Element {
     )
   }
 
-  const attachedNames = Object.keys(selected.components)
+  const attachedNames = componentNamesInOrder(
+    componentOrder[selected.id],
+    Object.keys(selected.components)
+  )
   const addableComponents = availableComponents.filter((name) => !attachedNames.includes(name))
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="border-border space-y-0.5 border-b p-3">
-        <p className="truncate text-sm font-medium">{selected.name || 'GameObject'}</p>
-        {selected.group && <p className="text-muted-foreground text-xs">{selected.group}</p>}
+      <div className="border-border grid grid-cols-2 gap-2 border-b p-3">
+        <TextField
+          // Remounted per object so the inputs always start from the object
+          // actually selected, rather than carrying over a previous edit.
+          key={`${selected.id}:name:${selected.name}`}
+          label="Name"
+          value={selected.name}
+          placeholder="GameObject"
+          onCommit={(name) => updateMetadata(selected.id, { name })}
+        />
+        <TextField
+          key={`${selected.id}:group:${selected.group}`}
+          label="Group"
+          value={selected.group}
+          placeholder="None"
+          onCommit={(group) => updateMetadata(selected.id, { group })}
+        />
       </div>
 
       <ScrollArea className="flex-1">
@@ -351,6 +458,12 @@ function AttributesPanel(): React.JSX.Element {
                 objectId={selected.id}
                 name={name}
                 details={selected.components[name]}
+                isDragging={draggedComponent === name}
+                onDragStart={setDraggedComponent}
+                onDragEnd={() => setDraggedComponent(null)}
+                onDrop={(sourceName, targetName) =>
+                  reorderComponents(selected.id, sourceName, targetName)
+                }
               />
             ))
           )}
@@ -397,7 +510,7 @@ function RunButton({
   const button =
     status === 'idle' ? (
       <Button
-        className="w-full"
+        size="sm"
         disabled={!activeProject || !canRunGames}
         onClick={() => activeProject && onRun(activeProject)}
       >
@@ -406,7 +519,7 @@ function RunButton({
       </Button>
     ) : (
       <Button
-        className="w-full"
+        size="sm"
         variant={status === 'running' ? 'destructive' : 'secondary'}
         disabled={isBusy}
         onClick={onStop}
@@ -422,7 +535,7 @@ function RunButton({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="w-full">{button}</span>
+          <span>{button}</span>
         </TooltipTrigger>
         <TooltipContent>{ORCHESTRATOR_UNAVAILABLE_MESSAGE}</TooltipContent>
       </Tooltip>
@@ -432,9 +545,12 @@ function RunButton({
   return button
 }
 
-function UtilityPanel(): React.JSX.Element {
+// The object actions sit directly above the canvas rather than in a panel of
+// their own: they act on what the canvas shows, so they belong next to it.
+function WorkspaceToolbar(): React.JSX.Element {
   const selectedObjectId = useEditorStore((state) => state.selectedObjectId)
   const addGameobject = useEditorStore((state) => state.addGameobject)
+  const duplicateGameobject = useEditorStore((state) => state.duplicateGameobject)
   const deleteGameobject = useEditorStore((state) => state.deleteGameobject)
   const activeProject = useProjectStore((state) => state.activeProject)
 
@@ -460,35 +576,35 @@ function UtilityPanel(): React.JSX.Element {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-3 p-3">
-      <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" size="sm" onClick={addGameobject}>
-          <Plus aria-hidden />
-          Add Object
-        </Button>
+    <div className="border-border flex h-11 shrink-0 items-center gap-2 border-b px-3">
+      <Button variant="secondary" size="sm" onClick={addGameobject}>
+        <Plus aria-hidden />
+        Add Object
+      </Button>
 
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={!selectedObjectId}
-          onClick={() => selectedObjectId && deleteGameobject(selectedObjectId)}
-        >
-          <Trash2 aria-hidden />
-          Delete
-        </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={!selectedObjectId}
+        onClick={() => selectedObjectId && deleteGameobject(selectedObjectId)}
+      >
+        <Trash2 aria-hidden />
+        Delete
+      </Button>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>
-              <Button variant="outline" size="sm" disabled>
-                <Copy aria-hidden />
-                Duplicate
-              </Button>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>Pending implementation</TooltipContent>
-        </Tooltip>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={!selectedObjectId}
+        onClick={() => selectedObjectId && duplicateGameobject(selectedObjectId)}
+      >
+        <Copy aria-hidden />
+        Duplicate
+      </Button>
 
+      {/* Save sits with Run rather than with the object actions: both act on
+          the project as a whole, where the others act on one object. */}
+      <div className="ml-auto flex items-center gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -498,17 +614,33 @@ function UtilityPanel(): React.JSX.Element {
           <Save aria-hidden />
           {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved' : 'Save'}
         </Button>
-      </div>
 
-      <RunButton
-        canRunGames={canRunGames}
-        activeProject={activeProject}
-        status={runStatus}
-        onRun={runGame}
-        onStop={stopGame}
-      />
+        <RunButton
+          canRunGames={canRunGames}
+          activeProject={activeProject}
+          status={runStatus}
+          onRun={runGame}
+          onStop={stopGame}
+        />
+      </div>
     </div>
   )
+}
+
+// Zoom bounds and step for the canvas. Wide enough to frame a whole scene or
+// work on one object closely, without letting the screen rect vanish entirely.
+const MIN_ZOOM = 0.1
+const MAX_ZOOM = 4
+const ZOOM_STEP = 1.1
+
+interface CanvasView {
+  x: number
+  y: number
+  scale: number
+}
+
+function clampZoom(scale: number): number {
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, scale))
 }
 
 function Workspace(): React.JSX.Element {
@@ -521,17 +653,32 @@ function Workspace(): React.JSX.Element {
   const stageRef = useRef<Konva.Stage>(null)
   const transformerRef = useRef<Konva.Transformer>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
+  // The canvas is infinite, so the view is panned and zoomed freely rather
+  // than recomputed from the container: null until the first measure, which
+  // is what frames the game screen on open.
+  const [view, setView] = useState<CanvasView | null>(null)
+  // Until the view has been moved by hand it keeps re-framing itself as the
+  // container resizes. The first measure can arrive before the layout has
+  // settled, and re-fitting is more useful than honouring that stale size.
+  const hasAdjustedView = useRef(false)
+
+  const fitToScreen = useCallback((width: number, height: number) => {
+    const { scale, offsetX, offsetY } = computeFrameLayout(width, height)
+    setView({ x: offsetX, y: offsetY, scale })
+  }, [])
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
 
     const observer = new ResizeObserver(([entry]) => {
-      setSize({ width: entry.contentRect.width, height: entry.contentRect.height })
+      const { width, height } = entry.contentRect
+      setSize({ width, height })
+      if (!hasAdjustedView.current) fitToScreen(width, height)
     })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [fitToScreen])
 
   // Attaches the Transformer's drag-to-resize handles to whichever shape is
   // selected — re-runs on gameObjects changes too, since the node for a
@@ -574,65 +721,116 @@ function Workspace(): React.JSX.Element {
   }
 
   function handleStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>): void {
-    // Clicked empty pasteboard, not a shape — clear selection.
-    if (e.target === e.target.getStage()) selectObject(null)
+    // Clicked the empty canvas or the game screen itself, not an object.
+    if (e.target === e.target.getStage() || e.target.name() === SCREEN_NODE_NAME) {
+      selectObject(null)
+    }
+  }
+
+  // Zooms toward the pointer rather than the canvas origin, so the thing under
+  // the cursor stays under the cursor.
+  function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): void {
+    e.evt.preventDefault()
+    const stage = stageRef.current
+    const pointer = stage?.getPointerPosition()
+    if (!stage || !pointer || !view) return
+
+    const nextScale = clampZoom(view.scale * (e.evt.deltaY > 0 ? 1 / ZOOM_STEP : ZOOM_STEP))
+    if (nextScale === view.scale) return
+
+    hasAdjustedView.current = true
+
+    const worldX = (pointer.x - view.x) / view.scale
+    const worldY = (pointer.y - view.y) / view.scale
+    setView({
+      scale: nextScale,
+      x: pointer.x - worldX * nextScale,
+      y: pointer.y - worldY * nextScale
+    })
   }
 
   const hasSize = size.width > 0 && size.height > 0
-  const { scale, offsetX, offsetY } = computeFrameLayout(size.width, size.height)
+  const scale = view?.scale ?? 1
 
   return (
-    <div ref={containerRef} className="bg-workspace relative h-full overflow-hidden">
+    <div ref={containerRef} className="bg-workspace relative min-h-0 flex-1 overflow-hidden">
       <h2 className="sr-only">Workspace</h2>
-      {hasSize && (
+      {hasSize && view && (
         <>
           <span
             className="text-muted-foreground pointer-events-none absolute z-10 text-xs"
-            style={{ left: offsetX, top: offsetY - 22 }}
+            style={{ left: view.x, top: view.y - 22 }}
           >
             Main Screen · {SCREEN_WIDTH}×{SCREEN_HEIGHT}
           </span>
+
+          <div className="absolute right-3 bottom-3 z-10 flex items-center gap-1.5">
+            <span className="text-muted-foreground text-xs tabular-nums">
+              {Math.round(view.scale * 100)}%
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => fitToScreen(size.width, size.height)}
+            >
+              <Maximize2 aria-hidden />
+              Fit
+            </Button>
+          </div>
+
           <Stage
             ref={stageRef}
             width={size.width}
             height={size.height}
+            x={view.x}
+            y={view.y}
+            scaleX={view.scale}
+            scaleY={view.scale}
+            draggable
+            onDragEnd={(e) => {
+              // Only the stage itself panning moves the view; a shape's own
+              // drag bubbles up here too and must not be mistaken for a pan.
+              if (e.target !== e.target.getStage()) return
+              hasAdjustedView.current = true
+              setView({ ...view, x: e.target.x(), y: e.target.y() })
+            }}
+            onWheel={handleWheel}
             onMouseDown={handleStageMouseDown}
           >
             <Layer>
-              <Group x={offsetX} y={offsetY} scaleX={scale} scaleY={scale}>
-                <Rect
-                  x={0}
-                  y={0}
-                  width={SCREEN_WIDTH}
-                  height={SCREEN_HEIGHT}
-                  fill={FRAME_FILL}
-                  stroke={FRAME_STROKE}
-                  strokeWidth={1 / scale}
-                />
-                {renderGrid(SCREEN_WIDTH, SCREEN_HEIGHT, GRID_CELL_SIZE, scale)}
-                {renderScene(gameObjects, {
-                  selectedObjectId,
-                  onSelect: selectObject,
-                  onDragEnd: handleDragEnd,
-                  onTransformEnd: handleTransformEnd,
-                  draggable: true,
-                  scale
-                })}
-                <Transformer
-                  ref={transformerRef}
-                  rotateEnabled={false}
-                  anchorSize={8 / scale}
-                  anchorCornerRadius={2 / scale}
-                  borderStroke={SELECTED_STROKE}
-                  anchorStroke={SELECTED_STROKE}
-                  anchorFill={FRAME_FILL}
-                  borderStrokeWidth={1 / scale}
-                  anchorStrokeWidth={1.5 / scale}
-                  boundBoxFunc={(oldBox, newBox) =>
-                    newBox.width < 10 || newBox.height < 10 ? oldBox : newBox
-                  }
-                />
-              </Group>
+              <Rect
+                name={SCREEN_NODE_NAME}
+                x={0}
+                y={0}
+                width={SCREEN_WIDTH}
+                height={SCREEN_HEIGHT}
+                fill={FRAME_FILL}
+                stroke={SCREEN_STROKE}
+                strokeWidth={1.5 / scale}
+              />
+              {renderGrid(SCREEN_WIDTH, SCREEN_HEIGHT, GRID_CELL_SIZE, scale)}
+              {renderScene(gameObjects, {
+                selectedObjectId,
+                onSelect: selectObject,
+                onDragEnd: handleDragEnd,
+                onTransformEnd: handleTransformEnd,
+                draggable: true,
+                scale
+              })}
+              <Transformer
+                ref={transformerRef}
+                rotateEnabled={false}
+                anchorSize={8 / scale}
+                anchorCornerRadius={2 / scale}
+                borderStroke={SELECTED_STROKE}
+                anchorStroke={SELECTED_STROKE}
+                anchorFill={FRAME_FILL}
+                borderStrokeWidth={1 / scale}
+                anchorStrokeWidth={1.5 / scale}
+                boundBoxFunc={(oldBox, newBox) =>
+                  newBox.width < 10 || newBox.height < 10 ? oldBox : newBox
+                }
+              />
             </Layer>
           </Stage>
         </>
@@ -663,20 +861,10 @@ function EditorShell(): React.JSX.Element {
           <ResizableHandle withHandle />
 
           <ResizablePanel defaultSize="62%">
-            <ResizablePanelGroup orientation="vertical">
-              <ResizablePanel defaultSize="78%" minSize="40%">
-                <Workspace />
-              </ResizablePanel>
-
-              <ResizableHandle withHandle />
-
-              <ResizablePanel defaultSize="22%" minSize="12%" maxSize="45%">
-                <div className="flex h-full flex-col overflow-hidden">
-                  <PanelHeading icon={LayoutGrid}>Utility</PanelHeading>
-                  <UtilityPanel />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
+            <div className="flex h-full flex-col overflow-hidden">
+              <WorkspaceToolbar />
+              <Workspace />
+            </div>
           </ResizablePanel>
 
           <ResizableHandle withHandle />
