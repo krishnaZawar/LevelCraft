@@ -24,6 +24,8 @@ func CreateRoutes(app *fiber.App) {
 
 	gameobjects := app.Group("/gameobjects")
 	gameobjects.Post("/", handler.AddGameobject)
+	gameobjects.Put("/:objectID", handler.UpdateGameobject)
+	gameobjects.Post("/:objectID/duplicate", handler.DuplicateGameobject)
 	gameobjects.Delete("/:objectID", handler.DeleteGameobject)
 
 	objComponents := gameobjects.Group("/:objectID/components")

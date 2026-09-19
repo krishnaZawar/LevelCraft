@@ -5,7 +5,9 @@ import {
   addGameobject as apiAddGameobject,
   deleteComponent as apiDeleteComponent,
   deleteGameobject as apiDeleteGameobject,
+  duplicateGameobject as apiDuplicateGameobject,
   updateComponent as apiUpdateComponent,
+  updateGameobject as apiUpdateGameobject,
   getComponents,
   getGameState,
   GameState
@@ -22,9 +24,39 @@ function syncOrder(order: string[], gameObjects: GameState): string[] {
   return [...kept, ...missing]
 }
 
+// Drop-to-reorder, shared by the Hierarchy's objects and the Attributes
+// panel's components. Dragging forward drops after the target and backward
+// drops before it, so dropping onto the next sibling actually moves.
+function moveWithin(order: string[], draggedId: string, targetId: string): string[] {
+  const draggedFrom = order.indexOf(draggedId)
+  const targetFrom = order.indexOf(targetId)
+  if (draggedFrom === -1 || targetFrom === -1 || draggedId === targetId) return order
+
+  const next = order.filter((id) => id !== draggedId)
+  let insertAt = next.indexOf(targetId)
+  if (draggedFrom < targetFrom) insertAt += 1
+  next.splice(insertAt, 0, draggedId)
+  return next
+}
+
+// The order components are shown in for one object, so a user can float the
+// ones they touch often to the top. Session-only, like the Hierarchy's order:
+// the backend stores components in a map and has no order of its own.
+export function componentNamesInOrder(order: string[] | undefined, attached: string[]): string[] {
+  if (!order) return attached
+  const kept = order.filter((name) => attached.includes(name))
+  return [...kept, ...attached.filter((name) => !kept.includes(name))]
+}
+
 interface EditorStoreState {
   gameObjects: GameState
   objectOrder: string[]
+  // objectId -> the order its components are listed in
+  componentOrder: Record<string, string[]>
+  // Collapsed by component name rather than per object: collapsing Transform
+  // is a statement about how much you care about Transform, not about one
+  // object, and it should hold as you click between objects.
+  collapsedComponents: string[]
   isLoading: boolean
   // Set only by fetchGameState — "the scene itself failed to load," shown
   // as a persistent inline banner with a retry action. Mutation failures
@@ -39,8 +71,15 @@ interface EditorStoreState {
   fetchAvailableComponents: () => Promise<void>
   selectObject: (id: string | null) => void
   reorderObjects: (draggedId: string, targetId: string) => void
+  reorderComponents: (objectId: string, draggedName: string, targetName: string) => void
+  toggleComponentCollapsed: (name: string) => void
   addGameobject: () => Promise<void>
+  duplicateGameobject: (objectId: string) => Promise<void>
   deleteGameobject: (objectId: string) => Promise<void>
+  updateGameobjectMetadata: (
+    objectId: string,
+    metadata: { name?: string; group?: string }
+  ) => Promise<void>
   addComponent: (objectId: string, componentName: string) => Promise<void>
   deleteComponent: (objectId: string, componentName: string) => Promise<void>
   updateComponent: (
@@ -57,6 +96,8 @@ interface EditorStoreState {
 export const useEditorStore = create<EditorStoreState>((set, get) => ({
   gameObjects: {},
   objectOrder: [],
+  componentOrder: {},
+  collapsedComponents: [],
   isLoading: false,
   loadError: null,
   selectedObjectId: null,
@@ -87,23 +128,27 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
 
   selectObject: (id) => set({ selectedObjectId: id }),
 
-  reorderObjects: (draggedId, targetId) => {
-    if (draggedId === targetId) return
-    set((state) => {
-      const draggedFrom = state.objectOrder.indexOf(draggedId)
-      const targetFrom = state.objectOrder.indexOf(targetId)
-      if (draggedFrom === -1 || targetFrom === -1) return {}
+  reorderObjects: (draggedId, targetId) =>
+    set((state) => ({ objectOrder: moveWithin(state.objectOrder, draggedId, targetId) })),
 
-      const order = state.objectOrder.filter((id) => id !== draggedId)
-      let insertAt = order.indexOf(targetId)
-      // Dragging forward drops after the target, dragging backward drops
-      // before it — otherwise dropping onto the very next sibling recomputes
-      // to the same position it started at and looks like nothing happened.
-      if (draggedFrom < targetFrom) insertAt += 1
-      order.splice(insertAt, 0, draggedId)
-      return { objectOrder: order }
-    })
-  },
+  reorderComponents: (objectId, draggedName, targetName) =>
+    set((state) => {
+      const attached = Object.keys(state.gameObjects[objectId]?.components ?? {})
+      const current = componentNamesInOrder(state.componentOrder[objectId], attached)
+      return {
+        componentOrder: {
+          ...state.componentOrder,
+          [objectId]: moveWithin(current, draggedName, targetName)
+        }
+      }
+    }),
+
+  toggleComponentCollapsed: (name) =>
+    set((state) => ({
+      collapsedComponents: state.collapsedComponents.includes(name)
+        ? state.collapsedComponents.filter((collapsed) => collapsed !== name)
+        : [...state.collapsedComponents, name]
+    })),
 
   addGameobject: async () => {
     try {
@@ -118,20 +163,61 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
     }
   },
 
+  duplicateGameobject: async (objectId) => {
+    try {
+      const { objectDetails } = await apiDuplicateGameobject(objectId)
+      set((state) => {
+        // Placed directly after what it was copied from rather than at the
+        // end, so the copy appears where the user is already looking.
+        const order = [...state.objectOrder]
+        const sourceAt = order.indexOf(objectId)
+        order.splice(sourceAt === -1 ? order.length : sourceAt + 1, 0, objectDetails.id)
+        return {
+          gameObjects: { ...state.gameObjects, [objectDetails.id]: objectDetails },
+          objectOrder: order,
+          selectedObjectId: objectDetails.id
+        }
+      })
+    } catch (err) {
+      toast.error("Couldn't duplicate the object", { description: (err as Error).message })
+    }
+  },
+
   deleteGameobject: async (objectId) => {
     try {
       await apiDeleteGameobject(objectId)
       set((state) => {
         const gameObjects = { ...state.gameObjects }
         delete gameObjects[objectId]
+        const componentOrder = { ...state.componentOrder }
+        delete componentOrder[objectId]
         return {
           gameObjects,
+          componentOrder,
           objectOrder: state.objectOrder.filter((id) => id !== objectId),
           selectedObjectId: state.selectedObjectId === objectId ? null : state.selectedObjectId
         }
       })
     } catch (err) {
       toast.error("Couldn't delete object", { description: (err as Error).message })
+    }
+  },
+
+  updateGameobjectMetadata: async (objectId, metadata) => {
+    // Optimistic for the same reason component edits are: a name typed into
+    // the panel should appear in the Hierarchy as it is typed, not a
+    // round-trip later.
+    const previous = get().gameObjects[objectId]
+    if (!previous) return
+    set((state) => ({
+      gameObjects: { ...state.gameObjects, [objectId]: { ...previous, ...metadata } }
+    }))
+    try {
+      const { objectDetails } = await apiUpdateGameobject(objectId, metadata)
+      set((state) => ({ gameObjects: { ...state.gameObjects, [objectId]: objectDetails } }))
+    } catch (err) {
+      set((state) => ({ gameObjects: { ...state.gameObjects, [objectId]: previous } }))
+      toast.error("Couldn't update the object", { description: (err as Error).message })
     }
   },
 
@@ -187,6 +273,8 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
     set({
       gameObjects: {},
       objectOrder: [],
+      componentOrder: {},
+      collapsedComponents: [],
       isLoading: false,
       loadError: null,
       selectedObjectId: null,
