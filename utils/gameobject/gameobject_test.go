@@ -50,6 +50,9 @@ var (
 func Test_NewGameobject(t *testing.T) {
 	obj := NewGameobject()
 
+	assert.Equal(t, defaultGameobjectName, obj.GetName())
+	assert.Equal(t, defaultGameobjectGroup, obj.GetGroup())
+
 	name, group := "name", "group"
 
 	obj.SetGroup(group)
@@ -63,6 +66,8 @@ func Test_NewGameobjectWithID(t *testing.T) {
 	obj := NewGameobjectWithID("123")
 
 	assert.Equal(t, "123", obj.GetID())
+	assert.Equal(t, defaultGameobjectName, obj.GetName())
+	assert.Equal(t, defaultGameobjectGroup, obj.GetGroup())
 }
 
 func Test_AddComponent(t *testing.T) {
