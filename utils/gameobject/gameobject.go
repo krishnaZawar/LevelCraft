@@ -33,6 +33,11 @@ const (
 	Gameobject_CurLabelComponents = "components"
 )
 
+const (
+	defaultGameobjectName  = "Gameobject"
+	defaultGameobjectGroup = "Group"
+)
+
 // Gameobject is the container that represents an object in the scene.
 //
 // The main function of the Gameobject is to organize and hold Components of an object together
@@ -46,19 +51,25 @@ type Gameobject struct {
 }
 
 func NewGameobject() *Gameobject {
-	return &Gameobject{
+	obj := &Gameobject{
 		id:         uuid.NewString(),
 		components: make(map[string]component.Component),
 		registry:   component.NewComponentRegistry(),
 	}
+	obj.SetName(defaultGameobjectName)
+	obj.SetGroup(defaultGameobjectGroup)
+	return obj
 }
 
 func NewGameobjectWithID(id string) *Gameobject {
-	return &Gameobject{
+	obj := &Gameobject{
 		id:         id,
 		components: make(map[string]component.Component),
 		registry:   component.NewComponentRegistry(),
 	}
+	obj.SetName(defaultGameobjectName)
+	obj.SetGroup(defaultGameobjectGroup)
+	return obj
 }
 
 // Adds a new Component to the gameobject
