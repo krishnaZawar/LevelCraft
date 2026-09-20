@@ -150,7 +150,7 @@ func Test_DuplicateName(t *testing.T) {
 		// Copying a copy continues the series rather than nesting suffixes.
 		{"copy of a copy", "Player (2)", []string{"Player", "Player (2)"}, "Player (1)"},
 		{"unnamed stays unnamed", "", []string{""}, ""},
-		{"spacing is normalised", "Player  (3)", []string{"Player"}, "Player (1)"},
+		{"if no duplicate name found, do not update", "Player  (3)", []string{"Player"}, "Player  (3)"},
 	}
 
 	for _, tt := range tests {

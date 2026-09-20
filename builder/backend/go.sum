@@ -16,6 +16,8 @@ github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260823130804-145d3b129259 h1:A
 github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260823130804-145d3b129259/go.mod h1:ncRmSuQuVOE8HqFrbK1rfE5HVIF6nF9UsNSuEWIW90Q=
 github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260906132906-e7610acf7cd1 h1:s2UR0bm1F8aavP/AGCK2+QoWW+yeHclD8A2kfrLty70=
 github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260906132906-e7610acf7cd1/go.mod h1:ncRmSuQuVOE8HqFrbK1rfE5HVIF6nF9UsNSuEWIW90Q=
+github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260920062011-2291eec9e710 h1:PRhxaaPrycQ1yvIZN7zntikYhM5lpiXlGX3R3HA29b4=
+github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260920062011-2291eec9e710/go.mod h1:ncRmSuQuVOE8HqFrbK1rfE5HVIF6nF9UsNSuEWIW90Q=
 github.com/krishnaZawar/distributed-logger/logger-sdk v0.0.0-20260604170103-09a3e7e26c78 h1:MpHw5In37Of0BWnmjc4xRA893jvjQLyfDNKLuz3U6GM=
 github.com/krishnaZawar/distributed-logger/logger-sdk v0.0.0-20260604170103-09a3e7e26c78/go.mod h1:R9osdqblFGTEX3TqYuI4dBHszV9l+co9KYvAF27xF4U=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=

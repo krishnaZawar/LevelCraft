@@ -16,8 +16,10 @@ import (
 var copyIndexSuffix = regexp.MustCompile(`\s*\(\d+\)$`)
 
 // Names a copy of sourceName so it doesn't collide with any existing object.
-// Unnamed objects stay unnamed: there is no base to number.
 func duplicateName(sourceName string, taken map[string]struct{}) string {
+	if _, exists := taken[sourceName]; !exists {
+		return sourceName
+	}
 	base := copyIndexSuffix.ReplaceAllString(sourceName, "")
 	if base == "" {
 		return sourceName
@@ -85,8 +87,13 @@ func DuplicateGameobject(ctx *fiber.Ctx) error {
 
 func AddGameobject(ctx *fiber.Ctx) error {
 	gameobject := gameobject.NewGameobject()
-
 	gsm := gamestatemanager.Get()
+
+	gameobject.SetName(duplicateName(
+		gameobject.GetName(),
+		takenNames(gsm.GetGameState()),
+	))
+
 	gsm.AddGameobject(gameobject)
 
 	resp := entity.CreateGameobjectResponse{
