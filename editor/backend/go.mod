@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.14
-	github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260906132906-e7610acf7cd1
+	github.com/krishnaZawar/LevelCraft/utils v0.0.0-20260920063319-2e4ebe98afec
 	github.com/stretchr/testify v1.11.1
 )
 

@@ -65,8 +65,8 @@ func Test_GetGameState(t *testing.T) {
 		obj.GetID(): map[string]interface{}{
 			gameobject.Gameobject_CurLabelComponents: map[string]interface{}{},
 			gameobject.Gameobject_CurLabelID:         obj.GetID(),
-			gameobject.Gameobject_CurLabelName:       "",
-			gameobject.Gameobject_CurLabelGroup:      "",
+			gameobject.Gameobject_CurLabelName:       gameobject.DefaultGameobjectName,
+			gameobject.Gameobject_CurLabelGroup:      gameobject.DefaultGameobjectGroup,
 		},
 	}
 
