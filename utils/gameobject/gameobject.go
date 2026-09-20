@@ -34,8 +34,8 @@ const (
 )
 
 const (
-	defaultGameobjectName  = "Gameobject"
-	defaultGameobjectGroup = "Group"
+	DefaultGameobjectName  = "Gameobject"
+	DefaultGameobjectGroup = "Group"
 )
 
 // Gameobject is the container that represents an object in the scene.
@@ -56,8 +56,8 @@ func NewGameobject() *Gameobject {
 		components: make(map[string]component.Component),
 		registry:   component.NewComponentRegistry(),
 	}
-	obj.SetName(defaultGameobjectName)
-	obj.SetGroup(defaultGameobjectGroup)
+	obj.SetName(DefaultGameobjectName)
+	obj.SetGroup(DefaultGameobjectGroup)
 	return obj
 }
 
@@ -67,8 +67,8 @@ func NewGameobjectWithID(id string) *Gameobject {
 		components: make(map[string]component.Component),
 		registry:   component.NewComponentRegistry(),
 	}
-	obj.SetName(defaultGameobjectName)
-	obj.SetGroup(defaultGameobjectGroup)
+	obj.SetName(DefaultGameobjectName)
+	obj.SetGroup(DefaultGameobjectGroup)
 	return obj
 }
 
