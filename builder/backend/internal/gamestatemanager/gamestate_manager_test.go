@@ -1,6 +1,7 @@
 package gamestatemanager
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/krishnaZawar/LevelCraft/utils/component"
@@ -47,63 +48,77 @@ func Test_GetGameobject(t *testing.T) {
 }
 
 func Test_GetGameState(t *testing.T) {
+	defVal := 100
 	gsm := NewGameStateManager()
 	obj := gameobject.NewGameobject()
+	obj.AddComponent(component.NewTransform(defVal, defVal, defVal, defVal))
 
 	gsm.AddGameobject(obj)
 
-	/*
-		expected state:
-		map[
-			<id>: map[
-				components:map[]
-				group:""
-				id:<id>
-				name:""
-			]
-		]
-	*/
-	expectState := map[string]interface{}{
-		obj.GetID(): map[string]interface{}{
-			gameobject.Gameobject_CurLabelComponents: map[string]interface{}{},
-			gameobject.Gameobject_CurLabelID:         obj.GetID(),
-			gameobject.Gameobject_CurLabelName:       gameobject.DefaultGameobjectName,
-			gameobject.Gameobject_CurLabelGroup:      gameobject.DefaultGameobjectGroup,
+	expectState := []gameobject.GameobjectDetails{
+		{
+			Id:    obj.GetID(),
+			Name:  obj.GetName(),
+			Group: obj.GetGroup(),
+			Components: []component.ComponentDetails{
+				{
+					Name: base.ComponentName_Transform,
+					Data: json.RawMessage(`{
+						"x": 100,
+						"y": 100,
+						"w": 100,
+						"h": 100
+					}`),
+				},
+			},
 		},
 	}
 
 	state := gsm.GetGameState()
 
-	assert.Equal(t, expectState, state)
+	assert.Equal(t, expectState[0].Id, state[0].Id)
+	assert.Equal(t, expectState[0].Name, state[0].Name)
+	assert.Equal(t, expectState[0].Group, state[0].Group)
+	assert.Equal(t, expectState[0].Components[0].Name, state[0].Components[0].Name)
+	assert.JSONEq(t, string(expectState[0].Components[0].Data), string(state[0].Components[0].Data))
 }
 
 func Test_buildFromDetails(t *testing.T) {
 	t.Run("valid build", func(t *testing.T) {
 		gsm := NewGameStateManager()
 
-		id := "obj123"
-		name, group := "name", "group"
-		defVal := 100
+		id, name, group := "obj123", "name", "group"
 
-		compDetails := map[string]interface{}{
-			component.Transform_CurLabelX: defVal,
-			component.Transform_CurLabelY: defVal,
-			component.Transform_CurLabelW: defVal,
-			component.Transform_CurLabelH: defVal,
+		sceneData := []byte(`[
+			{
+				"id": "obj123",
+				"name": "name",
+				"group": "group",
+				"components": [
+					{
+						"name": "Transform",
+						"data": {
+							"x": 100,
+							"y": 100,
+							"w": 100,
+							"h": 100
+						}
+					}
+				]
+			}
+		]`)
+
+		compData := component.ComponentDetails{
+			Name: base.ComponentName_Transform,
+			Data: json.RawMessage(`{
+				"x": 100,
+				"y": 100,
+				"w": 100,
+				"h": 100
+			}`),
 		}
 
-		buildData := map[string]interface{}{
-			id: map[string]interface{}{
-				gameobject.Gameobject_CurLabelID:    id,
-				gameobject.Gameobject_CurLabelName:  name,
-				gameobject.Gameobject_CurLabelGroup: group,
-				gameobject.Gameobject_CurLabelComponents: map[string]interface{}{
-					base.ComponentName_Transform: compDetails,
-				},
-			},
-		}
-
-		err := gsm.BuildFromDetails(buildData)
+		err := gsm.BuildFromDetails(sceneData)
 		assert.Nil(t, err)
 		assert.Equal(t, 1, len(gsm.gameobjects))
 
@@ -115,34 +130,34 @@ func Test_buildFromDetails(t *testing.T) {
 
 		comp, found := obj.GetComponent(base.ComponentName_Transform)
 		assert.Equal(t, true, found)
-		assert.Equal(t, compDetails, comp.GetComponentDetails())
+
+		actualDetails := comp.GetComponentDetails()
+		assert.JSONEq(t, string(compData.Data), string(actualDetails.Data))
+		assert.Equal(t, compData.Name, actualDetails.Name)
 	})
 	t.Run("invalid build", func(t *testing.T) {
 		gsm := NewGameStateManager()
 
-		id := "obj123"
-		name, group := "name", "group"
-		defVal := 100
+		sceneData := []byte(`[
+			{
+				"id": "obj123",
+				"name": "name",
+				"group": "group",
+				"components": [
+					{
+						"name": "transform",
+						"Data": {
+							"x": 100,
+							"y": 100,
+							"w": 100,
+							"h": 100
+						}
+					}
+				]
+			}
+		]`)
 
-		compDetails := map[string]interface{}{
-			component.Transform_CurLabelX: defVal,
-			component.Transform_CurLabelY: defVal,
-			component.Transform_CurLabelW: defVal,
-			component.Transform_CurLabelH: defVal,
-		}
-
-		buildData := map[string]interface{}{
-			id: map[string]interface{}{
-				gameobject.Gameobject_CurLabelID:    id + "1",
-				gameobject.Gameobject_CurLabelName:  name,
-				gameobject.Gameobject_CurLabelGroup: group,
-				gameobject.Gameobject_CurLabelComponents: map[string]interface{}{
-					base.ComponentName_Transform: compDetails,
-				},
-			},
-		}
-
-		err := gsm.BuildFromDetails(buildData)
+		err := gsm.BuildFromDetails(sceneData)
 		assert.NotNil(t, err)
 		assert.Equal(t, 0, len(gsm.gameobjects))
 	})

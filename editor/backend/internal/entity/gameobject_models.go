@@ -1,8 +1,10 @@
 package entity
 
+import "github.com/krishnaZawar/LevelCraft/utils/gameobject"
+
 type CreateGameobjectResponse struct {
-	Success       bool                   `json:"success"`
-	ObjectDetails map[string]interface{} `json:"objectDetails"`
+	Success       bool                         `json:"success"`
+	ObjectDetails gameobject.GameobjectDetails `json:"objectDetails"`
 }
 
 // UpdateGameobjectRequest carries the gameobject metadata to change.
@@ -13,13 +15,13 @@ type UpdateGameobjectRequest struct {
 }
 
 type UpdateGameobjectResponse struct {
-	Success       bool                   `json:"success"`
-	ObjectDetails map[string]interface{} `json:"objectDetails"`
+	Success       bool                         `json:"success"`
+	ObjectDetails gameobject.GameobjectDetails `json:"objectDetails"`
 }
 
 type DuplicateGameobjectResponse struct {
-	Success       bool                   `json:"success"`
-	ObjectDetails map[string]interface{} `json:"objectDetails"`
+	Success       bool                         `json:"success"`
+	ObjectDetails gameobject.GameobjectDetails `json:"objectDetails"`
 }
 
 type DeleteGameobjectResponse struct {

@@ -1,5 +1,7 @@
 package entity
 
+import "github.com/krishnaZawar/LevelCraft/utils/gameobject"
+
 type SaveGameRequest struct {
 	Filepath string `json:"filepath"` // destination where the game state should be saved. (JSON file)
 }
@@ -10,8 +12,8 @@ type SaveGameResponse struct {
 }
 
 type GetGameStateResponse struct {
-	Success   bool                   `json:"success"`
-	GameState map[string]interface{} `json:"gameState"`
+	Success   bool                           `json:"success"`
+	GameState []gameobject.GameobjectDetails `json:"gameState"`
 }
 
 type LoadGameRequest struct {
@@ -19,6 +21,6 @@ type LoadGameRequest struct {
 }
 
 type LoadGameResponse struct {
-	Success   bool                   `json:"success"`
-	GameState map[string]interface{} `json:"gameState"`
+	Success   bool                           `json:"success"`
+	GameState []gameobject.GameobjectDetails `json:"gameState"`
 }
