@@ -1,6 +1,8 @@
 package component
 
 import (
+	"encoding/json"
+
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 )
 
@@ -9,30 +11,20 @@ const (
 	defaultTransformValue = 100
 )
 
-// Used to define the labels used for marshalling and unmarshalling
-// defined as []string to provide backward compatibility in future
-var (
-	transform_LabelsX = []string{"x"}
-	transform_LabelsY = []string{"y"}
-	transform_LabelsW = []string{"w"}
-	transform_LabelsH = []string{"h"}
-)
-
-// current value used for unmarshalling
-// should be added to the labels slice
-const (
-	Transform_CurLabelX = "x"
-	Transform_CurLabelY = "y"
-	Transform_CurLabelW = "w"
-	Transform_CurLabelH = "h"
-)
-
 // Transform is used to determine the position and dimension of any object in the game scene
 type Transform struct {
 	x int // x coordinate of the object
 	y int // y coordinate of the object
 	w int // width of the object
 	h int // height of the object
+}
+
+// intermediary structure of Transform used for marshalling and unmarshalling component details
+type transformJSON struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+	W int `json:"w"`
+	H int `json:"h"`
 }
 
 // internal function used to register the base component copy with the componentRegistry
@@ -84,75 +76,32 @@ func (t *Transform) GetComponentName() string {
 }
 
 // Returns a snapshot of the complete data stored in the component
-func (t *Transform) GetComponentDetails() map[string]interface{} {
-	return map[string]interface{}{
-		Transform_CurLabelX: t.x,
-		Transform_CurLabelY: t.y,
-		Transform_CurLabelW: t.w,
-		Transform_CurLabelH: t.h,
+func (t *Transform) GetComponentDetails() ComponentDetails {
+	data := transformJSON{
+		X: t.x,
+		Y: t.y,
+		W: t.w,
+		H: t.h,
+	}
+	byteData, _ := json.Marshal(data)
+	return ComponentDetails{
+		Name: t.GetComponentName(),
+		Data: json.RawMessage(byteData),
 	}
 }
 
 // Build component from provided details
-func (t *Transform) BuildFromDetails(data map[string]interface{}) error {
-	temp := *t
-	for _, val := range transform_LabelsX {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.x = n
-			case float64:
-				temp.x = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			break
-		}
+func (t *Transform) BuildFromDetails(data json.RawMessage) error {
+	var componentData transformJSON
+	err := json.Unmarshal(data, &componentData)
+	if err != nil {
+		return err
 	}
 
-	for _, val := range transform_LabelsY {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.y = n
-			case float64:
-				temp.y = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			break
-		}
-	}
-
-	for _, val := range transform_LabelsW {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.w = n
-			case float64:
-				temp.w = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			break
-		}
-	}
-
-	for _, val := range transform_LabelsH {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.h = n
-			case float64:
-				temp.h = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			break
-		}
-	}
-
-	*t = temp
+	t.x = componentData.X
+	t.y = componentData.Y
+	t.w = componentData.W
+	t.h = componentData.H
 
 	return nil
 }

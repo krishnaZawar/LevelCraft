@@ -50,6 +50,15 @@ type Gameobject struct {
 	registry *component.ComponentRegistry // injected to build the gameobject from details provided
 }
 
+// structure of Gameobject used for marshalling and unmarshalling gameobject details and holding object details
+// the actual update tasks are done on the Gameobject struct only
+type GameobjectDetails struct {
+	Id         string                       `json:"id"`
+	Name       string                       `json:"name"`
+	Group      string                       `json:"group"`
+	Components []component.ComponentDetails `json:"components"`
+}
+
 func NewGameobject() *Gameobject {
 	obj := &Gameobject{
 		id:         uuid.NewString(),
@@ -100,87 +109,39 @@ func (g *Gameobject) GetComponent(componentName string) (component.Component, bo
 }
 
 // Returns the all the details of the gameobject
-func (g *Gameobject) GetGameobjectDetails() map[string]interface{} {
-	componentsData := map[string]interface{}{}
+func (g *Gameobject) GetGameobjectDetails() GameobjectDetails {
+	componentsData := []component.ComponentDetails{}
 	for componentName := range g.components {
-		componentsData[componentName] = g.components[componentName].GetComponentDetails()
+		componentsData = append(componentsData, g.components[componentName].GetComponentDetails())
 	}
-	return map[string]interface{}{
-		Gameobject_CurLabelID:         g.id,
-		Gameobject_CurLabelName:       g.name,
-		Gameobject_CurLabelGroup:      g.group,
-		Gameobject_CurLabelComponents: componentsData,
+	return GameobjectDetails{
+		Id:         g.GetID(),
+		Name:       g.GetName(),
+		Group:      g.GetGroup(),
+		Components: componentsData,
 	}
 }
 
 // Build gameobject from provided details
-func (g *Gameobject) BuildFromDetails(data map[string]interface{}) error {
-	temp := *g
-	for _, val := range gameobject_LabelsID {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case string:
-				if temp.id != n {
-					return ErrObjectIDCorrupted
-				}
-			default:
-				return ErrExpectedString
-			}
-			break
-		}
+func (g *Gameobject) BuildFromDetails(data GameobjectDetails) error {
+	if g.id != data.Id {
+		return ErrObjectIDCorrupted
 	}
 
-	for _, val := range gameobject_LabelsName {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case string:
-				temp.name = n
-			default:
-				return ErrExpectedString
-			}
-			break
-		}
-	}
+	g.SetName(data.Name)
+	g.SetGroup(data.Group)
 
-	for _, val := range gameobject_LabelsGroup {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case string:
-				temp.group = n
-			default:
-				return ErrExpectedString
-			}
-			break
+	for _, compDetails := range data.Components {
+		comp, found := g.registry.GetComponent(compDetails.Name)
+		if !found {
+			return ErrComponentNotFound
 		}
-	}
-
-	for _, val := range gameobject_LabelsComponents {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case map[string]interface{}:
-				for compName, data := range n {
-					comp, found := temp.registry.GetComponent(compName)
-					if !found {
-						return ErrComponentNotFound
-					}
-					compData, ok := data.(map[string]interface{})
-					if !ok {
-						return ErrComponentsStructureIncorrect
-					}
-					err := comp.BuildFromDetails(compData)
-					if err != nil {
-						return err
-					}
-					temp.components[compName] = comp
-				}
-			default:
-				return ErrExpectedMapStringInterface
-			}
-			break
+		err := comp.BuildFromDetails(compDetails.Data)
+		if err != nil {
+			return err
 		}
+		g.AddComponent(comp)
 	}
-
-	*g = temp
 
 	return nil
 }

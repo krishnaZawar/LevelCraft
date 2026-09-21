@@ -1,6 +1,7 @@
 package gameobject
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/krishnaZawar/LevelCraft/utils/component"
@@ -14,17 +15,17 @@ const (
 
 type MockComponent struct {
 	mockGetComponentName    func() string
-	mockGetComponentDetails func() map[string]interface{}
-	mockBuildFromDetails    func(map[string]interface{}) error
+	mockGetComponentDetails func() component.ComponentDetails
+	mockBuildFromDetails    func(json.RawMessage) error
 }
 
 func (mc *MockComponent) GetComponentName() string {
 	return mc.mockGetComponentName()
 }
-func (mc *MockComponent) GetComponentDetails() map[string]interface{} {
+func (mc *MockComponent) GetComponentDetails() component.ComponentDetails {
 	return mc.mockGetComponentDetails()
 }
-func (mc *MockComponent) BuildFromDetails(data map[string]interface{}) error {
+func (mc *MockComponent) BuildFromDetails(data json.RawMessage) error {
 	return mc.mockBuildFromDetails(data)
 }
 
@@ -33,15 +34,18 @@ var (
 		mockGetComponentName: func() string {
 			return componentName
 		},
-		mockGetComponentDetails: func() map[string]interface{} {
-			return map[string]interface{}{
-				"field1": "val1",
-				"field2": map[string]interface{}{
-					"field": "val",
-				},
+		mockGetComponentDetails: func() component.ComponentDetails {
+			return component.ComponentDetails{
+				Name: componentName,
+				Data: json.RawMessage(`{
+					"field1" : "val1",
+					"field2": {
+						"field: "val"
+					}
+				}`),
 			}
 		},
-		mockBuildFromDetails: func(m map[string]interface{}) error {
+		mockBuildFromDetails: func(data json.RawMessage) error {
 			return nil
 		},
 	}
@@ -131,12 +135,12 @@ func Test_BuildFromDetails(t *testing.T) {
 
 	var comp component.Component = component.NewTransform(100, 100, 100, 100)
 
-	data := map[string]interface{}{
-		Gameobject_CurLabelID:    obj.GetID(),
-		Gameobject_CurLabelName:  name,
-		Gameobject_CurLabelGroup: group,
-		Gameobject_CurLabelComponents: map[string]interface{}{
-			base.ComponentName_Transform: comp.GetComponentDetails(),
+	data := GameobjectDetails{
+		Id:    obj.GetID(),
+		Name:  name,
+		Group: group,
+		Components: []component.ComponentDetails{
+			comp.GetComponentDetails(),
 		},
 	}
 
@@ -167,8 +171,8 @@ func Test_GetGameobjectDetails(t *testing.T) {
 		expected result:
 
 		map[
-			components:map[
-				component:map[
+			components:list[
+				map[
 					field1:val1
 					field2:map[field:val]
 				]
@@ -178,14 +182,13 @@ func Test_GetGameobjectDetails(t *testing.T) {
 			name:name
 		]
 	*/
-	compName := comp.GetComponentName()
 	compData := comp.GetComponentDetails()
-	expectedData := map[string]interface{}{
-		Gameobject_CurLabelID:    obj.GetID(),
-		Gameobject_CurLabelName:  name,
-		Gameobject_CurLabelGroup: group,
-		Gameobject_CurLabelComponents: map[string]interface{}{
-			compName: compData,
+	expectedData := GameobjectDetails{
+		Id:    obj.GetID(),
+		Name:  name,
+		Group: group,
+		Components: []component.ComponentDetails{
+			compData,
 		},
 	}
 

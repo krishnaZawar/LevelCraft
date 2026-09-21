@@ -1,6 +1,8 @@
 package component
 
 import (
+	"encoding/json"
+
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
 )
@@ -23,10 +25,16 @@ type Component interface {
 	// Returns a snapshot of the complete data stored in the component
 	//
 	// Helpful in recursively building the game scene
-	GetComponentDetails() map[string]interface{}
+	GetComponentDetails() ComponentDetails
 
 	// Builds the component from the data it is provided
-	BuildFromDetails(map[string]interface{}) error
+	BuildFromDetails(json.RawMessage) error
+}
+
+// holds the component details structure to type-safe storing of components with heterogeneous attributes
+type ComponentDetails struct {
+	Name string          `json:"name"` // holds the name of the component
+	Data json.RawMessage `json:"data"` // holds the marshalled data of the component
 }
 
 // Creates a new component based on the component name

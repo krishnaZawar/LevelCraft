@@ -1,6 +1,10 @@
 package component
 
-import "github.com/krishnaZawar/LevelCraft/utils/component/base"
+import (
+	"encoding/json"
+
+	"github.com/krishnaZawar/LevelCraft/utils/component/base"
+)
 
 const (
 	// default value of each shade for the base color object
@@ -10,24 +14,6 @@ const (
 	defaultAlphaValue = 255
 )
 
-// Used to define the labels used for marshalling and unmarshalling
-// defined as []string to provide backward compatibility in future
-var (
-	color_LabelsR = []string{"r"}
-	color_LabelsG = []string{"g"}
-	color_LabelsB = []string{"b"}
-	color_LabelsA = []string{"a"}
-)
-
-// current value used for unmarshalling
-// should be added to the labels slice
-const (
-	Color_CurLabelR = "r"
-	Color_CurLabelG = "g"
-	Color_CurLabelB = "b"
-	Color_CurLabelA = "a"
-)
-
 // Color is used to define the color of the component.
 // It is based off the RGBA attributes
 type Color struct {
@@ -35,6 +21,14 @@ type Color struct {
 	g int // gree shade
 	b int // blue shade
 	a int // alpha -> used for transparency
+}
+
+// intermediary structure of Color used for marshalling and unmarshalling component details
+type colorJSON struct {
+	R int `json:"r"`
+	G int `json:"g"`
+	B int `json:"b"`
+	A int `json:"a"`
 }
 
 // internal function used to register the base component copy with the componentRegistry
@@ -75,87 +69,32 @@ func (c *Color) GetComponentName() string {
 }
 
 // Returns a snapshot of the complete data stored in the component
-func (c *Color) GetComponentDetails() map[string]interface{} {
-	return map[string]interface{}{
-		Color_CurLabelR: c.r,
-		Color_CurLabelG: c.g,
-		Color_CurLabelB: c.b,
-		Color_CurLabelA: c.a,
+func (c *Color) GetComponentDetails() ComponentDetails {
+	data := colorJSON{
+		R: c.r,
+		G: c.g,
+		B: c.b,
+		A: c.a,
+	}
+	byteData, _ := json.Marshal(data)
+	return ComponentDetails{
+		Name: c.GetComponentName(),
+		Data: json.RawMessage(byteData),
 	}
 }
 
 // Build component from provided details
-func (c *Color) BuildFromDetails(data map[string]interface{}) error {
-	temp := *c
-	for _, val := range color_LabelsR {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.r = n
-			case float64:
-				temp.r = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			if temp.r < base.ColorValueRangeMin || temp.r > base.ColorValueRangeMax {
-				return base.ErrColorValueRangeOutOfBounds
-			}
-			break
-		}
+func (c *Color) BuildFromDetails(data json.RawMessage) error {
+	var componentData colorJSON
+	err := json.Unmarshal(data, &componentData)
+	if err != nil {
+		return err
 	}
 
-	for _, val := range color_LabelsG {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.g = n
-			case float64:
-				temp.g = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			if temp.g < base.ColorValueRangeMin || temp.g > base.ColorValueRangeMax {
-				return base.ErrColorValueRangeOutOfBounds
-			}
-			break
-		}
-	}
-
-	for _, val := range color_LabelsB {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.b = n
-			case float64:
-				temp.b = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			if temp.b < base.ColorValueRangeMin || temp.b > base.ColorValueRangeMax {
-				return base.ErrColorValueRangeOutOfBounds
-			}
-			break
-		}
-	}
-
-	for _, val := range color_LabelsA {
-		if v, ok := data[val]; ok {
-			switch n := v.(type) {
-			case int:
-				temp.a = n
-			case float64:
-				temp.a = int(n)
-			default:
-				return base.ErrExpectedInteger
-			}
-			if temp.a < base.ColorValueRangeMin || temp.a > base.ColorValueRangeMax {
-				return base.ErrColorValueRangeOutOfBounds
-			}
-			break
-		}
-	}
-
-	*c = temp
+	c.r = componentData.R
+	c.g = componentData.G
+	c.b = componentData.B
+	c.a = componentData.A
 
 	return nil
 }
