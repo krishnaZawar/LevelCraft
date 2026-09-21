@@ -16,7 +16,7 @@ import (
 var copyIndexSuffix = regexp.MustCompile(`\s*\(\d+\)$`)
 
 // Names a copy of sourceName so it doesn't collide with any existing object.
-func duplicateName(sourceName string, taken map[string]struct{}) string {
+func duplicateName(sourceName string, taken map[string]bool) string {
 	if _, exists := taken[sourceName]; !exists {
 		return sourceName
 	}
@@ -33,16 +33,10 @@ func duplicateName(sourceName string, taken map[string]struct{}) string {
 }
 
 // collects the names currently in use across the scene
-func takenNames(scene map[string]interface{}) map[string]struct{} {
-	taken := map[string]struct{}{}
+func takenNames(scene []gameobject.GameobjectDetails) map[string]bool {
+	taken := map[string]bool{}
 	for _, objData := range scene {
-		data, ok := objData.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		if name, ok := data[gameobject.Gameobject_CurLabelName].(string); ok {
-			taken[name] = struct{}{}
-		}
+		taken[objData.Name] = true
 	}
 	return taken
 }
@@ -62,8 +56,8 @@ func DuplicateGameobject(ctx *fiber.Ctx) error {
 	// it, so the copy owns its components and editing one can't affect the other.
 	clone := gameobject.NewGameobject()
 	details := source.GetGameobjectDetails()
-	details[gameobject.Gameobject_CurLabelID] = clone.GetID()
-	details[gameobject.Gameobject_CurLabelName] = duplicateName(
+	details.Id = clone.GetID()
+	details.Name = duplicateName(
 		source.GetName(),
 		takenNames(gsm.GetGameState()),
 	)

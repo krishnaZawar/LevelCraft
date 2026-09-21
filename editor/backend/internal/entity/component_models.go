@@ -1,10 +1,16 @@
 package entity
 
+import (
+	"encoding/json"
+
+	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
+)
+
 type UpdateComponentRequest struct {
-	Details map[string]interface{} `json:"details"` // new details of the component
+	Details json.RawMessage `json:"details"` // new details of the component
 }
 
 type ComponentResponse struct {
-	Success       bool                   `json:"success"`
-	ObjectDetails map[string]interface{} `json:"objectDetails"`
+	Success       bool                         `json:"success"`
+	ObjectDetails gameobject.GameobjectDetails `json:"objectDetails"`
 }

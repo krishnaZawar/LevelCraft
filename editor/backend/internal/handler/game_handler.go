@@ -10,6 +10,7 @@ import (
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/entity"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/gamestatemanager"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/logger"
+	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
 )
 
 var ls = logger.Get()
@@ -101,18 +102,13 @@ func HandleLoadGame(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(resp)
 }
 
-func loadGame(gsm *gamestatemanager.GameStateManager, filepath string) (map[string]interface{}, error) {
+func loadGame(gsm *gamestatemanager.GameStateManager, filepath string) ([]gameobject.GameobjectDetails, error) {
 	fileData, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
 
-	var sceneData map[string]interface{}
-	if err := json.Unmarshal(fileData, &sceneData); err != nil {
-		return nil, err
-	}
-
-	if err := gsm.BuildFromDetails(sceneData); err != nil {
+	if err := gsm.BuildFromDetails(fileData); err != nil {
 		return nil, err
 	}
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -59,13 +58,8 @@ func verifyFilename(fileName string) error {
 // reads the file and initializes the game scene
 // program panics on failure
 func initGameScene(filepath string) error {
-	fileData, err := os.ReadFile(filepath)
+	sceneData, err := os.ReadFile(filepath)
 	if err != nil {
-		return err
-	}
-
-	var sceneData map[string]interface{}
-	if err := json.Unmarshal(fileData, &sceneData); err != nil {
 		return err
 	}
 

@@ -1,6 +1,7 @@
 package gamestatemanager
 
 import (
+	"encoding/json"
 	"errors"
 	"sync"
 
@@ -48,13 +49,13 @@ func (gsm *GameStateManager) GetGameobject(id string) (*gameobject.Gameobject, b
 }
 
 // returns the entire gamestate of the scene
-func (gsm *GameStateManager) GetGameState() map[string]interface{} {
+func (gsm *GameStateManager) GetGameState() []gameobject.GameobjectDetails {
 	gsm.mu.RLock()
 	defer gsm.mu.RUnlock()
-	state := map[string]interface{}{}
+	state := []gameobject.GameobjectDetails{}
 
-	for id, obj := range gsm.gameobjects {
-		state[id] = obj.GetGameobjectDetails()
+	for _, obj := range gsm.gameobjects {
+		state = append(state, obj.GetGameobjectDetails())
 	}
 
 	return state
@@ -74,15 +75,15 @@ func (gsm *GameStateManager) Reset() {
 //
 // Resets the current scene first, so this replaces rather than merges
 // with whatever was previously loaded
-func (gsm *GameStateManager) BuildFromDetails(scene map[string]interface{}) error {
-	gsm.Reset()
-	for id, objData := range scene {
-		obj := gameobject.NewGameobjectWithID(id)
-		data, ok := objData.(map[string]interface{})
-		if !ok {
-			return ErrExpectedMapStringInterface
-		}
-		err := obj.BuildFromDetails(data)
+func (gsm *GameStateManager) BuildFromDetails(data []byte) error {
+	var scene []gameobject.GameobjectDetails
+	err := json.Unmarshal(data, &scene)
+	if err != nil {
+		return err
+	}
+	for _, objData := range scene {
+		obj := gameobject.NewGameobjectWithID(objData.Id)
+		err := obj.BuildFromDetails(objData)
 		if err != nil {
 			return err
 		}

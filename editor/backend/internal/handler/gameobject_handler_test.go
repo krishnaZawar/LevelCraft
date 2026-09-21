@@ -76,7 +76,7 @@ func Test_UpdateGameobject(t *testing.T) {
 	if !parsed.Success {
 		t.Fatal("success = false, want true")
 	}
-	if parsed.ObjectDetails[gameobject.Gameobject_CurLabelName] != "new name" {
+	if parsed.ObjectDetails.Name != "new name" {
 		t.Fatalf("response details = %v, want the updated name", parsed.ObjectDetails)
 	}
 }
@@ -155,9 +155,9 @@ func Test_DuplicateName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			taken := map[string]struct{}{}
+			taken := map[string]bool{}
 			for _, name := range tt.taken {
-				taken[name] = struct{}{}
+				taken[name] = true
 			}
 
 			if got := duplicateName(tt.source, taken); got != tt.want {
@@ -195,20 +195,19 @@ func Test_DuplicateGameobject(t *testing.T) {
 		t.Fatalf("failed to parse response: %v", err)
 	}
 
-	cloneID, _ := parsed.ObjectDetails[gameobject.Gameobject_CurLabelID].(string)
-	if cloneID == "" || cloneID == source.GetID() {
-		t.Fatalf("clone id = %q, want a new id", cloneID)
+	if parsed.ObjectDetails.Id == "" || parsed.ObjectDetails.Id == source.GetID() {
+		t.Fatalf("clone id = %q, want a new id", parsed.ObjectDetails.Id)
 	}
-	t.Cleanup(func() { gamestatemanager.Get().DeleteGameobject(cloneID) })
+	t.Cleanup(func() { gamestatemanager.Get().DeleteGameobject(parsed.ObjectDetails.Id) })
 
-	if parsed.ObjectDetails[gameobject.Gameobject_CurLabelName] != "Player (1)" {
-		t.Fatalf("clone name = %v, want %q", parsed.ObjectDetails[gameobject.Gameobject_CurLabelName], "Player (1)")
+	if parsed.ObjectDetails.Name != "Player (1)" {
+		t.Fatalf("clone name = %v, want %q", parsed.ObjectDetails.Name, "Player (1)")
 	}
-	if parsed.ObjectDetails[gameobject.Gameobject_CurLabelGroup] != "actors" {
-		t.Fatalf("clone group = %v, want the source's group", parsed.ObjectDetails[gameobject.Gameobject_CurLabelGroup])
+	if parsed.ObjectDetails.Group != "actors" {
+		t.Fatalf("clone group = %v, want the source's group", parsed.ObjectDetails.Group)
 	}
 
-	clone, found := gamestatemanager.Get().GetGameobject(cloneID)
+	clone, found := gamestatemanager.Get().GetGameobject(parsed.ObjectDetails.Id)
 	if !found {
 		t.Fatal("the clone was not added to the scene")
 	}
