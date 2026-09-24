@@ -1,0 +1,13 @@
+linters:
+  enable:
+    - dupl
+    - errcheck
+    - gocritic
+    - gocyclo
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
+    - unused
