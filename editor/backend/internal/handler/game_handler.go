@@ -65,7 +65,7 @@ func saveGame(gsm *gamestatemanager.GameStateManager, filepath string) error {
 		return err
 	}
 
-	err = os.WriteFile(filepath, jsonData, 0644)
+	err = os.WriteFile(filepath, jsonData, 0644) //nolint:gosec // 0644 is intentional; file must be readable by other users
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func HandleLoadGame(ctx *fiber.Ctx) error {
 }
 
 func loadGame(gsm *gamestatemanager.GameStateManager, filepath string) ([]gameobject.GameobjectDetails, error) {
-	fileData, err := os.ReadFile(filepath)
+	fileData, err := os.ReadFile(filepath) //nolint:gosec // filepath is internally generated and not user-controlled
 	if err != nil {
 		return nil, err
 	}
