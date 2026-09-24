@@ -28,7 +28,7 @@ func StartEditorFrontend(backendURI string, orchestratorURI string) (*entity.Pro
 }
 
 func editorBackendConfig(port string) entity.CommandConfig {
-	return entity.CommandConfig{ //nolint:gosec - no hardcoded credentials; Pwd is a filesystem working directory
+	return entity.CommandConfig{ //nolint:gosec // no hardcoded credentials; Pwd is a filesystem working directory
 		Pwd:  "../editor/backend",
 		Name: "go",
 		Args: []string{"run", "cmd/main.go", "--port", port},
@@ -37,7 +37,7 @@ func editorBackendConfig(port string) entity.CommandConfig {
 }
 
 func editorFrontendConfig(port string) entity.CommandConfig {
-	return entity.CommandConfig{ //nolint:gosec - no hardcoded credentials; Pwd is a filesystem working directory
+	return entity.CommandConfig{ //nolint:gosec // no hardcoded credentials; Pwd is a filesystem working directory
 		Pwd:  "../editor/app",
 		Name: "npm",
 		Args: []string{"run", "dev"},

@@ -21,7 +21,7 @@ var client = &http.Client{
 
 // generates a random port number for the process to bind to
 func getRandomPort() string {
-	return strconv.Itoa(rand.IntN(base.MaxPortValue+1-base.MinPortValue) + base.MinPortValue) //nolint:gosec - use of weak random number generator for generating port, not any critical task
+	return strconv.Itoa(rand.IntN(base.MaxPortValue+1-base.MinPortValue) + base.MinPortValue) //nolint:gosec // use of weak random number generator for generating port, not any critical task
 }
 
 // pings the process endpoint for health check
@@ -35,14 +35,14 @@ func CheckProcessHealth(baseUrl string) error {
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Expected status code not found. expected status code: %d received status code: %d", http.StatusOK, resp.StatusCode)
+		return fmt.Errorf("expected status code not found. expected status code: %d received status code: %d", http.StatusOK, resp.StatusCode)
 	}
 	return nil
 }
 
 // builds and runs the comm command and returns the Process details and error if any
 func buildAndRunProcess(processName string, comm *entity.CommandConfig) (*entity.Process, error) {
-	cmd := exec.Command(comm.Name, comm.Args...) //nolint:gosec - subprocess launched with internal commandConfigs, no tainted inputs or agrs
+	cmd := exec.Command(comm.Name, comm.Args...) //nolint:gosec // subprocess launched with internal commandConfigs, no tainted inputs or agrs
 	cmd.Dir = comm.Pwd
 	cmd.Stdout = os.Stdout
 	if len(comm.Env) > 0 {
