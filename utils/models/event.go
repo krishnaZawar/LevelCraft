@@ -18,7 +18,7 @@ type EventResponse struct {
 	ShouldEmit bool        `json:"-"`       // tells whether the data should be sent to the frontend or not
 }
 
-// EventHandler is used to handle the corresponding event that occured
+// EventHandler is used to handle the corresponding event that occurred
 type EventHandler interface {
 	// Holds the actual logic on what happens when the event occurs
 	Handle(Event) *EventResponse

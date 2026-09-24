@@ -27,7 +27,7 @@ func NewQueue[T any]() *Queue[T] {
 // pushes an element to the end of the queue
 func (q *Queue[T]) Push(val T) {
 	if q.size == len(q.items) {
-		// grow the queue size when the no space to accomodate new elements
+		// grow the queue size when the no space to accommodate new elements
 		q.grow()
 	}
 	q.tail = (q.tail + 1) % len(q.items)

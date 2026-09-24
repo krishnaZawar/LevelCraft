@@ -50,195 +50,167 @@ func Test_MarshalAndUnmarshalColor(t *testing.T) {
 }
 
 func Test_UnmarshalColor(t *testing.T) {
-	t.Run("valid unmarshal", func(t *testing.T) {
-		data := json.RawMessage(
-			`{
-			"r": 100,
-			"g": 120,
-			"b": 140,
-			"a": 160
-			}`,
-		)
-		comp := newBaseColor()
-		err := comp.BuildFromDetails(data)
-		assert.Nil(t, err)
-
-		assert.Equal(t, 100, comp.r)
-		assert.Equal(t, 120, comp.g)
-		assert.Equal(t, 140, comp.b)
-		assert.Equal(t, 160, comp.a)
-	})
-	t.Run("invalid unmarshal", func(t *testing.T) {
-		data := json.RawMessage(
-			`{
-			"r": 100,
-			"g": 120,
-			"b": 140
-			"a": 160
-			}`,
-		)
-		comp := newBaseColor()
-		err := comp.BuildFromDetails(data)
-		assert.NotNil(t, err)
-
-		assert.Equal(t, defaultShadeValue, comp.r)
-		assert.Equal(t, defaultShadeValue, comp.g)
-		assert.Equal(t, defaultShadeValue, comp.b)
-		assert.Equal(t, defaultAlphaValue, comp.a)
-	})
-	t.Run("r value out of bounds", func(t *testing.T) {
-		t.Run("r is below bounds", func(t *testing.T) {
-			data := json.RawMessage(
+	tests := []struct {
+		name          string
+		baseComp      *Color
+		data          json.RawMessage
+		expectedErr   bool
+		expectedColor *Color
+	}{
+		{
+			name:     "valid unmarshal",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": -1,
-			"g": 120,
-			"b": 140,
-			"a": 160
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
-
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
-		})
-		t.Run("r is above bounds", func(t *testing.T) {
-			data := json.RawMessage(
+					"r": 100,
+					"g": 120,
+					"b": 140,
+					"a": 160
+				}`,
+			),
+			expectedErr:   false,
+			expectedColor: NewColor(100, 120, 140, 160),
+		},
+		{
+			name:     "invalid unmarshal",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": 256,
-			"g": 120,
-			"b": 140,
-			"a": 160
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
-
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
-		})
-	})
-
-	t.Run("g value out of bounds", func(t *testing.T) {
-		t.Run("g is below bounds", func(t *testing.T) {
-			data := json.RawMessage(
+					"r": 100,
+					"g": 120,
+					"b": 140
+					"a": 160
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "r is below bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": 0,
-			"g": -1,
-			"b": 140,
-			"a": 160
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
-
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
-		})
-		t.Run("g is above bounds", func(t *testing.T) {
-			data := json.RawMessage(
+					"r": -1,
+					"g": 120,
+					"b": 140,
+					"a": 160
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "r is above bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": 255,
-			"g": 256,
-			"b": 140,
-			"a": 160
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
-
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
-		})
-	})
-
-	t.Run("b value out of bounds", func(t *testing.T) {
-		t.Run("b is below bounds", func(t *testing.T) {
-			data := json.RawMessage(
+					"r": 256,
+					"g": 120,
+					"b": 140,
+					"a": 160
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "g is below bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": 0,
-			"g": 0,
-			"b": -1,
-			"a": 160
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
-
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
-		})
-		t.Run("b is above bounds", func(t *testing.T) {
-			data := json.RawMessage(
+					"r": 0,
+					"g": -1,
+					"b": 140,
+					"a": 160
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "g is above bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": 255,
-			"g": 255,
-			"b": 256,
-			"a": 160
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
-
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
-		})
-	})
-
-	t.Run("a value out of bounds", func(t *testing.T) {
-		t.Run("a is below bounds", func(t *testing.T) {
-			data := json.RawMessage(
+					"r": 255,
+					"g": 256,
+					"b": 140,
+					"a": 160
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "b is below bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": 0,
-			"g": 0,
-			"b": 0,
-			"a": -1
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
-
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
-		})
-		t.Run("a is above bounds", func(t *testing.T) {
-			data := json.RawMessage(
+					"r": 0,
+					"g": 0,
+					"b": -1,
+					"a": 160
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "b is above bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
 				`{
-			"r": 255,
-			"g": 255,
-			"b": 255,
-			"a": 256
-			}`,
-			)
-			comp := newBaseColor()
-			err := comp.BuildFromDetails(data)
-			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+					"r": 255,
+					"g": 255,
+					"b": 256,
+					"a": 160
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "a is below bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
+				`{
+					"r": 0,
+					"g": 0,
+					"b": 0,
+					"a": -1
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+		{
+			name:     "a is above bounds",
+			baseComp: newBaseColor(),
+			data: json.RawMessage(
+				`{
+					"r": 255,
+					"g": 255,
+					"b": 255,
+					"a": 256
+				}`,
+			),
+			expectedErr:   true,
+			expectedColor: newBaseColor(),
+		},
+	}
 
-			assert.Equal(t, defaultShadeValue, comp.r)
-			assert.Equal(t, defaultShadeValue, comp.g)
-			assert.Equal(t, defaultShadeValue, comp.b)
-			assert.Equal(t, defaultAlphaValue, comp.a)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.baseComp.BuildFromDetails(tt.data)
+			if tt.expectedErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, tt.expectedColor.r, tt.baseComp.r)
+			assert.Equal(t, tt.expectedColor.g, tt.baseComp.g)
+			assert.Equal(t, tt.expectedColor.b, tt.baseComp.b)
+			assert.Equal(t, tt.expectedColor.a, tt.baseComp.a)
 		})
-	})
+	}
 }
