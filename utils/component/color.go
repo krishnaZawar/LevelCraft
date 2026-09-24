@@ -2,9 +2,12 @@ package component
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 )
+
+var ErrColorValueRangeOutOfBounds = fmt.Errorf("ComponentError: Color values should be in the range of %d to %d", base.ColorValueRangeMin, base.ColorValueRangeMax)
 
 const (
 	// default value of each shade for the base color object
@@ -83,11 +86,31 @@ func (c *Color) GetComponentDetails() ComponentDetails {
 	}
 }
 
+func validateRange(val int) error {
+	if val > base.ColorValueRangeMax || val < base.ColorValueRangeMin {
+		return ErrColorValueRangeOutOfBounds
+	}
+	return nil
+}
+
 // Build component from provided details
 func (c *Color) BuildFromDetails(data json.RawMessage) error {
 	var componentData colorJSON
 	err := json.Unmarshal(data, &componentData)
 	if err != nil {
+		return err
+	}
+
+	if err := validateRange(componentData.R); err != nil {
+		return err
+	}
+	if err := validateRange(componentData.G); err != nil {
+		return err
+	}
+	if err := validateRange(componentData.B); err != nil {
+		return err
+	}
+	if err := validateRange(componentData.A); err != nil {
 		return err
 	}
 

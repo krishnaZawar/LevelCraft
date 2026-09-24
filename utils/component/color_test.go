@@ -86,4 +86,159 @@ func Test_UnmarshalColor(t *testing.T) {
 		assert.Equal(t, defaultShadeValue, comp.b)
 		assert.Equal(t, defaultAlphaValue, comp.a)
 	})
+	t.Run("r value out of bounds", func(t *testing.T) {
+		t.Run("r is below bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": -1,
+			"g": 120,
+			"b": 140,
+			"a": 160
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+		t.Run("r is above bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": 256,
+			"g": 120,
+			"b": 140,
+			"a": 160
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+	})
+
+	t.Run("g value out of bounds", func(t *testing.T) {
+		t.Run("g is below bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": 0,
+			"g": -1,
+			"b": 140,
+			"a": 160
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+		t.Run("g is above bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": 255,
+			"g": 256,
+			"b": 140,
+			"a": 160
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+	})
+
+	t.Run("b value out of bounds", func(t *testing.T) {
+		t.Run("b is below bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": 0,
+			"g": 0,
+			"b": -1,
+			"a": 160
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+		t.Run("b is above bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": 255,
+			"g": 255,
+			"b": 256,
+			"a": 160
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+	})
+
+	t.Run("a value out of bounds", func(t *testing.T) {
+		t.Run("a is below bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": 0,
+			"g": 0,
+			"b": 0,
+			"a": -1
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+		t.Run("a is above bounds", func(t *testing.T) {
+			data := json.RawMessage(
+				`{
+			"r": 255,
+			"g": 255,
+			"b": 255,
+			"a": 256
+			}`,
+			)
+			comp := newBaseColor()
+			err := comp.BuildFromDetails(data)
+			assert.Equal(t, ErrColorValueRangeOutOfBounds, err)
+
+			assert.Equal(t, defaultShadeValue, comp.r)
+			assert.Equal(t, defaultShadeValue, comp.g)
+			assert.Equal(t, defaultShadeValue, comp.b)
+			assert.Equal(t, defaultAlphaValue, comp.a)
+		})
+	})
 }
