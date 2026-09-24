@@ -21,7 +21,7 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.14.0
-          install-only: true
+          install-mode: binary
 
       - name: Run golangci-lint
         run: |
