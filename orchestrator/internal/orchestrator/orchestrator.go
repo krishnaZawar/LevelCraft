@@ -113,7 +113,7 @@ func (o *Orchestrator) start() error {
 
 	editorBackend, ok := o.getProcess(base.Process_EditorBackend)
 	if !ok {
-		return errors.New("editor backend process not found. Stopping...")
+		return errors.New("editor backend process not found")
 	}
 	if err := o.runProcess(func() (*entity.Process, error) {
 		return executor.StartEditorFrontend(editorBackend.CommunicationURI, orchestratorURI)

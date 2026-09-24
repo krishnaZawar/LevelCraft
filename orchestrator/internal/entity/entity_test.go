@@ -23,7 +23,7 @@ func startSleeper(t *testing.T) *Process {
 // "still there" means for a pid nothing is running under any more.
 func processState(t *testing.T, pid int) string {
 	t.Helper()
-	out, err := exec.Command("ps", "-o", "stat=", "-p", strconv.Itoa(pid)).Output()
+	out, err := exec.Command("ps", "-o", "stat=", "-p", strconv.Itoa(pid)).Output() //nolint:gosec - pid is an int; no shell is invoked
 	if err != nil {
 		return "" // the pid is gone entirely, which is the outcome we want
 	}
