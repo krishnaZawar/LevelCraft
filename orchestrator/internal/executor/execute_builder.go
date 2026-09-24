@@ -36,7 +36,7 @@ func builderBackendConfig(port string, scenePath string) entity.CommandConfig {
 }
 
 func builderFrontendConfig(port string) entity.CommandConfig {
-	return entity.CommandConfig{
+	return entity.CommandConfig{ //nolint:gosec // no hardcoded credentials; Pwd is a filesystem working directory
 		Pwd:  "../builder/app",
 		Name: "npm",
 		Args: []string{"run", "dev"},
