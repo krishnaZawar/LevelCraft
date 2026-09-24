@@ -4,7 +4,52 @@ on:
   push
 
 jobs:
-  go-services:
+  lint-go-services:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cloning Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.1"
+          cache: true
+
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
+
+      - name: Run golangci-lint
+        run: |
+          set -uo pipefail
+          lint_failed=0
+          for mod in $(find . -name go.mod); do
+            dir=$(dirname "$mod")
+            report=$(echo "$dir" | sed 's#^\./##; s#/#-#g')
+            echo "=================================="
+            echo "Linting $dir"
+            echo "=================================="
+            (
+              cd "$dir"
+              golangci-lint run \
+                --output.text.path=stdout \
+                  --output.json.path="$GITHUB_WORKSPACE/lint-results/${report}.json"
+            ) || lint_failed=1
+          done
+          if [ "$lint_failed" -eq 1 ]; then
+            echo "::warning::golangci-lint found issues"
+          fi
+
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golangci-lint-reports
+          path: lint-results/
+          retention-days: 7
+
+  test-go-services:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
