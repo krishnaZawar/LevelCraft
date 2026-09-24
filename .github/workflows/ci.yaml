@@ -26,19 +26,21 @@ jobs:
           lint_failed=0
           for mod in $(find . -name go.mod); do
             dir=$(dirname "$mod")
+            report=$(echo "$dir" | sed 's#^\./##; s#/#-#g')
             echo "=================================="
             echo "Linting $dir"
             echo "=================================="
             (
               cd "$dir"
               golangci-lint run \
-                --output.json.path="$GITHUB_WORKSPACE/lint-results/${name}.json"
+                --output.text.path=stdout \
+                  --output.json.path="$GITHUB_WORKSPACE/lint-results/${report}.json"
             ) || lint_failed=1
           done
           if [ "$lint_failed" -eq 1 ]; then
             echo "::warning::golangci-lint found issues"
           fi
-          
+
       - name: Upload lint reports
         if: always()
         uses: actions/upload-artifact@v4
