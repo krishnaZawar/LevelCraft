@@ -13,3 +13,9 @@ linters:
     - revive
     - staticcheck
     - unused
+
+  settings:
+    revive:
+      rules:
+        - name: var-naming
+          disabled: true
