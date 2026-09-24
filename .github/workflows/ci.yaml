@@ -22,7 +22,7 @@ jobs:
 
       - name: Run golangci-lint
         run: |
-          set -uo pipefail
+          set -euo pipefail
           lint_failed=0
           for mod in $(find . -name go.mod); do
             dir=$(dirname "$mod")
@@ -37,9 +37,7 @@ jobs:
                   --output.json.path="$GITHUB_WORKSPACE/lint-results/${report}.json"
             ) || lint_failed=1
           done
-          if [ "$lint_failed" -eq 1 ]; then
-            echo "::warning::golangci-lint found issues"
-          fi
+          exit "${lint_failed}"
 
       - name: Upload lint reports
         if: always()
