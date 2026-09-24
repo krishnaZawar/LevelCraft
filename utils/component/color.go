@@ -13,7 +13,7 @@ const (
 	// default value of each shade for the base color object
 	defaultShadeValue = 0
 
-	//default value of the alpha attribute
+	// default value of the alpha attribute
 	defaultAlphaValue = 255
 )
 

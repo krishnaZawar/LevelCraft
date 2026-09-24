@@ -119,6 +119,7 @@ func Test_GetComponent(t *testing.T) {
 
 	t.Run("when component exists", func(t *testing.T) {
 		ok := obj.AddComponent(comp)
+		assert.Equal(t, true, ok)
 
 		val, ok := obj.GetComponent(comp.GetComponentName())
 		assert.Equal(t, true, ok)

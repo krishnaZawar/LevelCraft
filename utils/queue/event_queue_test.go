@@ -6,10 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	subscriber1 = "sub1"
-)
-
 func Test_NewEventQueue(t *testing.T) {
 	eq := NewEventQueue()
 
