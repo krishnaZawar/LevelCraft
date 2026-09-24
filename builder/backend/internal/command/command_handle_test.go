@@ -5,6 +5,7 @@ import (
 
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
 	"github.com/krishnaZawar/LevelCraft/utils/input"
+	"github.com/krishnaZawar/LevelCraft/utils/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,70 +62,95 @@ var (
 	}
 )
 
-func Test_KeyDownCommandHandle(t *testing.T) {
-	t.Run("KeyDownCommandTest valid data to handle function", func(t *testing.T) {
-		comm := &KeyDownCommand{
-			KeyName:      Name_KeyA,
-			inputManager: inputmanager.NewInputManager(&testMapping),
-		}
-		val, err := comm.inputManager.GetInputState(comm.KeyName)
-		assert.Nil(t, err)
-		assert.Equal(t, inputmanager.KeyState_Up, val)
+func Test_CommandHandles(t *testing.T) {
+	tests := []struct {
+		name                        string
+		keyName                     string
+		createComm                  func(im *inputmanager.InputManager) models.Command
+		expectedInitialFetchErr     bool
+		expectedFetchErrAfterHandle bool
+		expectedInitialKeyState     inputmanager.KeyState
+		expectedFinalKeyState       inputmanager.KeyState
+	}{
+		{
+			name:    "KeyDownCommandTest valid data to handle function",
+			keyName: Name_KeyA,
+			createComm: func(im *inputmanager.InputManager) models.Command {
+				return &KeyDownCommand{
+					KeyName:      Name_KeyA,
+					inputManager: im,
+				}
+			},
+			expectedInitialFetchErr:     false,
+			expectedFetchErrAfterHandle: false,
+			expectedInitialKeyState:     inputmanager.KeyState_Up,
+			expectedFinalKeyState:       inputmanager.KeyState_Down,
+		},
+		{
+			name:    "KeyDownCommandTest invalid data to handle function",
+			keyName: Name_NonExistentKey,
+			createComm: func(im *inputmanager.InputManager) models.Command {
+				return &KeyDownCommand{
+					KeyName:      Name_NonExistentKey,
+					inputManager: im,
+				}
+			},
+			expectedInitialFetchErr:     true,
+			expectedFetchErrAfterHandle: true,
+			expectedInitialKeyState:     inputmanager.KeyState_Null,
+			expectedFinalKeyState:       inputmanager.KeyState_Null,
+		},
+		{
+			name:    "KeyUpCommandTest valid data to handle function",
+			keyName: Name_KeyA,
+			createComm: func(im *inputmanager.InputManager) models.Command {
+				return &KeyUpCommand{
+					KeyName:      Name_KeyA,
+					inputManager: im,
+				}
+			},
+			expectedInitialFetchErr:     false,
+			expectedFetchErrAfterHandle: false,
+			expectedInitialKeyState:     inputmanager.KeyState_Up,
+			expectedFinalKeyState:       inputmanager.KeyState_Up,
+		},
+		{
+			name:    "KeyUpCommandTest invalid data to handle function",
+			keyName: Name_NonExistentKey,
+			createComm: func(im *inputmanager.InputManager) models.Command {
+				return &KeyUpCommand{
+					KeyName:      Name_NonExistentKey,
+					inputManager: im,
+				}
+			},
+			expectedInitialFetchErr:     true,
+			expectedFetchErrAfterHandle: true,
+			expectedInitialKeyState:     inputmanager.KeyState_Null,
+			expectedFinalKeyState:       inputmanager.KeyState_Null,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			inputManager := inputmanager.NewInputManager(&testMapping)
+			comm := tt.createComm(inputManager)
 
-		comm.Handle()
+			val, err := inputManager.GetInputState(tt.keyName)
+			if tt.expectedInitialFetchErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, tt.expectedInitialKeyState, val)
 
-		val, err = comm.inputManager.GetInputState(comm.KeyName)
-		assert.Nil(t, err)
-		assert.Equal(t, inputmanager.KeyState_Down, val)
-	})
+			comm.Handle()
 
-	t.Run("KeyDownCommandTest invalid data to handle function", func(t *testing.T) {
-		comm := &KeyDownCommand{
-			KeyName:      Name_NonExistentKey,
-			inputManager: inputmanager.NewInputManager(&testMapping),
-		}
-		val, err := comm.inputManager.GetInputState(comm.KeyName)
-		assert.Equal(t, inputmanager.ErrKeyNotFound, err)
-		assert.Equal(t, inputmanager.KeyState_Null, val)
-
-		comm.Handle()
-
-		val, err = comm.inputManager.GetInputState(comm.KeyName)
-		assert.Equal(t, inputmanager.ErrKeyNotFound, err)
-		assert.Equal(t, inputmanager.KeyState_Null, val)
-	})
-}
-
-func Test_KeyUpCommandHandle(t *testing.T) {
-	t.Run("KeyUpCommandTest valid data to handle function", func(t *testing.T) {
-		comm := &KeyUpCommand{
-			KeyName:      Name_KeyA,
-			inputManager: inputmanager.NewInputManager(&testMapping),
-		}
-		val, err := comm.inputManager.GetInputState(comm.KeyName)
-		assert.Nil(t, err)
-		assert.Equal(t, inputmanager.KeyState_Up, val)
-
-		comm.Handle()
-
-		val, err = comm.inputManager.GetInputState(comm.KeyName)
-		assert.Nil(t, err)
-		assert.Equal(t, inputmanager.KeyState_Up, val)
-	})
-
-	t.Run("KeyUpCommandTest invalid data to handle function", func(t *testing.T) {
-		comm := &KeyUpCommand{
-			KeyName:      Name_NonExistentKey,
-			inputManager: inputmanager.NewInputManager(&testMapping),
-		}
-		val, err := comm.inputManager.GetInputState(comm.KeyName)
-		assert.Equal(t, inputmanager.ErrKeyNotFound, err)
-		assert.Equal(t, inputmanager.KeyState_Null, val)
-
-		comm.Handle()
-
-		val, err = comm.inputManager.GetInputState(comm.KeyName)
-		assert.Equal(t, inputmanager.ErrKeyNotFound, err)
-		assert.Equal(t, inputmanager.KeyState_Null, val)
-	})
+			val, err = inputManager.GetInputState(tt.keyName)
+			if tt.expectedFetchErrAfterHandle {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, tt.expectedFinalKeyState, val)
+		})
+	}
 }

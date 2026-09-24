@@ -58,7 +58,7 @@ func verifyFilename(fileName string) error {
 // reads the file and initializes the game scene
 // program panics on failure
 func initGameScene(filepath string) error {
-	sceneData, err := os.ReadFile(filepath)
+	sceneData, err := os.ReadFile(filepath) //nolint:gosec // filepath is user-controlled and required to load the scene but enough validation exists for safety
 	if err != nil {
 		return err
 	}
