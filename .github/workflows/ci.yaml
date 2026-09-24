@@ -31,12 +31,21 @@ jobs:
             echo "=================================="
             (
               cd "$dir"
-              golangci-lint run
+              golangci-lint run \
+                --output.json.path="$GITHUB_WORKSPACE/lint-results/${name}.json"
             ) || lint_failed=1
           done
           if [ "$lint_failed" -eq 1 ]; then
             echo "::warning::golangci-lint found issues"
           fi
+          
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golangci-lint-reports
+          path: lint-results/
+          retention-days: 7
 
   test-go-services:
     runs-on: ubuntu-latest
