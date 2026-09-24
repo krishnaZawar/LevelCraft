@@ -18,7 +18,7 @@ func HandleCommandRequests(c *websocket.Conn) {
 
 	defer func() {
 		ls.Info().Msg("client disconnected")
-		c.Close()
+		_ = c.Close()
 	}()
 
 	errCh := make(chan error, 2)

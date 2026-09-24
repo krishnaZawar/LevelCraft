@@ -103,7 +103,7 @@ func HandleLoadGame(ctx *fiber.Ctx) error {
 }
 
 func loadGame(gsm *gamestatemanager.GameStateManager, filepath string) ([]gameobject.GameobjectDetails, error) {
-	fileData, err := os.ReadFile(filepath) //nolint:gosec // filepath is internally generated and not user-controlled
+	fileData, err := os.ReadFile(filepath) //nolint:gosec // filepath is user-controlled and required to load the scene but enough validation exists for safety
 	if err != nil {
 		return nil, err
 	}
