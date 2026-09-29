@@ -13,6 +13,9 @@ import {
 
 const MANIFEST_FILE = 'project.json'
 const SCENE_FILE = 'scene.json'
+// A scene is a JSON array of gameobjects, so an empty one is `[]`, not `{}`.
+// The backend unmarshals into a slice and rejects an object outright.
+const EMPTY_SCENE = '[]'
 const RECENT_PROJECTS_FILE = 'recent-projects.json'
 
 // Windows-reserved device names (case-insensitive), invalid as a filename on
@@ -134,7 +137,7 @@ export async function createProject(name: string): Promise<ProjectApiResult> {
   try {
     await mkdir(projectPath, { recursive: false })
     await writeManifest(projectPath, manifest)
-    await writeFile(join(projectPath, SCENE_FILE), '{}', 'utf-8')
+    await writeFile(join(projectPath, SCENE_FILE), EMPTY_SCENE, 'utf-8')
   } catch (err) {
     return { ok: false, error: 'io-error', message: (err as Error).message }
   }
@@ -212,7 +215,7 @@ export async function createTempScene(sourceName: string): Promise<TempScene> {
     lastOpenedAt: now
   }
   await writeManifest(projectPath, manifest)
-  await writeFile(join(projectPath, SCENE_FILE), '{}', 'utf-8')
+  await writeFile(join(projectPath, SCENE_FILE), EMPTY_SCENE, 'utf-8')
 
   activeTempScene = { path: projectPath, scenePath: join(projectPath, SCENE_FILE) }
   return activeTempScene
