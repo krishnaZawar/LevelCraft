@@ -78,3 +78,45 @@ jobs:
               go build ./...
             )
           done
+
+  lint-frontend-apps:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [editor/app, builder/app]
+
+    steps:
+      - name: Cloning Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ${{ matrix.app }}/package-lock.json
+
+      # The shared config is linked as a file: dependency, so Node resolves its
+      # plugin imports from eslint-config/node_modules — installing only in the
+      # app would leave ESLint unable to load them.
+      - name: Install shared lint config
+        working-directory: eslint-config
+        run: npm ci
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.app }}
+        run: npm ci
+
+      - name: Check formatting
+        working-directory: ${{ matrix.app }}
+        run: npm run format:check
+
+      - name: Typecheck
+        working-directory: ${{ matrix.app }}
+        run: npm run typecheck
+
+      - name: Run ESLint
+        working-directory: ${{ matrix.app }}
+        # Caching is for local runs; CI always lints the whole tree.
+        run: npx eslint . --max-warnings 0

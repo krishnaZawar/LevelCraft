@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { useProjectStore } from '@/store/projectStore'
-import { ProjectSummary } from '../../../shared/project'
+import { type ProjectSummary } from '../../../shared/project'
 
 const RELATIVE_TIME = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
 const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
@@ -124,7 +124,7 @@ function NewProjectDialog(): React.JSX.Element {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCreate()
+              if (e.key === 'Enter') void handleCreate()
             }}
             disabled={isLoading}
           />
@@ -195,8 +195,8 @@ function Home(): React.JSX.Element {
   const openProjectFromPath = useProjectStore((state) => state.openProjectFromPath)
 
   useEffect(() => {
-    refreshProjects()
-    checkBackend()
+    void refreshProjects()
+    void checkBackend()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

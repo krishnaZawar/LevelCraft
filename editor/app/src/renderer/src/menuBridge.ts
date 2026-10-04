@@ -1,4 +1,4 @@
-import { MenuAction } from '../../shared/project'
+import { type MenuAction } from '../../shared/project'
 import { saveGame } from './api/gameApi'
 import { useProjectStore } from './store/projectStore'
 
@@ -14,8 +14,8 @@ export function dispatchMenuAction(action: MenuAction): void {
       break
 
     case 'open-project':
-      window.api.project.browseForFolder().then((path) => {
-        if (path) useProjectStore.getState().openProjectFromPath(path)
+      void window.api.project.browseForFolder().then((path) => {
+        if (path) void useProjectStore.getState().openProjectFromPath(path)
       })
       break
 

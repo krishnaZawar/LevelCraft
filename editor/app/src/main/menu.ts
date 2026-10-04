@@ -1,5 +1,5 @@
-import { BrowserWindow, ipcMain, Menu, MenuItemConstructorOptions } from 'electron'
-import { MenuAction } from '../shared/project'
+import { BrowserWindow, ipcMain, Menu, type MenuItemConstructorOptions } from 'electron'
+import { type MenuAction } from '../shared/project'
 
 function sendAction(action: MenuAction): void {
   BrowserWindow.getFocusedWindow()?.webContents.send('menu:action', action)

@@ -4,3 +4,5 @@
 
 # packaged output (scripts/package.mjs)
 dist
+# npm dependencies
+node_modules

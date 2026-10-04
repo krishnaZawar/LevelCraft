@@ -105,7 +105,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   } catch {
     throw new Error(BACKEND_UNREACHABLE_MESSAGE)
   }
-  const data = await res.json()
+  const data: unknown = await res.json()
   if (!res.ok) {
     throw new Error((data as ErrorResponse).message ?? 'Request failed')
   }

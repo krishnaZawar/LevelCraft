@@ -1,4 +1,4 @@
-import { createServer, Server } from 'http'
+import { createServer, type Server } from 'http'
 
 // Lets external process managers (the orchestrator's `editorFrontend`
 // process type, see orchestrator/internal/base/const.go) health-check this

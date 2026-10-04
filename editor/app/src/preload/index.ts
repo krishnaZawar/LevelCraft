@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { LevelCraftApi, MenuAction } from '../shared/project'
+import { type LevelCraftApi, type MenuAction } from '../shared/project'
 
 const api: LevelCraftApi = {
   platform: process.platform,
@@ -21,10 +21,10 @@ const api: LevelCraftApi = {
     toggleFullscreen: () => ipcRenderer.send('window:toggleFullscreen')
   },
   backend: {
-    getBaseUrl: () => ipcRenderer.sendSync('backend:getBaseUrlSync')
+    getBaseUrl: (): string => ipcRenderer.sendSync('backend:getBaseUrlSync') as string
   },
   orchestrator: {
-    getBaseUrl: () => ipcRenderer.sendSync('orchestrator:getBaseUrlSync')
+    getBaseUrl: (): string => ipcRenderer.sendSync('orchestrator:getBaseUrlSync') as string
   },
   game: {
     createTempScene: (sourceName) => ipcRenderer.invoke('game:createTempScene', sourceName),
@@ -49,8 +49,8 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore (define in dts)
+  // @ts-expect-error — defined in index.d.ts, not on the real window type
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
+  // @ts-expect-error — defined in index.d.ts, not on the real window type
   window.api = api
 }

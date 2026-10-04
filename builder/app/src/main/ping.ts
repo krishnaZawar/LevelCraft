@@ -1,4 +1,4 @@
-import { createServer, Server } from 'http'
+import { createServer, type Server } from 'http'
 
 // Lets the orchestrator health-check this app like every other process:
 // GET /ping -> 200, on the port it handed down via LEVELCRAFT_PING_PORT.

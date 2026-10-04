@@ -5,10 +5,10 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
 import { join } from 'path'
 import {
   PROJECT_SCHEMA_VERSION,
-  ProjectApiResult,
-  ProjectManifest,
-  ProjectOperationError,
-  ProjectSummary
+  type ProjectApiResult,
+  type ProjectManifest,
+  type ProjectOperationError,
+  type ProjectSummary
 } from '../shared/project'
 
 const MANIFEST_FILE = 'project.json'
@@ -175,7 +175,7 @@ function recentProjectsFilePath(): string {
 export async function getRecentProjectPaths(): Promise<string[]> {
   try {
     const raw = await readFile(recentProjectsFilePath(), 'utf-8')
-    const parsed = JSON.parse(raw)
+    const parsed: unknown = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed.filter((p) => typeof p === 'string') : []
   } catch {
     return []
