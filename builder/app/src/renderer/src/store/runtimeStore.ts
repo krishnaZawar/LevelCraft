@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { GameState } from '@/scene/types'
+import { toGameState, type GameState, type WireGameObject } from '@/scene/types'
 
 // The orchestrator assigns the backend's port at spawn time, so there is no
 // fixed fallback: an empty address means this app was started without it.
@@ -61,7 +61,7 @@ export const useRuntimeStore = create<RuntimeStoreState>((set) => ({
       // full scene snapshot, so branching on it would be wrong.
       try {
         const parsed = JSON.parse(event.data as string)
-        if (parsed?.data) set({ snapshot: parsed.data })
+        if (parsed?.data) set({ snapshot: toGameState(parsed.data as WireGameObject[]) })
       } catch {
         // Malformed frame — ignored, as the backend does with bad input.
       }

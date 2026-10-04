@@ -158,7 +158,7 @@ function HierarchyPanel(): React.JSX.Element {
   }
 
   return (
-    <ScrollArea className="flex-1">
+    <ScrollArea className="min-h-0 flex-1">
       <ul className="p-1">
         {objects.map((object) => {
           const isSelected = selectedObjectId === object.id
@@ -427,7 +427,7 @@ function AttributesPanel(): React.JSX.Element {
   const addableComponents = availableComponents.filter((name) => !attachedNames.includes(name))
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="border-border grid grid-cols-2 gap-2 border-b p-3">
         <TextField
           // Remounted per object so the inputs always start from the object
@@ -447,7 +447,7 @@ function AttributesPanel(): React.JSX.Element {
         />
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="min-h-0 flex-1">
         <div className="space-y-2 p-3">
           {attachedNames.length === 0 ? (
             <p className="text-muted-foreground text-xs">No components yet.</p>
