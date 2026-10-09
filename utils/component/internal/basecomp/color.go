@@ -1,10 +1,11 @@
-package component
+package basecomp
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
+	"github.com/krishnaZawar/LevelCraft/utils/component/internal/models"
 )
 
 var ErrColorValueRangeOutOfBounds = fmt.Errorf("ComponentError: Color values should be in the range of %d to %d", base.ColorValueRangeMin, base.ColorValueRangeMax)
@@ -35,7 +36,7 @@ type colorJSON struct {
 }
 
 // internal function used to register the base component copy with the componentRegistry
-func newBaseColor() *Color {
+func NewBaseColor() *Color {
 	return &Color{
 		r: defaultShadeValue,
 		g: defaultShadeValue,
@@ -45,7 +46,7 @@ func newBaseColor() *Color {
 }
 
 func NewColor(r int, g int, b int, a int) *Color {
-	color := newBaseColor()
+	color := NewBaseColor()
 	color.Set(r, g, b, a)
 
 	return color
@@ -72,7 +73,7 @@ func (c *Color) GetComponentName() string {
 }
 
 // Returns a snapshot of the complete data stored in the component
-func (c *Color) GetComponentDetails() ComponentDetails {
+func (c *Color) GetComponentDetails() models.ComponentDetails {
 	data := colorJSON{
 		R: c.r,
 		G: c.g,
@@ -80,7 +81,7 @@ func (c *Color) GetComponentDetails() ComponentDetails {
 		A: c.a,
 	}
 	byteData, _ := json.Marshal(data)
-	return ComponentDetails{
+	return models.ComponentDetails{
 		Name: c.GetComponentName(),
 		Data: json.RawMessage(byteData),
 	}
@@ -122,4 +123,9 @@ func (c *Color) BuildFromDetails(data json.RawMessage) error {
 	return nil
 }
 
-var _ Component = &Color{}
+// no interaction possible
+func (c *Color) HandlesInput(input string) bool {
+	return false
+}
+
+var _ models.Component = &Color{}

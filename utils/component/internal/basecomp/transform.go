@@ -1,9 +1,10 @@
-package component
+package basecomp
 
 import (
 	"encoding/json"
 
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
+	"github.com/krishnaZawar/LevelCraft/utils/component/internal/models"
 )
 
 const (
@@ -28,7 +29,7 @@ type transformJSON struct {
 }
 
 // internal function used to register the base component copy with the componentRegistry
-func newBaseTransform() *Transform {
+func NewBaseTransform() *Transform {
 	return &Transform{
 		x: defaultTransformValue,
 		y: defaultTransformValue,
@@ -38,7 +39,7 @@ func newBaseTransform() *Transform {
 }
 
 func NewTransform(x int, y int, w int, h int) *Transform {
-	transform := newBaseTransform()
+	transform := NewBaseTransform()
 	transform.UpdatePosition(x, y)
 	transform.UpdateDimension(w, h)
 	return transform
@@ -76,7 +77,7 @@ func (t *Transform) GetComponentName() string {
 }
 
 // Returns a snapshot of the complete data stored in the component
-func (t *Transform) GetComponentDetails() ComponentDetails {
+func (t *Transform) GetComponentDetails() models.ComponentDetails {
 	data := transformJSON{
 		X: t.x,
 		Y: t.y,
@@ -84,7 +85,7 @@ func (t *Transform) GetComponentDetails() ComponentDetails {
 		H: t.h,
 	}
 	byteData, _ := json.Marshal(data)
-	return ComponentDetails{
+	return models.ComponentDetails{
 		Name: t.GetComponentName(),
 		Data: json.RawMessage(byteData),
 	}
@@ -106,4 +107,9 @@ func (t *Transform) BuildFromDetails(data json.RawMessage) error {
 	return nil
 }
 
-var _ Component = &Transform{}
+// no interaction possible
+func (t *Transform) HandlesInput(input string) bool {
+	return false
+}
+
+var _ models.Component = &Transform{}

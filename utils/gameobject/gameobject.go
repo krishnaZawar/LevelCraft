@@ -108,6 +108,15 @@ func (g *Gameobject) GetComponent(componentName string) (component.Component, bo
 	return comp, ok
 }
 
+// List all the components the gameobject holds
+func (g *Gameobject) ListComponents() []component.Component {
+	comps := []component.Component{}
+	for _, comp := range g.components {
+		comps = append(comps, comp)
+	}
+	return comps
+}
+
 // Returns the all the details of the gameobject
 func (g *Gameobject) GetGameobjectDetails() GameobjectDetails {
 	componentsData := []component.ComponentDetails{}
