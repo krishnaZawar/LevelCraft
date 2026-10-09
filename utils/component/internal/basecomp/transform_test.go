@@ -1,4 +1,4 @@
-package component
+package basecomp
 
 import (
 	"encoding/json"
@@ -44,7 +44,7 @@ func Test_MarshalAndUnmarshalTransform(t *testing.T) {
 	x, y, w, h := 100, 120, 140, 160
 	expected := NewTransform(x, y, w, h)
 
-	found := newBaseTransform()
+	found := NewBaseTransform()
 
 	details := expected.GetComponentDetails()
 	err := found.BuildFromDetails(details.Data)
@@ -64,7 +64,7 @@ func Test_UnmarshalTransform(t *testing.T) {
 			"h": 160
 			}`,
 		)
-		comp := newBaseTransform()
+		comp := NewBaseTransform()
 		err := comp.BuildFromDetails(data)
 		assert.Nil(t, err)
 
@@ -82,7 +82,7 @@ func Test_UnmarshalTransform(t *testing.T) {
 			"h": 160
 			}`,
 		)
-		comp := newBaseTransform()
+		comp := NewBaseTransform()
 		err := comp.BuildFromDetails(data)
 		assert.NotNil(t, err)
 

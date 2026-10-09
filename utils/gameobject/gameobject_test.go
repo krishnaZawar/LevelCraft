@@ -17,6 +17,7 @@ type MockComponent struct {
 	mockGetComponentName    func() string
 	mockGetComponentDetails func() component.ComponentDetails
 	mockBuildFromDetails    func(json.RawMessage) error
+	mockHandlesInput        func(string) bool
 }
 
 func (mc *MockComponent) GetComponentName() string {
@@ -27,6 +28,9 @@ func (mc *MockComponent) GetComponentDetails() component.ComponentDetails {
 }
 func (mc *MockComponent) BuildFromDetails(data json.RawMessage) error {
 	return mc.mockBuildFromDetails(data)
+}
+func (mc *MockComponent) HandlesInput(input string) bool {
+	return mc.mockHandlesInput(input)
 }
 
 var (
@@ -47,6 +51,9 @@ var (
 		},
 		mockBuildFromDetails: func(data json.RawMessage) error {
 			return nil
+		},
+		mockHandlesInput: func(input string) bool {
+			return false
 		},
 	}
 )
@@ -124,6 +131,23 @@ func Test_GetComponent(t *testing.T) {
 		val, ok := obj.GetComponent(comp.GetComponentName())
 		assert.Equal(t, true, ok)
 		assert.Equal(t, comp, val)
+	})
+}
+
+func Test_ListComponents(t *testing.T) {
+	obj := NewGameobject()
+
+	t.Run("no components", func(t *testing.T) {
+		list := obj.ListComponents()
+		assert.Equal(t, []component.Component{}, list)
+	})
+
+	t.Run("when components present", func(t *testing.T) {
+		ok := obj.AddComponent(comp)
+		assert.Equal(t, true, ok)
+
+		list := obj.ListComponents()
+		assert.Equal(t, []component.Component{comp}, list)
 	})
 }
 
