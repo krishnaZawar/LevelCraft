@@ -31,7 +31,7 @@ type ComponentDetails struct {
 	Data json.RawMessage `json:"data"` // holds the marshalled data of the component
 }
 
-// the factory funtion that is used to create and serve the component
+// the factory function that is used to create and serve the component
 type ComponentFactory func() Component
 
 // Creates a new component based on the component name
