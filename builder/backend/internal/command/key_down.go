@@ -25,13 +25,14 @@ func (kdc *KeyDownCommand) GetCommandName() string {
 }
 
 // break down the command into events based on the game semantics
-func (kdc *KeyDownCommand) Handle() []models.Event {
+func (kdc *KeyDownCommand) Handle() error {
 	// pass through the interpreter and handle command
 	err := kdc.inputManager.SetInputState(kdc.KeyName, inputmanager.KeyState_Down)
 	if err != nil {
 		ls.ErrorWith(err).Msgf("failed to set key state down for %s", kdc.KeyName)
+		return err
 	}
-	return []models.Event{}
+	return nil
 }
 
 // CommandFactory to convert request to KeyDownCommand type

@@ -106,3 +106,18 @@ var inputManager *InputManager = newSingleton()
 func Get() *InputManager {
 	return inputManager
 }
+
+var mapping *input.InputMapping
+
+func LoadMapping() error {
+	var err error
+	mapping, err = input.LoadMapping()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetMapping() *input.InputMapping {
+	return mapping
+}

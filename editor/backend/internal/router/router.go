@@ -14,6 +14,8 @@ func CreateRoutes(app *fiber.App) {
 		})
 	})
 
+	app.Get("/inputmapping", handler.GetInputMapping)
+
 	game := app.Group("/game")
 	game.Post("/save", handler.HandleSaveGame)
 	game.Post("/load", handler.HandleLoadGame)

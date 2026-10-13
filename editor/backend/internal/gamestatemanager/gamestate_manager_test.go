@@ -7,19 +7,20 @@ import (
 	"github.com/krishnaZawar/LevelCraft/utils/component"
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
+	"github.com/krishnaZawar/LevelCraft/utils/input"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_AddGameobject(t *testing.T) {
 	gsm := NewGameStateManager()
-	gsm.AddGameobject(gameobject.NewGameobject())
+	gsm.AddGameobject(gameobject.NewGameobject(component.NewComponentRegistry(&input.InputMapping{})))
 
 	assert.Equal(t, 1, len(gsm.GetGameState()))
 }
 
 func Test_DeleteGameobject(t *testing.T) {
 	gsm := NewGameStateManager()
-	obj := gameobject.NewGameobject()
+	obj := gameobject.NewGameobject(component.NewComponentRegistry(&input.InputMapping{}))
 
 	gsm.AddGameobject(obj)
 
@@ -37,7 +38,7 @@ func Test_DeleteGameobject(t *testing.T) {
 
 func Test_GetGameobject(t *testing.T) {
 	gsm := NewGameStateManager()
-	expectedObj := gameobject.NewGameobject()
+	expectedObj := gameobject.NewGameobject(component.NewComponentRegistry(&input.InputMapping{}))
 
 	gsm.AddGameobject(expectedObj)
 
@@ -48,9 +49,9 @@ func Test_GetGameobject(t *testing.T) {
 }
 
 func Test_GetGameState(t *testing.T) {
-	defVal := 100
+	defVal := 100.0
 	gsm := NewGameStateManager()
-	obj := gameobject.NewGameobject()
+	obj := gameobject.NewGameobject(component.NewComponentRegistry(&input.InputMapping{}))
 	obj.AddComponent(component.NewTransform(defVal, defVal, defVal, defVal))
 
 	gsm.AddGameobject(obj)
@@ -85,8 +86,9 @@ func Test_GetGameState(t *testing.T) {
 
 func Test_Reset(t *testing.T) {
 	gsm := NewGameStateManager()
-	gsm.AddGameobject(gameobject.NewGameobject())
-	gsm.AddGameobject(gameobject.NewGameobject())
+	registry := component.NewComponentRegistry(&input.InputMapping{})
+	gsm.AddGameobject(gameobject.NewGameobject(registry))
+	gsm.AddGameobject(gameobject.NewGameobject(registry))
 
 	gsm.Reset()
 

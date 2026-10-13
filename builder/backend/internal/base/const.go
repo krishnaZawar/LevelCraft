@@ -2,9 +2,15 @@ package base
 
 const ServiceName = "game-builder"
 
+// Command names
 const (
 	Command_KeyDown = "KeyDownCommand"
 	Command_KeyUp   = "KeyUpCommand"
+)
+
+// Event names
+const (
+	Event_MoveEvent = "MoveEvent"
 )
 
 const (
