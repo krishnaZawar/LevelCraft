@@ -18,17 +18,21 @@ func Test_NewComponentRegistry(t *testing.T) {
 	assert.Equal(t, 3, compRegistry.Size())
 
 	var expected models.Component
-	comp, ok := compRegistry.GetComponent(base.ComponentName_Transform)
+	var factory models.ComponentFactory
+	factory, ok := compRegistry.GetComponent(base.ComponentName_Transform)
+	comp := factory()
 	expected = basecomp.NewBaseTransform()
 	assert.Equal(t, true, ok)
 	assert.Equal(t, expected, comp)
 
-	comp, ok = compRegistry.GetComponent(base.ComponentName_Color)
+	factory, ok = compRegistry.GetComponent(base.ComponentName_Color)
+	comp = factory()
 	expected = basecomp.NewBaseColor()
 	assert.Equal(t, true, ok)
 	assert.Equal(t, expected, comp)
 
-	comp, ok = compRegistry.GetComponent(base.ComponentName_InputMovement)
+	factory, ok = compRegistry.GetComponent(base.ComponentName_InputMovement)
+	comp = factory()
 	expected = movement.NewBaseInputMovement(mapping)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, expected, comp)
