@@ -11,16 +11,14 @@ import (
 
 // This is used to create the decoder and register
 // all the commandFactories relevant to the types of Commands for decoding CommandRequests
-func initCommandFactoryDecoder() *helper.Registry[string, models.CommandFactory] {
-	inputmanager := inputmanager.Get()
-
+func initCommandFactoryDecoder(inputmanager *inputmanager.InputManager) *helper.Registry[string, models.CommandFactory] {
 	decoder := helper.NewRegistry[string, models.CommandFactory]()
 	decoder.Register(base.Command_KeyDown, command.NewKeyDownCommandFactory(inputmanager))
 	decoder.Register(base.Command_KeyUp, command.NewKeyUpCommandFactory(inputmanager))
 	return decoder
 }
 
-var cmdQueue = queue.NewCommandQueue(initCommandFactoryDecoder())
+var cmdQueue = queue.NewCommandQueue(initCommandFactoryDecoder(inputmanager.Get()))
 
 var evtQueue = queue.NewEventQueue()
 

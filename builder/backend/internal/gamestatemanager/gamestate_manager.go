@@ -2,14 +2,11 @@ package gamestatemanager
 
 import (
 	"encoding/json"
-	"errors"
 	"sync"
 
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
+	"github.com/krishnaZawar/LevelCraft/utils/component"
 	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
-)
-
-var (
-	ErrExpectedMapStringInterface = errors.New("GamesceneError: Expected Map string interface")
 )
 
 // GameStateManager is a thread safe manager
@@ -40,6 +37,17 @@ func (gsm *GameStateManager) DeleteGameobject(id string) {
 	delete(gsm.gameobjects, id)
 }
 
+// list all the gameobjects in the scene
+func (gsm *GameStateManager) ListGameobjects() []*gameobject.Gameobject {
+	gsm.mu.RLock()
+	defer gsm.mu.RUnlock()
+	objs := []*gameobject.Gameobject{}
+	for _, obj := range gsm.gameobjects {
+		objs = append(objs, obj)
+	}
+	return objs
+}
+
 // fetches a gameobject from the scene
 func (gsm *GameStateManager) GetGameobject(id string) (*gameobject.Gameobject, bool) {
 	gsm.mu.RLock()
@@ -68,8 +76,9 @@ func (gsm *GameStateManager) BuildFromDetails(data []byte) error {
 	if err != nil {
 		return err
 	}
+	componentRegistry := component.NewComponentRegistry(inputmanager.GetMapping())
 	for _, objData := range scene {
-		obj := gameobject.NewGameobjectWithID(objData.Id)
+		obj := gameobject.NewGameobjectWithID(objData.Id, componentRegistry)
 		err := obj.BuildFromDetails(objData)
 		if err != nil {
 			return err

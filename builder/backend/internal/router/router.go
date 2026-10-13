@@ -15,4 +15,6 @@ func CreateRoutes(app *fiber.App) {
 		})
 	})
 	app.Get("/requests", websocket.New(handler.HandleCommandRequests))
+
+	app.Get("/inputmapping", handler.GetInputMapping)
 }

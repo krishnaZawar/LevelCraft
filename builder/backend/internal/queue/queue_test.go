@@ -11,21 +11,28 @@ import (
 )
 
 func Test_InitCommandFactoryDecoder(t *testing.T) {
-	decoder := initCommandFactoryDecoder()
+	inputmanager := &inputmanager.InputManager{}
+	decoder := initCommandFactoryDecoder(inputmanager)
+
+	assert.Equal(t, 2, decoder.Size())
 
 	tests := []struct {
-		key          string
-		expectedType models.CommandFactory
+		key      string
+		expected models.CommandFactory
 	}{
 		{
-			key:          base.Command_KeyDown,
-			expectedType: command.NewKeyDownCommandFactory(&inputmanager.InputManager{}),
+			key:      base.Command_KeyDown,
+			expected: command.NewKeyDownCommandFactory(inputmanager),
+		},
+		{
+			key:      base.Command_KeyUp,
+			expected: command.NewKeyUpCommandFactory(inputmanager),
 		},
 	}
 
 	for _, tt := range tests {
 		cf, found := decoder.GetValue(tt.key)
 		assert.Equal(t, true, found)
-		assert.IsType(t, tt.expectedType, cf)
+		assert.Equal(t, tt.expected, cf)
 	}
 }

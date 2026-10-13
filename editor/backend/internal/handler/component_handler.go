@@ -6,8 +6,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/entity"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/gamestatemanager"
+	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/inputmapping"
 	"github.com/krishnaZawar/LevelCraft/utils/component"
-	"github.com/krishnaZawar/LevelCraft/utils/input"
 )
 
 func GetComponents(ctx *fiber.Ctx) error {
@@ -27,7 +27,7 @@ func AddComponent(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusNotFound).JSON(entity.NewErrorResponse("gameobject not found"))
 	}
 
-	comp, found := component.NewComponentRegistry(&input.InputMapping{}).GetComponent(componentName)
+	comp, found := component.NewComponentRegistry(inputmapping.Get()).GetComponent(componentName)
 	if !found {
 		ls.Error().Msgf("component with name: %s does not exist", componentName)
 		return ctx.Status(http.StatusNotFound).JSON(entity.NewErrorResponse("component not found"))

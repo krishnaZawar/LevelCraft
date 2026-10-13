@@ -69,6 +69,7 @@ func Test_CommandHandles(t *testing.T) {
 		createComm                  func(im *inputmanager.InputManager) models.Command
 		expectedInitialFetchErr     bool
 		expectedFetchErrAfterHandle bool
+		expectedHandleErr           bool
 		expectedInitialKeyState     inputmanager.KeyState
 		expectedFinalKeyState       inputmanager.KeyState
 	}{
@@ -83,6 +84,7 @@ func Test_CommandHandles(t *testing.T) {
 			},
 			expectedInitialFetchErr:     false,
 			expectedFetchErrAfterHandle: false,
+			expectedHandleErr:           false,
 			expectedInitialKeyState:     inputmanager.KeyState_Up,
 			expectedFinalKeyState:       inputmanager.KeyState_Down,
 		},
@@ -97,6 +99,7 @@ func Test_CommandHandles(t *testing.T) {
 			},
 			expectedInitialFetchErr:     true,
 			expectedFetchErrAfterHandle: true,
+			expectedHandleErr:           true,
 			expectedInitialKeyState:     inputmanager.KeyState_Null,
 			expectedFinalKeyState:       inputmanager.KeyState_Null,
 		},
@@ -111,6 +114,7 @@ func Test_CommandHandles(t *testing.T) {
 			},
 			expectedInitialFetchErr:     false,
 			expectedFetchErrAfterHandle: false,
+			expectedHandleErr:           false,
 			expectedInitialKeyState:     inputmanager.KeyState_Up,
 			expectedFinalKeyState:       inputmanager.KeyState_Up,
 		},
@@ -125,6 +129,7 @@ func Test_CommandHandles(t *testing.T) {
 			},
 			expectedInitialFetchErr:     true,
 			expectedFetchErrAfterHandle: true,
+			expectedHandleErr:           true,
 			expectedInitialKeyState:     inputmanager.KeyState_Null,
 			expectedFinalKeyState:       inputmanager.KeyState_Null,
 		},
@@ -142,7 +147,12 @@ func Test_CommandHandles(t *testing.T) {
 			}
 			assert.Equal(t, tt.expectedInitialKeyState, val)
 
-			comm.Handle()
+			err = comm.Handle()
+			if tt.expectedHandleErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
 
 			val, err = inputManager.GetInputState(tt.keyName)
 			if tt.expectedFetchErrAfterHandle {
