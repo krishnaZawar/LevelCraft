@@ -8,6 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/entity"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/gamestatemanager"
+	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/inputmapping"
+	"github.com/krishnaZawar/LevelCraft/utils/component"
 	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
 )
 
@@ -54,7 +56,8 @@ func DuplicateGameobject(ctx *fiber.Ctx) error {
 
 	// Rebuilt from the source's own details rather than sharing anything with
 	// it, so the copy owns its components and editing one can't affect the other.
-	clone := gameobject.NewGameobject()
+	compRegistry := component.NewComponentRegistry(inputmapping.Get())
+	clone := gameobject.NewGameobject(compRegistry)
 	details := source.GetGameobjectDetails()
 	details.Id = clone.GetID()
 	details.Name = duplicateName(
@@ -80,7 +83,8 @@ func DuplicateGameobject(ctx *fiber.Ctx) error {
 }
 
 func AddGameobject(ctx *fiber.Ctx) error {
-	gameobject := gameobject.NewGameobject()
+	compRegistry := component.NewComponentRegistry(inputmapping.Get())
+	gameobject := gameobject.NewGameobject(compRegistry)
 	gsm := gamestatemanager.Get()
 
 	gameobject.SetName(duplicateName(
