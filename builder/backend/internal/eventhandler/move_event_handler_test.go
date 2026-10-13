@@ -18,7 +18,7 @@ type mockEvent struct {
 }
 
 func (me *mockEvent) GetEventName() string {
-	return "MockEvent"
+	return me.mockGetEventName()
 }
 
 var compRegistry = component.NewComponentRegistry(&input.InputMapping{
@@ -49,7 +49,11 @@ var compRegistry = component.NewComponentRegistry(&input.InputMapping{
 func Test_MoveEventHandler(t *testing.T) {
 	t.Run("incompatible event type passed", func(t *testing.T) {
 		handler := NewMoveEventHandler(&gamestatemanager.GameStateManager{})
-		evt := &mockEvent{}
+		evt := &mockEvent{
+			mockGetEventName: func() string {
+				return "MockEvent"
+			},
+		}
 
 		resp := handler.Handle(evt, 1)
 
