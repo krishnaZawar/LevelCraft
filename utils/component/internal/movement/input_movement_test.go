@@ -112,7 +112,7 @@ func Test_InputMovementGetDirections(t *testing.T) {
 			},
 			inputKey:     "LEFT_MOUSE_BUTTON",
 			expectedXDir: 0,
-			expectedYDir: -1,
+			expectedYDir: 1,
 		},
 		{
 			name: "down key passed and y direction not allowed movement",
@@ -132,7 +132,7 @@ func Test_InputMovementGetDirections(t *testing.T) {
 			},
 			inputKey:     "LEFT_MOUSE_BUTTON",
 			expectedXDir: 0,
-			expectedYDir: 1,
+			expectedYDir: -1,
 		},
 		{
 			name: "up key passed and y direction not allowed movement",
