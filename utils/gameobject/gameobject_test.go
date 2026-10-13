@@ -222,12 +222,3 @@ func Test_GetGameobjectDetails(t *testing.T) {
 
 	assert.Equal(t, data, expectedData)
 }
-
-func contains(arr []string, value string) bool {
-	for _, val := range arr {
-		if val == value {
-			return true
-		}
-	}
-	return false
-}
