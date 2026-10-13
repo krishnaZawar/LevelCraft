@@ -31,26 +31,29 @@ type ComponentDetails struct {
 	Data json.RawMessage `json:"data"` // holds the marshalled data of the component
 }
 
+// the factory function that is used to create and serve the component
+type ComponentFactory func() Component
+
 // Creates a new component based on the component name
 // returns a copy of the base component
 type ComponentRegistry struct {
 	// name -> component mapping
-	registry *helper.Registry[string, Component]
+	registry *helper.Registry[string, ComponentFactory]
 }
 
 func NewComponentRegistry() *ComponentRegistry {
 	return &ComponentRegistry{
-		registry: helper.NewRegistry[string, Component](),
+		registry: helper.NewRegistry[string, ComponentFactory](),
 	}
 }
 
 // registers a new component with the registry
-func (cr *ComponentRegistry) Register(name string, comp Component) {
-	cr.registry.Register(name, comp)
+func (cr *ComponentRegistry) Register(name string, compFactory ComponentFactory) {
+	cr.registry.Register(name, compFactory)
 }
 
 // fetches the base component for the name
-func (cr *ComponentRegistry) GetComponent(name string) (Component, bool) {
+func (cr *ComponentRegistry) GetComponent(name string) (ComponentFactory, bool) {
 	comp, ok := cr.registry.GetValue(name)
 	return comp, ok
 }

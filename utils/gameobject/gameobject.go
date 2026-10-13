@@ -126,10 +126,11 @@ func (g *Gameobject) BuildFromDetails(data GameobjectDetails) error {
 	g.SetGroup(data.Group)
 
 	for _, compDetails := range data.Components {
-		comp, found := g.registry.GetComponent(compDetails.Name)
+		factory, found := g.registry.GetComponent(compDetails.Name)
 		if !found {
 			return NewErrComponentNotFound(compDetails.Name)
 		}
+		comp := factory()
 		err := comp.BuildFromDetails(compDetails.Data)
 		if err != nil {
 			return err
