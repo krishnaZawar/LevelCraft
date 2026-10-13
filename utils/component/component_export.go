@@ -22,7 +22,7 @@ type ComponentDetails = models.ComponentDetails
 
 type Transform = basecomp.Transform
 
-func NewTransform(x, y, w, h int) *Transform {
+func NewTransform(x, y, w, h float64) *Transform {
 	return basecomp.NewTransform(x, y, w, h)
 }
 
@@ -34,6 +34,6 @@ func NewColor(r, g, b, a int) *Color {
 
 type InputMovement = movement.InputMovement
 
-func NewInputMovement(inputmapping *input.InputMapping, speed int) *movement.InputMovement {
+func NewInputMovement(inputmapping *input.InputMapping, speed float64) *movement.InputMovement {
 	return movement.NewInputMovement(inputmapping, speed)
 }

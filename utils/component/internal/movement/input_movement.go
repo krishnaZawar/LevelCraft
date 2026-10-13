@@ -17,7 +17,7 @@ const (
 //
 // The user can also restrict movement to particular axes and control the inputKeys used
 type InputMovement struct {
-	speed int // the speed with which the object should move
+	speed float64 // the speed with which the object should move
 
 	// X direction related config
 	// Input Keys for X direction can only be mapped if movement is allowed on that axis
@@ -36,7 +36,7 @@ type InputMovement struct {
 
 // intermediary structure of InputMovement used for marshalling and unmarshalling component details
 type inputMovementJSON struct {
-	Speed int `json:"speed"`
+	Speed float64 `json:"speed"`
 
 	AllowX   bool   `json:"allowX"`
 	LeftKey  string `json:"leftKey,omitempty"`
@@ -55,10 +55,39 @@ func NewBaseInputMovement(inputMapping *input.InputMapping) *InputMovement {
 	}
 }
 
-func NewInputMovement(inputMapping *input.InputMapping, speed int) *InputMovement {
+func NewInputMovement(inputMapping *input.InputMapping, speed float64) *InputMovement {
 	inputMovement := NewBaseInputMovement(inputMapping)
 	inputMovement.speed = speed
 	return inputMovement
+}
+
+// get the configured speed for the component
+func (im *InputMovement) GetSpeed() float64 {
+	return im.speed
+}
+
+// get the directions of movement for input
+// the directions are returned in (x, y)
+func (im *InputMovement) GetDirections(input string) (int, int) {
+	switch input {
+	case im.leftKey:
+		if im.allowX {
+			return -1, 0
+		}
+	case im.rightKey:
+		if im.allowX {
+			return 1, 0
+		}
+	case im.downKey:
+		if im.allowY {
+			return 0, -1
+		}
+	case im.upKey:
+		if im.allowY {
+			return 0, 1
+		}
+	}
+	return 0, 0
 }
 
 // Returns the name of the component

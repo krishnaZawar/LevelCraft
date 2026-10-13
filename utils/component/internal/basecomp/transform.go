@@ -9,23 +9,23 @@ import (
 
 const (
 	// default value of each attribute for the base transform object
-	defaultTransformValue = 100
+	defaultTransformValue = 100.0
 )
 
 // Transform is used to determine the position and dimension of any object in the game scene
 type Transform struct {
-	x int // x coordinate of the object
-	y int // y coordinate of the object
-	w int // width of the object
-	h int // height of the object
+	x float64 // x coordinate of the object
+	y float64 // y coordinate of the object
+	w float64 // width of the object
+	h float64 // height of the object
 }
 
 // intermediary structure of Transform used for marshalling and unmarshalling component details
 type transformJSON struct {
-	X int `json:"x"`
-	Y int `json:"y"`
-	W int `json:"w"`
-	H int `json:"h"`
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+	W float64 `json:"w"`
+	H float64 `json:"h"`
 }
 
 // internal function used to register the base component copy with the componentRegistry
@@ -38,7 +38,7 @@ func NewBaseTransform() *Transform {
 	}
 }
 
-func NewTransform(x int, y int, w int, h int) *Transform {
+func NewTransform(x float64, y float64, w float64, h float64) *Transform {
 	transform := NewBaseTransform()
 	transform.UpdatePosition(x, y)
 	transform.UpdateDimension(w, h)
@@ -47,26 +47,26 @@ func NewTransform(x int, y int, w int, h int) *Transform {
 
 // Returns the position of the object
 //
-// Return type is (int, int) indicating (x coordinate, y coordinate)
-func (t *Transform) GetPosition() (int, int) {
+// Return type is (float, float) indicating (x coordinate, y coordinate)
+func (t *Transform) GetPosition() (float64, float64) {
 	return t.x, t.y
 }
 
 // Returns the dimension of the object
 //
-// Return type is (int, int) indicating (width, height)
-func (t *Transform) GetDimension() (int, int) {
+// Return type is (float, float) indicating (width, height)
+func (t *Transform) GetDimension() (float64, float64) {
 	return t.w, t.h
 }
 
 // Updates the position of the object
-func (t *Transform) UpdatePosition(x int, y int) {
+func (t *Transform) UpdatePosition(x float64, y float64) {
 	t.x = x
 	t.y = y
 }
 
 // Updates the dimension of the object
-func (t *Transform) UpdateDimension(w int, h int) {
+func (t *Transform) UpdateDimension(w float64, h float64) {
 	t.w = w
 	t.h = h
 }

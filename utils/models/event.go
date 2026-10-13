@@ -21,5 +21,5 @@ type EventResponse struct {
 // EventHandler is used to handle the corresponding event that occurred
 type EventHandler interface {
 	// Holds the actual logic on what happens when the event occurs
-	Handle(Event) *EventResponse
+	Handle(Event, float64) *EventResponse
 }
