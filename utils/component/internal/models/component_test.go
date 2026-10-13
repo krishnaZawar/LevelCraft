@@ -52,12 +52,17 @@ func Test_RegisterAndFetch(t *testing.T) {
 				return false
 			},
 		}
+
+		compFactory = func() Component {
+			return comp
+		}
 	)
 
-	compRegistry.Register(componentName, comp)
+	compRegistry.Register(componentName, compFactory)
 
-	component, ok := compRegistry.GetComponent(componentName)
-
+	factory, ok := compRegistry.GetComponent(componentName)
 	assert.Equal(t, true, ok)
+
+	component := factory()
 	assert.Equal(t, comp, component)
 }
