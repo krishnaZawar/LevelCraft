@@ -33,3 +33,8 @@ func (r *Registry[K, V]) GetValue(key K) (V, bool) {
 	val, ok := r.items[key]
 	return val, ok
 }
+
+// Returns the size of the registry
+func (r *Registry[K, V]) Size() int {
+	return len(r.items)
+}

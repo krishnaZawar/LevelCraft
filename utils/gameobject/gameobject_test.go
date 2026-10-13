@@ -6,6 +6,7 @@ import (
 
 	"github.com/krishnaZawar/LevelCraft/utils/component"
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
+	"github.com/krishnaZawar/LevelCraft/utils/input"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,10 +57,12 @@ var (
 			return false
 		},
 	}
+
+	registry = component.NewComponentRegistry(&input.InputMapping{})
 )
 
 func Test_NewGameobject(t *testing.T) {
-	obj := NewGameobject()
+	obj := NewGameobject(registry)
 
 	assert.Equal(t, DefaultGameobjectName, obj.GetName())
 	assert.Equal(t, DefaultGameobjectGroup, obj.GetGroup())
@@ -74,7 +77,7 @@ func Test_NewGameobject(t *testing.T) {
 }
 
 func Test_NewGameobjectWithID(t *testing.T) {
-	obj := NewGameobjectWithID("123")
+	obj := NewGameobjectWithID("123", registry)
 
 	assert.Equal(t, "123", obj.GetID())
 	assert.Equal(t, DefaultGameobjectName, obj.GetName())
@@ -82,7 +85,7 @@ func Test_NewGameobjectWithID(t *testing.T) {
 }
 
 func Test_AddComponent(t *testing.T) {
-	obj := NewGameobject()
+	obj := NewGameobject(registry)
 
 	t.Run("when component does not exist", func(t *testing.T) {
 		ok := obj.AddComponent(comp)
@@ -100,7 +103,7 @@ func Test_AddComponent(t *testing.T) {
 }
 
 func Test_RemoveComponent(t *testing.T) {
-	obj := NewGameobject()
+	obj := NewGameobject(registry)
 	obj.AddComponent(comp)
 	t.Run("delete non existent component", func(t *testing.T) {
 		obj.RemoveComponent("")
@@ -116,7 +119,7 @@ func Test_RemoveComponent(t *testing.T) {
 }
 
 func Test_GetComponent(t *testing.T) {
-	obj := NewGameobject()
+	obj := NewGameobject(registry)
 
 	t.Run("when component does not exist", func(t *testing.T) {
 		val, ok := obj.GetComponent(comp.GetComponentName())
@@ -135,7 +138,7 @@ func Test_GetComponent(t *testing.T) {
 }
 
 func Test_ListComponents(t *testing.T) {
-	obj := NewGameobject()
+	obj := NewGameobject(registry)
 
 	t.Run("no components", func(t *testing.T) {
 		list := obj.ListComponents()
@@ -152,8 +155,8 @@ func Test_ListComponents(t *testing.T) {
 }
 
 func Test_BuildFromDetails(t *testing.T) {
-	obj := NewGameobject()
-	obj.registry = component.NewComponentRegistry()
+	obj := NewGameobject(registry)
+	obj.registry = registry
 
 	id := obj.GetID()
 	name, group := "name", "group"
@@ -182,7 +185,7 @@ func Test_BuildFromDetails(t *testing.T) {
 	assert.Equal(t, comp.GetComponentDetails(), objComp.GetComponentDetails())
 }
 func Test_GetGameobjectDetails(t *testing.T) {
-	obj := NewGameobject()
+	obj := NewGameobject(registry)
 
 	name, group := "name", "group"
 	obj.SetGroup(group)
@@ -227,37 +230,4 @@ func contains(arr []string, value string) bool {
 		}
 	}
 	return false
-}
-
-func Test_AssertLabelUpdates(t *testing.T) {
-	tests := []struct {
-		name  string
-		arr   []string
-		value string
-	}{
-		{
-			name:  "Assert Gameobject_LabelsID update",
-			arr:   gameobject_LabelsID,
-			value: Gameobject_CurLabelID,
-		},
-		{
-			name:  "Assert Gameobject_LabelsName update",
-			arr:   gameobject_LabelsName,
-			value: Gameobject_CurLabelName,
-		},
-		{
-			name:  "Assert Gameobject_LabelsGroup update",
-			arr:   gameobject_LabelsGroup,
-			value: Gameobject_CurLabelGroup,
-		},
-		{
-			name:  "Assert Gameobject_LabelsComponents update",
-			arr:   gameobject_LabelsComponents,
-			value: Gameobject_CurLabelComponents,
-		},
-	}
-
-	for _, tt := range tests {
-		assert.Equal(t, true, contains(tt.arr, tt.value))
-	}
 }

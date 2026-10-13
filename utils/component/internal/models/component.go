@@ -54,3 +54,8 @@ func (cr *ComponentRegistry) GetComponent(name string) (Component, bool) {
 	comp, ok := cr.registry.GetValue(name)
 	return comp, ok
 }
+
+// returns the size of the mapping of the registry
+func (cr *ComponentRegistry) Size() int {
+	return cr.registry.Size()
+}

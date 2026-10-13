@@ -6,11 +6,16 @@ import (
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/basecomp"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/models"
+	"github.com/krishnaZawar/LevelCraft/utils/component/internal/movement"
+	"github.com/krishnaZawar/LevelCraft/utils/input"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_NewComponentRegistry(t *testing.T) {
-	compRegistry := NewComponentRegistry()
+	mapping := &input.InputMapping{}
+	compRegistry := NewComponentRegistry(mapping)
+
+	assert.Equal(t, 3, compRegistry.Size())
 
 	var expected models.Component
 	comp, ok := compRegistry.GetComponent(base.ComponentName_Transform)
@@ -20,6 +25,11 @@ func Test_NewComponentRegistry(t *testing.T) {
 
 	comp, ok = compRegistry.GetComponent(base.ComponentName_Color)
 	expected = basecomp.NewBaseColor()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, expected, comp)
+
+	comp, ok = compRegistry.GetComponent(base.ComponentName_InputMovement)
+	expected = movement.NewBaseInputMovement(mapping)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, expected, comp)
 }
