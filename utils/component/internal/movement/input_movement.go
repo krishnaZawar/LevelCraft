@@ -80,11 +80,11 @@ func (im *InputMovement) GetDirections(input string) (int, int) {
 		}
 	case im.downKey:
 		if im.allowY {
-			return 0, -1
+			return 0, 1
 		}
 	case im.upKey:
 		if im.allowY {
-			return 0, 1
+			return 0, -1
 		}
 	}
 	return 0, 0
