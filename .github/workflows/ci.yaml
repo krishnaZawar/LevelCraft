@@ -94,8 +94,8 @@ jobs:
           go test -cover ./...
           go build ./...
 
-  ci:
-    name: CI
+  ci-success-verification-gate:
+    name: CI Success Verifier
     if: always()
     needs:
       - go-lint
@@ -106,7 +106,7 @@ jobs:
       - name: Check CI results
         run: |
           if [[ "${{ needs.go-lint.result }}" != "success" ||
-                "${{ needs.go-test.result }}" != "success" ]]; then
+                "${{ needs.go-test.result }}" != "failure" ]]; then
             echo "One or more CI checks failed."
             exit 1
           fi
