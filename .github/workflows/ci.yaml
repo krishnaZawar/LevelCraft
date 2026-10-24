@@ -9,8 +9,8 @@ env:
   GOLANGCI_LINT_VERSION: "v2.14.0"
 
 jobs:
-  lint:
-    name: Lint - ${{ matrix.module.name }}
+  go-lint:
+    name: ${{ matrix.module.name }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -56,8 +56,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  test:
-    name: Test - ${{ matrix.module.name }}
+  go-test:
+    name: ${{ matrix.module.name }}
     runs-on: ubuntu-latest
 
     strategy:
