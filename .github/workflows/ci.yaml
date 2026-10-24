@@ -106,7 +106,7 @@ jobs:
       - name: Check CI results
         run: |
           if [[ "${{ needs.go-lint.result }}" != "success" ||
-                "${{ needs.go-test.result }}" != "failure" ]]; then
+                "${{ needs.go-test.result }}" != "success" ]]; then
             echo "One or more CI checks failed."
             exit 1
           fi
