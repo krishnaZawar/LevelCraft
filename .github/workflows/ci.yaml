@@ -9,22 +9,22 @@ env:
   GOLANGCI_LINT_VERSION: "v2.14.0"
 
 jobs:
-  go-services:
-    name: ${{ matrix.module.name }}
+  lint:
+    name: Lint - ${{ matrix.module.name }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         module:
-        - path: builder/backend
-          name: builder-backend
-        - path: editor/backend
-          name: editor-backend
-        - path: orchestrator
-          name: orchestrator
-        - path: utils
-          name: utils
+          - path: builder/backend
+            name: builder-backend
+          - path: editor/backend
+            name: editor-backend
+          - path: orchestrator
+            name: orchestrator
+          - path: utils
+            name: utils
 
     steps:
       - name: Cloning Repository
@@ -51,11 +51,38 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          # the echo job piped with sed allows the workflow to normalize the names for upload
-          # like builder/backend would become builder-backend, the former throws error while the latter does not
           name: golangci-lint-report-${{ matrix.module.name }}
           path: ${{ matrix.module.path }}/lint-results/
           if-no-files-found: ignore
+          retention-days: 7
+
+  test:
+    name: Test - ${{ matrix.module.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - path: builder/backend
+            name: builder-backend
+          - path: editor/backend
+            name: editor-backend
+          - path: orchestrator
+            name: orchestrator
+          - path: utils
+            name: utils
+
+    steps:
+      - name: Cloning Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: '**/go.sum'
 
       - name: Test
         working-directory: ${{ matrix.module.path }}
