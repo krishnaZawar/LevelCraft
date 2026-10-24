@@ -1,11 +1,30 @@
 name: LevelCraft CI
 
 on:
-  push
+  push:
+  workflow_dispatch:
+
+env:
+  GO_VERSION: "1.26.1"
+  GOLANGCI_LINT_VERSION: "v2.14.0"
 
 jobs:
-  lint-go-services:
+  go-lint:
+    name: ${{ matrix.module.name }}
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - path: builder/backend
+            name: builder-backend
+          - path: editor/backend
+            name: editor-backend
+          - path: orchestrator
+            name: orchestrator
+          - path: utils
+            name: utils
 
     steps:
       - name: Cloning Repository
@@ -14,43 +33,45 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.26.1"
+          go-version: ${{ env.GO_VERSION }}
           cache: true
+          cache-dependency-path: '**/go.sum'
 
-      - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
+      - name: Lint
+        id: lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          working-directory: ${{ matrix.module.path }}
+          args: >-
+            --output.text.path=stdout
+            --output.json.path=lint-results/report.json
 
-      - name: Run golangci-lint
-        run: |
-          set -euo pipefail
-          lint_failed=0
-          for mod in $(find . -name go.mod); do
-            dir=$(dirname "$mod")
-            report=$(echo "$dir" | sed 's#^\./##; s#/#-#g')
-            echo "=================================="
-            echo "Linting $dir"
-            echo "=================================="
-            (
-              cd "$dir"
-              golangci-lint run \
-                --output.text.path=stdout \
-                  --output.json.path="$GITHUB_WORKSPACE/lint-results/${report}.json"
-            ) || lint_failed=1
-          done
-          exit "${lint_failed}"
-
-      - name: Upload lint reports
+      - name: Upload lint results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: golangci-lint-reports
-          path: lint-results/
+          name: golangci-lint-report-${{ matrix.module.name }}
+          path: ${{ matrix.module.path }}/lint-results/
+          if-no-files-found: ignore
           retention-days: 7
 
-  test-go-services:
+  go-test:
+    name: ${{ matrix.module.name }}
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
+      matrix:
+        module:
+          - path: builder/backend
+            name: builder-backend
+          - path: editor/backend
+            name: editor-backend
+          - path: orchestrator
+            name: orchestrator
+          - path: utils
+            name: utils
 
     steps:
       - name: Cloning Repository
@@ -59,22 +80,35 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.26.1"
+          go-version: ${{ env.GO_VERSION }}
           cache: true
+          cache-dependency-path: '**/go.sum'
 
-      - name: Test Go modules
+      - name: Test
+        working-directory: ${{ matrix.module.path }}
         shell: bash
         run: |
           set -euo pipefail
-          for mod in $(find . -name go.mod); do
-            dir=$(dirname "$mod")
-            echo "=================================="
-            echo "Testing $dir"
-            echo "=================================="
-            (
-              cd "$dir"
-              go vet ./...
-              go test -cover ./...
-              go build ./...
-            )
-          done
+
+          go vet ./...
+          go test -cover ./...
+          go build ./...
+
+  ci-success-verification-gate:
+    name: CI Success Verifier
+    if: always()
+    needs:
+      - go-lint
+      - go-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check CI results
+        run: |
+          if [[ "${{ needs.go-lint.result }}" != "success" ||
+                "${{ needs.go-test.result }}" != "success" ]]; then
+            echo "One or more CI checks failed."
+            exit 1
+          fi
+
+          echo "All CI checks passed."
