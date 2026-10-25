@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Group, Layer, Rect, Stage } from 'react-konva'
 import { computeFrameLayout, SCREEN_HEIGHT, SCREEN_WIDTH } from '@/scene/frameLayout'
-import { KEY_CODE_TO_NAME } from '@/scene/keyMapping'
+import { engineKeyName } from '@/scene/inputKeys'
 import { renderScene } from '@/scene/renderScene'
 import { useRuntimeStore } from '@/store/runtimeStore'
 
@@ -30,6 +30,7 @@ function App(): React.JSX.Element {
   const connect = useRuntimeStore((state) => state.connect)
   const sendKeyDown = useRuntimeStore((state) => state.sendKeyDown)
   const sendKeyUp = useRuntimeStore((state) => state.sendKeyUp)
+  const knowsKey = useRuntimeStore((state) => state.knowsKey)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -55,15 +56,17 @@ function App(): React.JSX.Element {
       // OS key-repeat fires keydown repeatedly while held, but the protocol
       // wants exactly one KeyDownCommand per press.
       if (e.repeat) return
-      const keyName = KEY_CODE_TO_NAME[e.code]
-      if (!keyName) return
+      const keyName = engineKeyName(e.code)
+      if (!keyName || !knowsKey(keyName)) return
       heldKeys.current.add(keyName)
       sendKeyDown(keyName)
     }
 
     function handleKeyUp(e: KeyboardEvent): void {
-      const keyName = KEY_CODE_TO_NAME[e.code]
-      if (!keyName) return
+      const keyName = engineKeyName(e.code)
+      // No knowsKey check: a key that was sent down must be released even if
+      // the mapping arrived, or changed, in between.
+      if (!keyName || !heldKeys.current.has(keyName)) return
       heldKeys.current.delete(keyName)
       sendKeyUp(keyName)
     }
@@ -84,7 +87,7 @@ function App(): React.JSX.Element {
       window.removeEventListener('blur', handleBlur)
       handleBlur()
     }
-  }, [sendKeyDown, sendKeyUp])
+  }, [sendKeyDown, sendKeyUp, knowsKey])
 
   const hasSize = size.width > 0 && size.height > 0
   const { scale, offsetX, offsetY } = computeFrameLayout(size.width, size.height)

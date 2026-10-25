@@ -1,11 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { LevelCraftBuilderApi } from '../shared/api'
+import { type LevelCraftBuilderApi } from '../shared/api'
 
 const api: LevelCraftBuilderApi = {
   platform: process.platform,
   backend: {
-    getBaseUrl: () => ipcRenderer.sendSync('backend:getBaseUrlSync')
+    getBaseUrl: (): string => ipcRenderer.sendSync('backend:getBaseUrlSync') as string
   },
   window: {
     close: () => ipcRenderer.send('window:close')
@@ -20,8 +20,8 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore (define in dts)
+  // @ts-expect-error — defined in index.d.ts, not on the real window type
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
+  // @ts-expect-error — defined in index.d.ts, not on the real window type
   window.api = api
 }

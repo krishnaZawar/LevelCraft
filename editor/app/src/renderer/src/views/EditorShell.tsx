@@ -40,8 +40,8 @@ import { renderGrid, renderScene, SELECTED_STROKE } from '@/scene/renderScene'
 import { componentNamesInOrder, useEditorStore } from '@/store/editorStore'
 import { CardBody } from '@/cards/CardBody'
 import { useProjectStore } from '@/store/projectStore'
-import { RunStatus, useRunStore } from '@/store/runStore'
-import { ProjectSummary } from '../../../shared/project'
+import { type RunStatus, useRunStore } from '@/store/runStore'
+import { type ProjectSummary } from '../../../shared/project'
 
 const FRAME_FILL = 'oklch(0.145 0 0)'
 // A solid white edge, so the game screen reads as a definite boundary on an
@@ -330,8 +330,8 @@ function AttributesPanel(): React.JSX.Element {
   const [draggedComponent, setDraggedComponent] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchAvailableComponents()
-    fetchInputKeys()
+    void fetchAvailableComponents()
+    void fetchInputKeys()
   }, [fetchAvailableComponents, fetchInputKeys])
 
   const selected = selectedObjectId ? gameObjects[selectedObjectId] : null
@@ -621,7 +621,11 @@ function Workspace(): React.JSX.Element {
   function handleDragEnd(objectId: string, x: number, y: number): void {
     const transform = gameObjects[objectId]?.components.Transform
     if (!transform) return
-    updateComponent(objectId, 'Transform', { ...transform, x: Math.round(x), y: Math.round(y) })
+    void updateComponent(objectId, 'Transform', {
+      ...transform,
+      x: Math.round(x),
+      y: Math.round(y)
+    })
   }
 
   function handleTransformEnd(objectId: string, node: Konva.Node): void {
@@ -642,7 +646,7 @@ function Workspace(): React.JSX.Element {
     // shape. setAttrs applies all of them atomically in the same redraw.
     node.setAttrs({ x, y, width, height, scaleX: 1, scaleY: 1 })
 
-    updateComponent(objectId, 'Transform', { ...transform, x, y, w: width, h: height })
+    void updateComponent(objectId, 'Transform', { ...transform, x, y, w: width, h: height })
   }
 
   function handleStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>): void {
@@ -768,7 +772,7 @@ function EditorShell(): React.JSX.Element {
   const fetchGameState = useEditorStore((state) => state.fetchGameState)
 
   useEffect(() => {
-    fetchGameState()
+    void fetchGameState()
   }, [fetchGameState])
 
   return (

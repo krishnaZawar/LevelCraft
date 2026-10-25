@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { toast } from 'sonner'
-import { ProjectSummary } from '../../../shared/project'
+import { type ProjectSummary } from '../../../shared/project'
 import { saveGame } from '../api/gameApi'
 import { getGameStatus, runGame, stopGame } from '../api/orchestratorApi'
 
@@ -58,7 +58,9 @@ export const useRunStore = create<RunStoreState>((set, get) => ({
     set({ status: 'running' })
 
     stopPolling()
-    pollTimer = setInterval(async () => {
+    // setInterval expects a void callback, so the async work is kicked off
+    // inside it rather than handed to it.
+    const poll = async (): Promise<void> => {
       // Only 'running' is worth asking about; stop() knows the answer.
       if (get().status !== 'running') return
       try {
@@ -71,7 +73,9 @@ export const useRunStore = create<RunStoreState>((set, get) => ({
       stopPolling()
       await clearTempScene()
       set({ status: 'idle' })
-    }, STATUS_POLL_INTERVAL_MS)
+    }
+
+    pollTimer = setInterval(() => void poll(), STATUS_POLL_INTERVAL_MS)
   },
 
   stop: async () => {

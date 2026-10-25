@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { ProjectSummary } from '../../../shared/project'
+import { type ProjectSummary } from '../../../shared/project'
 import { isBackendReachable, loadGame } from '../api/gameApi'
 
 interface ProjectStoreState {

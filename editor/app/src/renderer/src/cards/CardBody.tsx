@@ -32,7 +32,9 @@ function renderField(
   // always start from what the component holds rather than a stale draft. The
   // slider syncs itself instead, because remounting it would drop focus
   // mid-adjustment.
-  const key = config.input === 'slider' ? config.field : `${config.field}:${String(value)}`
+  // JSON rather than String(): a value can be any shape, and String() on an
+  // object yields "[object Object]" for every one of them.
+  const key = config.input === 'slider' ? config.field : `${config.field}:${JSON.stringify(value)}`
   const commit = (next: unknown): void => onCommit({ [config.field]: next })
 
   switch (config.input) {
@@ -64,7 +66,14 @@ function renderField(
     case 'slider':
       return <SliderField key={key} config={config} value={Number(value ?? 0)} onCommit={commit} />
     case 'text':
-      return <TextField key={key} config={config} value={String(value ?? '')} onCommit={commit} />
+      return (
+        <TextField
+          key={key}
+          config={config}
+          value={typeof value === 'string' ? value : ''}
+          onCommit={commit}
+        />
+      )
     case 'number':
       return <NumberField key={key} config={config} value={Number(value ?? 0)} onCommit={commit} />
   }

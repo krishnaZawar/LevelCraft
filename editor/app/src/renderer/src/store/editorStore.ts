@@ -11,7 +11,7 @@ import {
   getComponents,
   getInputKeys,
   getGameState,
-  GameState
+  type GameState
 } from '../api/gameApi'
 
 // Keeps the Hierarchy's manual drag-reorder in sync with whatever ids

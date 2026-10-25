@@ -7,6 +7,7 @@ on:
 env:
   GO_VERSION: "1.26.1"
   GOLANGCI_LINT_VERSION: "v2.14.0"
+  NODE_VERSION: "22"
 
 jobs:
   go-lint:
@@ -94,19 +95,69 @@ jobs:
           go test -cover ./...
           go build ./...
 
+  frontend-lint:
+    name: ${{ matrix.app.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - path: editor/app
+            name: editor-app
+          - path: builder/app
+            name: builder-app
+
+    steps:
+      - name: Cloning Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ matrix.app.path }}/package-lock.json
+
+      # The shared config is linked as a file: dependency, so Node resolves its
+      # plugin imports from eslint-config/node_modules — installing only in the
+      # app would leave ESLint unable to load them.
+      - name: Install shared lint config
+        working-directory: eslint-config
+        run: npm ci
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.app.path }}
+        run: npm ci
+
+      - name: Check formatting
+        working-directory: ${{ matrix.app.path }}
+        run: npm run format:check
+
+      - name: Typecheck
+        working-directory: ${{ matrix.app.path }}
+        run: npm run typecheck
+
+      - name: Lint
+        working-directory: ${{ matrix.app.path }}
+        # Warnings fail too: advisory while you work, blocking before merge.
+        run: npx eslint . --max-warnings 0
+
   ci-success-verification-gate:
     name: CI Success Verifier
     if: always()
     needs:
       - go-lint
       - go-test
+      - frontend-lint
     runs-on: ubuntu-latest
 
     steps:
       - name: Check CI results
         run: |
           if [[ "${{ needs.go-lint.result }}" != "success" ||
-                "${{ needs.go-test.result }}" != "success" ]]; then
+                "${{ needs.go-test.result }}" != "success" ||
+                "${{ needs.frontend-lint.result }}" != "success" ]]; then
             echo "One or more CI checks failed."
             exit 1
           fi

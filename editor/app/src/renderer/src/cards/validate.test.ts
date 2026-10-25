@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
-import { CardConfigError, validateCardConfig } from './validate'
+import { type CardConfigError, validateCardConfig } from './validate'
 
 function validate(yaml: string): ReturnType<typeof validateCardConfig> {
   return validateCardConfig(parse(yaml))
