@@ -1,0 +1,29 @@
+{
+  "name": "@levelcraft/eslint-config",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared ESLint baseline for every LevelCraft frontend app.",
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs",
+    "./prettier": "./prettier.json"
+  },
+  "files": [
+    "index.mjs",
+    "prettier.json"
+  ],
+  "dependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "eslint-plugin-sonarjs": "^3.0.5",
+    "globals": "^16.5.0",
+    "typescript-eslint": "^8.46.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "^5.0.0"
+  }
+}

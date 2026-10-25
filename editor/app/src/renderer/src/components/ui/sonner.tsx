@@ -1,4 +1,4 @@
-import { Toaster as Sonner, ToasterProps } from 'sonner'
+import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
 // Dark-only per Phase 0's theme decision (see docs/client/personality.md) —
 // no light/system branching needed, unlike shadcn's default template.

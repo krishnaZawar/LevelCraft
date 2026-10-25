@@ -60,8 +60,8 @@ export const useRuntimeStore = create<RuntimeStoreState>((set) => ({
       // `msg` is always the literal "inputState" even though `data` is the
       // full scene snapshot, so branching on it would be wrong.
       try {
-        const parsed = JSON.parse(event.data as string)
-        if (parsed?.data) set({ snapshot: toGameState(parsed.data as WireGameObject[]) })
+        const parsed = JSON.parse(event.data as string) as { data?: WireGameObject[] }
+        if (parsed.data) set({ snapshot: toGameState(parsed.data) })
       } catch {
         // Malformed frame — ignored, as the backend does with bad input.
       }
