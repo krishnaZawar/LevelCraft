@@ -1,0 +1,63 @@
+# How each component's card is laid out in the Attributes panel.
+#
+# The generator reads this at startup and builds the cards from it, so adding
+# or rearranging a component's inputs is an edit here rather than a change to
+# EditorShell. See docs/editor/component-card-config.md for the language.
+#
+# A component with no entry here still renders: the generator falls back to the
+# fields the component actually carries, picking a widget from each value's
+# type. So a new component is usable immediately and laid out deliberately
+# later.
+
+version: 1
+
+components:
+  Transform:
+    description: Position and size in world space.
+    rows:
+      - fields:
+          - { field: x, label: X, input: number }
+          - { field: y, label: Y, input: number }
+      - fields:
+          - { field: w, label: W, input: number, min: 1 }
+          - { field: h, label: H, input: number, min: 1 }
+
+  Color:
+    description: Fill colour, 0-255 per channel.
+    rows:
+      - fields:
+          - { field: r, label: R, input: slider, min: 0, max: 255 }
+          - { field: g, label: G, input: slider, min: 0, max: 255 }
+      - fields:
+          - { field: b, label: B, input: slider, min: 0, max: 255 }
+          - { field: a, label: A, input: slider, min: 0, max: 255 }
+
+  InputMovement:
+    description: Move the object with the keyboard.
+    rows:
+      - fields:
+          - { field: speed, label: Speed, input: number, min: 0 }
+
+      - fields:
+          # The engine validates the flag and its keys together, so switching
+          # the axis on has to name keys in the same update.
+          - field: allowX
+            label: Move horizontally
+            input: checkbox
+            enables: { leftKey: KEY_A, rightKey: KEY_D }
+      # The engine clears these keys whenever the axis is off, so showing them
+      # then would offer an edit that cannot stick.
+      - visibleIf: { field: allowX, equals: true }
+        fields:
+          - { field: leftKey, label: Left, input: select, optionsFrom: inputKeys }
+          - { field: rightKey, label: Right, input: select, optionsFrom: inputKeys }
+
+      - fields:
+          - field: allowY
+            label: Move vertically
+            input: checkbox
+            enables: { upKey: KEY_W, downKey: KEY_S }
+      - visibleIf: { field: allowY, equals: true }
+        fields:
+          - { field: upKey, label: Up, input: select, optionsFrom: inputKeys }
+          - { field: downKey, label: Down, input: select, optionsFrom: inputKeys }
