@@ -38,24 +38,10 @@ import { cn } from '@/lib/utils'
 import { computeFrameLayout, SCREEN_HEIGHT, SCREEN_WIDTH } from '@/scene/frameLayout'
 import { renderGrid, renderScene, SELECTED_STROKE } from '@/scene/renderScene'
 import { componentNamesInOrder, useEditorStore } from '@/store/editorStore'
+import { CardBody } from '@/cards/CardBody'
 import { useProjectStore } from '@/store/projectStore'
 import { type RunStatus, useRunStore } from '@/store/runStore'
 import { type ProjectSummary } from '../../../shared/project'
-
-// Keeps field order stable and predictable instead of relying on JSON key
-// order. Falls back to whatever keys the component actually has, so a
-// future component type still renders without needing an entry here.
-const COMPONENT_FIELD_ORDER: Record<string, string[]> = {
-  Transform: ['x', 'y', 'w', 'h'],
-  Color: ['r', 'g', 'b', 'a']
-}
-
-// Matches utils/component/base/const.go's ColorValueRangeMin/Max — clamped
-// client-side so an out-of-range value never reaches the backend at all,
-// rather than round-tripping to find out it gets rejected.
-const COMPONENT_FIELD_RANGE: Record<string, Record<string, [number, number]>> = {
-  Color: { r: [0, 255], g: [0, 255], b: [0, 255], a: [0, 255] }
-}
 
 const FRAME_FILL = 'oklch(0.145 0 0)'
 // A solid white edge, so the game screen reads as a definite boundary on an
@@ -206,58 +192,6 @@ function HierarchyPanel(): React.JSX.Element {
   )
 }
 
-function NumberField({
-  label,
-  value,
-  onCommit,
-  range
-}: {
-  label: string
-  value: number
-  onCommit: (value: number) => void
-  range?: [number, number]
-}): React.JSX.Element {
-  // Re-initializes from `value` whenever it changes externally: the parent
-  // remounts this via a `value`-derived key instead of syncing with an effect.
-  const [text, setText] = useState(String(value))
-  const isInvalid = text.trim() !== '' && !Number.isFinite(Number(text))
-
-  function commit(): void {
-    let parsed = Number(text)
-    if (!Number.isFinite(parsed)) {
-      setText(String(value))
-      return
-    }
-    // Clamp rather than reject outright — matches how Unity/most inspectors
-    // handle out-of-range numeric input instead of silently sending it
-    // through and finding out the backend rejected it.
-    if (range) {
-      parsed = Math.min(range[1], Math.max(range[0], Math.round(parsed)))
-    }
-    if (parsed !== value) {
-      onCommit(parsed)
-    }
-    setText(String(parsed))
-  }
-
-  return (
-    <label className="flex items-center gap-1.5 text-xs">
-      <span className="text-muted-foreground w-3 shrink-0 uppercase">{label}</span>
-      <Input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
-        }}
-        inputMode="numeric"
-        aria-invalid={isInvalid}
-        className="h-7 font-mono text-xs tabular-nums"
-      />
-    </label>
-  )
-}
-
 function TextField({
   label,
   value,
@@ -324,8 +258,6 @@ function ComponentCard({
   const isCollapsed = useEditorStore((state) => state.collapsedComponents.includes(name))
   const toggleCollapsed = useEditorStore((state) => state.toggleComponentCollapsed)
 
-  const fields = COMPONENT_FIELD_ORDER[name] ?? Object.keys(details)
-
   return (
     <div
       draggable
@@ -374,20 +306,11 @@ function ComponentCard({
       </div>
 
       {!isCollapsed && (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 px-2.5 pt-0.5 pb-2.5">
-          {fields.map((field) => {
-            const value = Number(details[field] ?? 0)
-            return (
-              <NumberField
-                key={`${objectId}:${field}:${value}`}
-                label={field}
-                value={value}
-                range={COMPONENT_FIELD_RANGE[name]?.[field]}
-                onCommit={(next) => updateComponent(objectId, name, { ...details, [field]: next })}
-              />
-            )
-          })}
-        </div>
+        <CardBody
+          componentName={name}
+          details={details}
+          onCommit={(patch) => updateComponent(objectId, name, { ...details, ...patch })}
+        />
       )}
     </div>
   )
@@ -399,6 +322,7 @@ function AttributesPanel(): React.JSX.Element {
   const availableComponents = useEditorStore((state) => state.availableComponents)
   const fetchAvailableComponents = useEditorStore((state) => state.fetchAvailableComponents)
   const addComponent = useEditorStore((state) => state.addComponent)
+  const fetchInputKeys = useEditorStore((state) => state.fetchInputKeys)
   const componentOrder = useEditorStore((state) => state.componentOrder)
   const reorderComponents = useEditorStore((state) => state.reorderComponents)
   const updateMetadata = useEditorStore((state) => state.updateGameobjectMetadata)
@@ -407,7 +331,8 @@ function AttributesPanel(): React.JSX.Element {
 
   useEffect(() => {
     void fetchAvailableComponents()
-  }, [fetchAvailableComponents])
+    void fetchInputKeys()
+  }, [fetchAvailableComponents, fetchInputKeys])
 
   const selected = selectedObjectId ? gameObjects[selectedObjectId] : null
 
