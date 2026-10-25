@@ -22,6 +22,7 @@ func GameLoop() {
 	gamestateManager := gamestatemanager.Get()
 
 	evtGeneratorRegistry := eventgenerator.GetEventGeneratorRegistry()
+	frameEvtGeneratorRegistry := eventgenerator.GetFrameEventGeneratorRegistry()
 
 	const FPS = 60
 	frameStep := 1.0 / FPS
@@ -65,6 +66,7 @@ func GameLoop() {
 							GameobjectID: gameobject.GetID(),
 							Component:    comp,
 							InputKey:     input,
+							DeltaTime:    dt,
 						}
 						events, err := generator.GenerateEvents(eventCtx)
 						if err != nil {
@@ -75,6 +77,29 @@ func GameLoop() {
 							evtQueue.Ingest(event)
 						}
 					}
+				}
+			}
+		}
+
+		// run the components that move on their own, with no input behind them
+		for _, gameobject := range gameobjects {
+			for _, comp := range gameobject.ListComponents() {
+				generator, found := frameEvtGeneratorRegistry.GetValue(comp.GetComponentName())
+				if !found {
+					continue
+				}
+				eventCtx := eventgenerator.EventGeneratorCtx{
+					GameobjectID: gameobject.GetID(),
+					Component:    comp,
+					DeltaTime:    dt,
+				}
+				events, err := generator.GenerateEvents(eventCtx)
+				if err != nil {
+					ls.ErrorWith(err).Msgf("failed to generate frame events from component %s for ctx %+v", comp.GetComponentName(), eventCtx)
+					continue
+				}
+				for _, event := range events {
+					evtQueue.Ingest(event)
 				}
 			}
 		}
