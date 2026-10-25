@@ -1,18 +1,9 @@
-package component
+package models
 
 import (
 	"encoding/json"
 
-	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
-)
-
-// holds the list of all the components that will be used by the editor to display all the components available
-var (
-	ComponentList = []string{
-		base.ComponentName_Transform,
-		base.ComponentName_Color,
-	}
 )
 
 // Component is a modular unit of data and functions attached to the object
@@ -29,6 +20,9 @@ type Component interface {
 
 	// Builds the component from the data it is provided
 	BuildFromDetails(json.RawMessage) error
+
+	// defines whether a component can interact with given user input or not
+	HandlesInput(string) bool
 }
 
 // holds the component details structure to type-safe storing of components with heterogeneous attributes
@@ -37,35 +31,34 @@ type ComponentDetails struct {
 	Data json.RawMessage `json:"data"` // holds the marshalled data of the component
 }
 
+// the factory function that is used to create and serve the component
+type ComponentFactory func() Component
+
 // Creates a new component based on the component name
 // returns a copy of the base component
 type ComponentRegistry struct {
 	// name -> component mapping
-	registry *helper.Registry[string, Component]
+	registry *helper.Registry[string, ComponentFactory]
 }
 
-func newComponentRegistry() *ComponentRegistry {
+func NewComponentRegistry() *ComponentRegistry {
 	return &ComponentRegistry{
-		registry: helper.NewRegistry[string, Component](),
+		registry: helper.NewRegistry[string, ComponentFactory](),
 	}
 }
 
-// contains the registry object registered with all the components base copies
-func NewComponentRegistry() *ComponentRegistry {
-	compRegistry := newComponentRegistry()
-	compRegistry.register(base.ComponentName_Transform, newBaseTransform())
-	compRegistry.register(base.ComponentName_Color, newBaseColor())
-
-	return compRegistry
-}
-
 // registers a new component with the registry
-func (cr *ComponentRegistry) register(name string, comp Component) {
-	cr.registry.Register(name, comp)
+func (cr *ComponentRegistry) Register(name string, compFactory ComponentFactory) {
+	cr.registry.Register(name, compFactory)
 }
 
 // fetches the base component for the name
-func (cr *ComponentRegistry) GetComponent(name string) (Component, bool) {
+func (cr *ComponentRegistry) GetComponent(name string) (ComponentFactory, bool) {
 	comp, ok := cr.registry.GetValue(name)
 	return comp, ok
+}
+
+// returns the size of the mapping of the registry
+func (cr *ComponentRegistry) Size() int {
+	return cr.registry.Size()
 }

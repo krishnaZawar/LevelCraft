@@ -14,6 +14,7 @@ import (
 	"github.com/krishnaZawar/LevelCraft/utils/component"
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
+	"github.com/krishnaZawar/LevelCraft/utils/input"
 )
 
 func newTestApp() *fiber.App {
@@ -24,7 +25,7 @@ func newTestApp() *fiber.App {
 
 func seedGameobject(t *testing.T, name string, group string) *gameobject.Gameobject {
 	t.Helper()
-	obj := gameobject.NewGameobject()
+	obj := gameobject.NewGameobject(component.NewComponentRegistry(&input.InputMapping{}))
 	obj.SetName(name)
 	obj.SetGroup(group)
 	gamestatemanager.Get().AddGameobject(obj)
@@ -222,7 +223,7 @@ func Test_DuplicateGameobject(t *testing.T) {
 
 	sourceTransform, _ := source.GetComponent(base.ComponentName_Transform)
 	if x, y := sourceTransform.(*component.Transform).GetPosition(); x != 10 || y != 20 {
-		t.Fatalf("source moved with the clone: got (%d, %d), want (10, 20)", x, y)
+		t.Fatalf("source moved with the clone: got (%f, %f), want (10, 20)", x, y)
 	}
 }
 

@@ -45,29 +45,29 @@ func (cq *CommandQueue) Ingest(req models.CommandRequest) {
 // Return types:
 //   - []Event: all the events that the command should emit
 //   - error : returns error when unable to fetch CommandRequest or the corresponding Factory
-func (cq *CommandQueue) ConsumeCommand() ([]models.Event, error) {
+func (cq *CommandQueue) ConsumeCommand() error {
 	cq.rqMu.Lock()
 	req, ok := cq.requestQueue.Pop()
 	if !ok {
 		cq.rqMu.Unlock()
-		return []models.Event{}, ErrNoCommandRequestsFound
+		return ErrNoCommandRequestsFound
 	}
 	cq.rqMu.Unlock()
 
 	// fetch the factory for the corresponding CommandRequest
 	factory, ok := cq.decoder.GetValue(req.RequestType)
 	if !ok {
-		return []models.Event{}, ErrFactoryNotFound
+		return ErrFactoryNotFound
 	}
 
 	// fetch Command with all the details
 	command, err := factory.NewCommand(req.RequestDetails)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// fetch all the corresponding events to be published from the Command
-	return command.Handle(), nil
+	return command.Handle()
 }
 
 // Length function returns the length of the commandQueue

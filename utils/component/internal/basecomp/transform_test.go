@@ -1,4 +1,4 @@
-package component
+package basecomp
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GetTransform(t *testing.T) {
-	x, y, w, h := 100, 100, 100, 100
+	x, y, w, h := 100.0, 100.0, 100.0, 100.0
 	tr := NewTransform(x, y, w, h)
 
 	actualX, actualY := tr.GetPosition()
@@ -25,7 +25,7 @@ func Test_GetTransform(t *testing.T) {
 func Test_UpdateTransform(t *testing.T) {
 	tr := NewTransform(50, 50, 50, 50)
 
-	x, y, w, h := 100, 100, 100, 100
+	x, y, w, h := 100.0, 100.0, 100.0, 100.0
 
 	tr.UpdatePosition(x, y)
 	tr.UpdateDimension(w, h)
@@ -41,10 +41,10 @@ func Test_UpdateTransform(t *testing.T) {
 }
 
 func Test_MarshalAndUnmarshalTransform(t *testing.T) {
-	x, y, w, h := 100, 120, 140, 160
+	x, y, w, h := 100.0, 120.0, 140.0, 160.0
 	expected := NewTransform(x, y, w, h)
 
-	found := newBaseTransform()
+	found := NewBaseTransform()
 
 	details := expected.GetComponentDetails()
 	err := found.BuildFromDetails(details.Data)
@@ -64,14 +64,14 @@ func Test_UnmarshalTransform(t *testing.T) {
 			"h": 160
 			}`,
 		)
-		comp := newBaseTransform()
+		comp := NewBaseTransform()
 		err := comp.BuildFromDetails(data)
 		assert.Nil(t, err)
 
-		assert.Equal(t, 100, comp.x)
-		assert.Equal(t, 120, comp.y)
-		assert.Equal(t, 140, comp.w)
-		assert.Equal(t, 160, comp.h)
+		assert.Equal(t, 100.0, comp.x)
+		assert.Equal(t, 120.0, comp.y)
+		assert.Equal(t, 140.0, comp.w)
+		assert.Equal(t, 160.0, comp.h)
 	})
 	t.Run("invalid unmarshal", func(t *testing.T) {
 		data := json.RawMessage(
@@ -82,7 +82,7 @@ func Test_UnmarshalTransform(t *testing.T) {
 			"h": 160
 			}`,
 		)
-		comp := newBaseTransform()
+		comp := NewBaseTransform()
 		err := comp.BuildFromDetails(data)
 		assert.NotNil(t, err)
 

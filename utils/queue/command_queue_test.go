@@ -21,13 +21,13 @@ func (mcf *MockCommandFactory) NewCommand(details json.RawMessage) (models.Comma
 
 type MockCommand struct {
 	mockGetCommandName func() string
-	mockHandle         func() []models.Event
+	mockHandle         func() error
 }
 
 func (mc *MockCommand) GetCommandName() string {
 	return mc.mockGetCommandName()
 }
-func (mc *MockCommand) Handle() []models.Event {
+func (mc *MockCommand) Handle() error {
 	return mc.mockHandle()
 }
 
@@ -59,8 +59,8 @@ var (
 		mockGetCommandName: func() string {
 			return command1
 		},
-		mockHandle: func() []models.Event {
-			return []models.Event{e1}
+		mockHandle: func() error {
+			return nil
 		},
 	}
 
@@ -107,9 +107,7 @@ func Test_ConsumeCommand(t *testing.T) {
 	cq := NewCommandQueue(NewTestDecoder())
 
 	t.Run("consume from empty queue", func(t *testing.T) {
-		events, err := cq.ConsumeCommand()
-
-		assert.Equal(t, []models.Event{}, events)
+		err := cq.ConsumeCommand()
 		assert.Equal(t, err, ErrNoCommandRequestsFound)
 	})
 
@@ -119,9 +117,7 @@ func Test_ConsumeCommand(t *testing.T) {
 			RequestDetails: []byte{},
 		}
 		cq.Ingest(invalidReq)
-		events, err := cq.ConsumeCommand()
-
-		assert.Equal(t, []models.Event{}, events)
+		err := cq.ConsumeCommand()
 		assert.Equal(t, err, ErrFactoryNotFound)
 	})
 
@@ -133,12 +129,8 @@ func Test_ConsumeCommand(t *testing.T) {
 
 		cq.Ingest(req)
 
-		events, err := cq.ConsumeCommand()
-
+		err := cq.ConsumeCommand()
 		assert.Nil(t, err)
-
-		expectedEvents := []models.Event{e1}
-		assert.Equal(t, expectedEvents, events)
 	})
 
 	t.Run("test error from factory", func(t *testing.T) {
@@ -152,8 +144,7 @@ func Test_ConsumeCommand(t *testing.T) {
 		}
 		cq.Ingest(req)
 
-		_, err := cq.ConsumeCommand()
-
+		err := cq.ConsumeCommand()
 		assert.NotNil(t, err)
 	})
 }
@@ -206,7 +197,7 @@ func Test_ConcurrentPushPop(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for i := 1; i <= requests; i++ {
-				_, err := cq.ConsumeCommand()
+				err := cq.ConsumeCommand()
 				resMu.Lock()
 				if err != nil {
 					res.Incorrect++

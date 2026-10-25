@@ -18,7 +18,7 @@ type Command interface {
 	GetCommandName() string
 
 	// Handle how the Command should broken down into Events
-	Handle() []Event
+	Handle() error
 }
 
 // CommandFactory holds the implementation to convert the CommandRequest details to the Command of our choice

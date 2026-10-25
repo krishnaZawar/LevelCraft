@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/inputmapping"
 	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/router"
 )
 
@@ -24,9 +25,14 @@ func main() {
 		AllowMethods: "GET,POST,PUT,DELETE",
 	}))
 
+	err := inputmapping.Load()
+	if err != nil {
+		panic(err)
+	}
+
 	router.CreateRoutes(app)
 
-	err := app.Listen(":" + strconv.Itoa(*port))
+	err = app.Listen(":" + strconv.Itoa(*port))
 	if err != nil {
 		panic(err)
 	}

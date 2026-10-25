@@ -1,4 +1,4 @@
-package component
+package basecomp
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ func Test_GetColor(t *testing.T) {
 }
 
 func Test_SetColor(t *testing.T) {
-	color := newBaseColor()
+	color := NewBaseColor()
 
 	r, g, b, a := 100, 100, 100, 100
 
@@ -39,7 +39,7 @@ func Test_MarshalAndUnmarshalColor(t *testing.T) {
 	r, g, b, a := 100, 120, 140, 160
 	expected := NewColor(r, g, b, a)
 
-	found := newBaseColor()
+	found := NewBaseColor()
 
 	details := expected.GetComponentDetails()
 	err := found.BuildFromDetails(details.Data)
@@ -59,7 +59,7 @@ func Test_UnmarshalColor(t *testing.T) {
 	}{
 		{
 			name:     "valid unmarshal",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 100,
@@ -73,7 +73,7 @@ func Test_UnmarshalColor(t *testing.T) {
 		},
 		{
 			name:     "invalid unmarshal",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 100,
@@ -83,11 +83,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "r is below bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": -1,
@@ -97,11 +97,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "r is above bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 256,
@@ -111,11 +111,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "g is below bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 0,
@@ -125,11 +125,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "g is above bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 255,
@@ -139,11 +139,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "b is below bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 0,
@@ -153,11 +153,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "b is above bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 255,
@@ -167,11 +167,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "a is below bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 0,
@@ -181,11 +181,11 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 		{
 			name:     "a is above bounds",
-			baseComp: newBaseColor(),
+			baseComp: NewBaseColor(),
 			data: json.RawMessage(
 				`{
 					"r": 255,
@@ -195,7 +195,7 @@ func Test_UnmarshalColor(t *testing.T) {
 				}`,
 			),
 			expectedErr:   true,
-			expectedColor: newBaseColor(),
+			expectedColor: NewBaseColor(),
 		},
 	}
 

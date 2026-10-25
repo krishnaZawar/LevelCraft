@@ -56,3 +56,13 @@ func Test_GetValue(t *testing.T) {
 		assert.Equal(t, value, val)
 	})
 }
+
+func Test_RegistrySize(t *testing.T) {
+	registry := &Registry[string, string]{}
+
+	assert.Equal(t, 0, registry.Size())
+
+	registry.Register("test-key", "test-value")
+
+	assert.Equal(t, 1, registry.Size())
+}

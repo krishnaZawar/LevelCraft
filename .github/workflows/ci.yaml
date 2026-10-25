@@ -1,90 +1,112 @@
 name: LevelCraft CI
 
 on:
-  push
+  push:
+  workflow_dispatch:
+
+env:
+  GO_VERSION: "1.26.1"
+  GOLANGCI_LINT_VERSION: "v2.14.0"
+  NODE_VERSION: "22"
 
 jobs:
-  lint-go-services:
+  go-lint:
+    name: ${{ matrix.module.name }}
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Cloning Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.26.1"
-          cache: true
-
-      - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
-
-      - name: Run golangci-lint
-        run: |
-          set -euo pipefail
-          lint_failed=0
-          for mod in $(find . -name go.mod); do
-            dir=$(dirname "$mod")
-            report=$(echo "$dir" | sed 's#^\./##; s#/#-#g')
-            echo "=================================="
-            echo "Linting $dir"
-            echo "=================================="
-            (
-              cd "$dir"
-              golangci-lint run \
-                --output.text.path=stdout \
-                  --output.json.path="$GITHUB_WORKSPACE/lint-results/${report}.json"
-            ) || lint_failed=1
-          done
-          exit "${lint_failed}"
-
-      - name: Upload lint reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: golangci-lint-reports
-          path: lint-results/
-          retention-days: 7
-
-  test-go-services:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-
-    steps:
-      - name: Cloning Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.26.1"
-          cache: true
-
-      - name: Test Go modules
-        shell: bash
-        run: |
-          set -euo pipefail
-          for mod in $(find . -name go.mod); do
-            dir=$(dirname "$mod")
-            echo "=================================="
-            echo "Testing $dir"
-            echo "=================================="
-            (
-              cd "$dir"
-              go vet ./...
-              go test -cover ./...
-              go build ./...
-            )
-          done
-
-  lint-frontend-apps:
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        app: [editor/app, builder/app]
+        module:
+          - path: builder/backend
+            name: builder-backend
+          - path: editor/backend
+            name: editor-backend
+          - path: orchestrator
+            name: orchestrator
+          - path: utils
+            name: utils
+
+    steps:
+      - name: Cloning Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: '**/go.sum'
+
+      - name: Lint
+        id: lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          working-directory: ${{ matrix.module.path }}
+          args: >-
+            --output.text.path=stdout
+            --output.json.path=lint-results/report.json
+
+      - name: Upload lint results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golangci-lint-report-${{ matrix.module.name }}
+          path: ${{ matrix.module.path }}/lint-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  go-test:
+    name: ${{ matrix.module.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - path: builder/backend
+            name: builder-backend
+          - path: editor/backend
+            name: editor-backend
+          - path: orchestrator
+            name: orchestrator
+          - path: utils
+            name: utils
+
+    steps:
+      - name: Cloning Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: '**/go.sum'
+
+      - name: Test
+        working-directory: ${{ matrix.module.path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          go vet ./...
+          go test -cover ./...
+          go build ./...
+
+  frontend-lint:
+    name: ${{ matrix.app.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - path: editor/app
+            name: editor-app
+          - path: builder/app
+            name: builder-app
 
     steps:
       - name: Cloning Repository
@@ -93,9 +115,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: ${{ matrix.app }}/package-lock.json
+          cache-dependency-path: ${{ matrix.app.path }}/package-lock.json
 
       # The shared config is linked as a file: dependency, so Node resolves its
       # plugin imports from eslint-config/node_modules — installing only in the
@@ -105,18 +127,39 @@ jobs:
         run: npm ci
 
       - name: Install dependencies
-        working-directory: ${{ matrix.app }}
+        working-directory: ${{ matrix.app.path }}
         run: npm ci
 
       - name: Check formatting
-        working-directory: ${{ matrix.app }}
+        working-directory: ${{ matrix.app.path }}
         run: npm run format:check
 
       - name: Typecheck
-        working-directory: ${{ matrix.app }}
+        working-directory: ${{ matrix.app.path }}
         run: npm run typecheck
 
-      - name: Run ESLint
-        working-directory: ${{ matrix.app }}
-        # Caching is for local runs; CI always lints the whole tree.
+      - name: Lint
+        working-directory: ${{ matrix.app.path }}
+        # Warnings fail too: advisory while you work, blocking before merge.
         run: npx eslint . --max-warnings 0
+
+  ci-success-verification-gate:
+    name: CI Success Verifier
+    if: always()
+    needs:
+      - go-lint
+      - go-test
+      - frontend-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check CI results
+        run: |
+          if [[ "${{ needs.go-lint.result }}" != "success" ||
+                "${{ needs.go-test.result }}" != "success" ||
+                "${{ needs.frontend-lint.result }}" != "success" ]]; then
+            echo "One or more CI checks failed."
+            exit 1
+          fi
+
+          echo "All CI checks passed."

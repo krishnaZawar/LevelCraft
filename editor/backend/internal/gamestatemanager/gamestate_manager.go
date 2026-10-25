@@ -2,14 +2,11 @@ package gamestatemanager
 
 import (
 	"encoding/json"
-	"errors"
 	"sync"
 
+	"github.com/krishnaZawar/LevelCraft/editor/backend/internal/inputmapping"
+	"github.com/krishnaZawar/LevelCraft/utils/component"
 	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
-)
-
-var (
-	ErrExpectedMapStringInterface = errors.New("GamesceneError: Expected Map string interface")
 )
 
 // GameStateManager is a thread safe manager
@@ -81,8 +78,9 @@ func (gsm *GameStateManager) BuildFromDetails(data []byte) error {
 	if err != nil {
 		return err
 	}
+	compRegistry := component.NewComponentRegistry(inputmapping.Get())
 	for _, objData := range scene {
-		obj := gameobject.NewGameobjectWithID(objData.Id)
+		obj := gameobject.NewGameobjectWithID(objData.Id, compRegistry)
 		err := obj.BuildFromDetails(objData)
 		if err != nil {
 			return err

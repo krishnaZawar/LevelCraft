@@ -2,6 +2,7 @@ package gameobject
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/krishnaZawar/LevelCraft/utils/component"
@@ -10,27 +11,11 @@ import (
 var (
 	ErrExpectedString               = errors.New("GameobjectError: Expected string value")
 	ErrComponentsStructureIncorrect = errors.New("GamobjectError: Components structure was incorrect")
-	ErrExpectedMapStringInterface   = errors.New("GameobjectError: Expected map string interface")
-	ErrComponentNotFound            = errors.New("GameobjectError: Component not found")
 	ErrObjectIDCorrupted            = errors.New("GameobjectError: ObjectID was corrupted")
-)
 
-// Used to define the labels used for marshalling and unmarshalling
-// defined as []string to provide backward compatibility in future
-var (
-	gameobject_LabelsID         = []string{"id"}
-	gameobject_LabelsName       = []string{"name"}
-	gameobject_LabelsGroup      = []string{"group"}
-	gameobject_LabelsComponents = []string{"components"}
-)
-
-// current value used for unmarshalling
-// should be added to the labels slice
-const (
-	Gameobject_CurLabelID         = "id"
-	Gameobject_CurLabelName       = "name"
-	Gameobject_CurLabelGroup      = "group"
-	Gameobject_CurLabelComponents = "components"
+	NewErrComponentNotFound = func(compName string) error {
+		return fmt.Errorf("GameobjectError: Component %s not found", compName)
+	}
 )
 
 const (
@@ -59,22 +44,22 @@ type GameobjectDetails struct {
 	Components []component.ComponentDetails `json:"components"`
 }
 
-func NewGameobject() *Gameobject {
+func NewGameobject(registry *component.ComponentRegistry) *Gameobject {
 	obj := &Gameobject{
 		id:         uuid.NewString(),
 		components: make(map[string]component.Component),
-		registry:   component.NewComponentRegistry(),
+		registry:   registry,
 	}
 	obj.SetName(DefaultGameobjectName)
 	obj.SetGroup(DefaultGameobjectGroup)
 	return obj
 }
 
-func NewGameobjectWithID(id string) *Gameobject {
+func NewGameobjectWithID(id string, registry *component.ComponentRegistry) *Gameobject {
 	obj := &Gameobject{
 		id:         id,
 		components: make(map[string]component.Component),
-		registry:   component.NewComponentRegistry(),
+		registry:   registry,
 	}
 	obj.SetName(DefaultGameobjectName)
 	obj.SetGroup(DefaultGameobjectGroup)
@@ -108,6 +93,15 @@ func (g *Gameobject) GetComponent(componentName string) (component.Component, bo
 	return comp, ok
 }
 
+// List all the components the gameobject holds
+func (g *Gameobject) ListComponents() []component.Component {
+	comps := []component.Component{}
+	for _, comp := range g.components {
+		comps = append(comps, comp)
+	}
+	return comps
+}
+
 // Returns the all the details of the gameobject
 func (g *Gameobject) GetGameobjectDetails() GameobjectDetails {
 	componentsData := []component.ComponentDetails{}
@@ -132,10 +126,11 @@ func (g *Gameobject) BuildFromDetails(data GameobjectDetails) error {
 	g.SetGroup(data.Group)
 
 	for _, compDetails := range data.Components {
-		comp, found := g.registry.GetComponent(compDetails.Name)
+		factory, found := g.registry.GetComponent(compDetails.Name)
 		if !found {
-			return ErrComponentNotFound
+			return NewErrComponentNotFound(compDetails.Name)
 		}
+		comp := factory()
 		err := comp.BuildFromDetails(compDetails.Data)
 		if err != nil {
 			return err

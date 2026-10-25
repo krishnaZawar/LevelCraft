@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/gamestatemanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/handler"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/router"
 )
 
@@ -22,7 +23,12 @@ func main() {
 
 	flag.Parse()
 
-	err := verifyFilename(*fileName)
+	err := inputmanager.LoadMapping()
+	if err != nil {
+		panic(err)
+	}
+
+	err = verifyFilename(*fileName)
 	if err != nil {
 		panic(err)
 	}

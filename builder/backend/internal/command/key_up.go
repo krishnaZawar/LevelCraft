@@ -22,13 +22,14 @@ func (kuc *KeyUpCommand) GetCommandName() string {
 }
 
 // break down the command into events based on the game semantics
-func (kuc *KeyUpCommand) Handle() []models.Event {
+func (kuc *KeyUpCommand) Handle() error {
 	// pass through the interpreter and handle command
 	err := kuc.inputManager.SetInputState(kuc.KeyName, inputmanager.KeyState_Up)
 	if err != nil {
 		ls.ErrorWith(err).Msgf("failed to set key state up for %s", kuc.KeyName)
+		return err
 	}
-	return []models.Event{}
+	return nil
 }
 
 // CommandFactory to convert request to KeyUpCommand type
