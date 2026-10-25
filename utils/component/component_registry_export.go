@@ -22,6 +22,12 @@ func NewComponentRegistry(inputMapping *input.InputMapping) *models.ComponentReg
 	compRegistry.Register(base.ComponentName_InputMovement, func() models.Component {
 		return movement.NewBaseInputMovement(inputMapping)
 	})
+	compRegistry.Register(base.ComponentName_Patrol, func() models.Component {
+		return movement.NewBasePatrol()
+	})
+	compRegistry.Register(base.ComponentName_Follow, func() models.Component {
+		return movement.NewBaseFollow()
+	})
 
 	return compRegistry
 }

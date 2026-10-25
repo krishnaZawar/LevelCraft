@@ -40,10 +40,12 @@ func Test_GetComponentName(t *testing.T) {
 }
 
 func Test_ComponentList(t *testing.T) {
-	listLen := 3
+	listLen := 5
 	assert.Equal(t, listLen, len(ComponentList))
 
 	assert.Equal(t, true, contains(ComponentList, base.ComponentName_InputMovement))
 	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Transform))
 	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Color))
+	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Patrol))
+	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Follow))
 }

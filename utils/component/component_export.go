@@ -14,6 +14,8 @@ var (
 		base.ComponentName_Transform,
 		base.ComponentName_Color,
 		base.ComponentName_InputMovement,
+		base.ComponentName_Patrol,
+		base.ComponentName_Follow,
 	}
 )
 
@@ -36,4 +38,22 @@ type InputMovement = movement.InputMovement
 
 func NewInputMovement(inputmapping *input.InputMapping, speed float64) *movement.InputMovement {
 	return movement.NewInputMovement(inputmapping, speed)
+}
+
+type Patrol = movement.Patrol
+type Point = movement.Point
+
+func NewPatrol(speed float64, points []Point, pingPong bool) *Patrol {
+	return movement.NewPatrol(speed, points, pingPong)
+}
+
+type Follow = movement.Follow
+
+const (
+	FollowTarget_Object = movement.FollowTarget_Object
+	FollowTarget_Point  = movement.FollowTarget_Point
+)
+
+func NewFollow(speed float64, targetMode string, stopDistance float64) *Follow {
+	return movement.NewFollow(speed, targetMode, stopDistance)
 }

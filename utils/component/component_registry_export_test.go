@@ -15,13 +15,25 @@ func Test_NewComponentRegistry(t *testing.T) {
 	mapping := &input.InputMapping{}
 	compRegistry := NewComponentRegistry(mapping)
 
-	assert.Equal(t, 3, compRegistry.Size())
+	assert.Equal(t, 5, compRegistry.Size())
 
 	var expected models.Component
 	var factory models.ComponentFactory
 	factory, ok := compRegistry.GetComponent(base.ComponentName_Transform)
 	comp := factory()
 	expected = basecomp.NewBaseTransform()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, expected, comp)
+
+	factory, ok = compRegistry.GetComponent(base.ComponentName_Patrol)
+	comp = factory()
+	expected = movement.NewBasePatrol()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, expected, comp)
+
+	factory, ok = compRegistry.GetComponent(base.ComponentName_Follow)
+	comp = factory()
+	expected = movement.NewBaseFollow()
 	assert.Equal(t, true, ok)
 	assert.Equal(t, expected, comp)
 

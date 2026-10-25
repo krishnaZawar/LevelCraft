@@ -5,6 +5,8 @@ const (
 	ComponentName_Transform     = "Transform"
 	ComponentName_Color         = "Color"
 	ComponentName_InputMovement = "InputMovement"
+	ComponentName_Patrol        = "Patrol"
+	ComponentName_Follow        = "Follow"
 )
 
 // Indicates the bounds of color value ranges
