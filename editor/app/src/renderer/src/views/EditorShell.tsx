@@ -287,13 +287,13 @@ function ComponentCard({
           type="button"
           onClick={() => toggleCollapsed(name)}
           aria-expanded={!isCollapsed}
-          className="flex flex-1 items-center gap-1 text-left text-xs font-semibold"
+          className="flex min-w-0 flex-1 items-center gap-1 text-left text-xs font-semibold"
         >
           <ChevronRight
-            className={cn('size-3.5 transition-transform', !isCollapsed && 'rotate-90')}
+            className={cn('size-3.5 shrink-0 transition-transform', !isCollapsed && 'rotate-90')}
             aria-hidden
           />
-          {name}
+          <span className="truncate">{name}</span>
         </button>
         <Button
           variant="ghost"
@@ -353,7 +353,12 @@ function AttributesPanel(): React.JSX.Element {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="border-border grid grid-cols-2 gap-2 border-b p-3">
+      <div
+        className="border-border grid gap-2 border-b p-3"
+        // Name and group sit side by side while they fit and stack once they
+        // do not, rather than being clipped at the panel edge.
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 7.5rem), 1fr))' }}
+      >
         <TextField
           // Remounted per object so the inputs always start from the object
           // actually selected, rather than carrying over a previous edit.

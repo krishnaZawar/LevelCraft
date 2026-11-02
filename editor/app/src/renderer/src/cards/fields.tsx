@@ -24,7 +24,9 @@ interface FieldProps<T> {
 
 function FieldLabel({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <span className="text-muted-foreground text-[10px] tracking-wide uppercase">{children}</span>
+    <span className="text-muted-foreground shrink-0 text-[10px] tracking-wide uppercase">
+      {children}
+    </span>
   )
 }
 
@@ -51,7 +53,7 @@ export function NumberField({ config, value, onCommit }: FieldProps<number>): Re
   }
 
   return (
-    <label className="flex items-center gap-2" title={config.help}>
+    <label className="flex min-w-0 items-center gap-2" title={config.help}>
       <FieldLabel>{config.label}</FieldLabel>
       <Input
         value={text}
@@ -66,7 +68,7 @@ export function NumberField({ config, value, onCommit }: FieldProps<number>): Re
             e.currentTarget.blur()
           }
         }}
-        className="h-7 flex-1 text-xs"
+        className="h-7 w-full min-w-0 flex-1 text-xs"
       />
     </label>
   )
@@ -76,7 +78,7 @@ export function TextField({ config, value, onCommit }: FieldProps<string>): Reac
   const [text, setText] = useState(value)
 
   return (
-    <label className="flex items-center gap-2" title={config.help}>
+    <label className="flex min-w-0 items-center gap-2" title={config.help}>
       <FieldLabel>{config.label}</FieldLabel>
       <Input
         value={text}
@@ -90,7 +92,7 @@ export function TextField({ config, value, onCommit }: FieldProps<string>): Reac
             e.currentTarget.blur()
           }
         }}
-        className="h-7 flex-1 text-xs"
+        className="h-7 w-full min-w-0 flex-1 text-xs"
       />
     </label>
   )
@@ -98,7 +100,7 @@ export function TextField({ config, value, onCommit }: FieldProps<string>): Reac
 
 export function CheckboxField({ config, value, onCommit }: FieldProps<boolean>): React.JSX.Element {
   return (
-    <label className="flex items-center gap-2" title={config.help}>
+    <label className="flex min-w-0 items-center gap-2" title={config.help}>
       <Checkbox
         checked={value}
         aria-label={config.label}
@@ -128,19 +130,23 @@ export function SliderField({ config, value, onCommit }: FieldProps<number>): Re
   const max = config.max ?? 100
 
   return (
-    <label className="flex items-center gap-2" title={config.help}>
+    <label className="flex min-w-0 items-center gap-2" title={config.help}>
       <FieldLabel>{config.label}</FieldLabel>
       <Slider
         value={[draft]}
+        // Keeps a usable track: without a floor the thumb is all that is left
+        // of the control once the panel narrows.
         min={min}
         max={max}
         step={config.step ?? 1}
         aria-label={config.label}
         onValueChange={([next]) => setDraft(next)}
         onValueCommit={([next]) => next !== value && onCommit(next)}
-        className="flex-1"
+        className="min-w-16 flex-1"
       />
-      <span className="text-muted-foreground w-8 text-right text-xs tabular-nums">{draft}</span>
+      <span className="text-muted-foreground w-8 shrink-0 text-right text-xs tabular-nums">
+        {draft}
+      </span>
     </label>
   )
 }
@@ -152,10 +158,14 @@ export function SelectField({
   onCommit
 }: FieldProps<string> & { options: SelectOption[] }): React.JSX.Element {
   return (
-    <label className="flex items-center gap-2" title={config.help}>
+    <label className="flex min-w-0 items-center gap-2" title={config.help}>
       <FieldLabel>{config.label}</FieldLabel>
       <Select value={value || undefined} onValueChange={onCommit}>
-        <SelectTrigger size="sm" className="h-7 flex-1 text-xs" aria-label={config.label}>
+        <SelectTrigger
+          size="sm"
+          className="h-7 w-full min-w-0 flex-1 text-xs"
+          aria-label={config.label}
+        >
           <SelectValue placeholder="None" />
         </SelectTrigger>
         <SelectContent>

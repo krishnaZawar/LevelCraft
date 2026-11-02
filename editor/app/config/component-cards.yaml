@@ -19,8 +19,8 @@ components:
           - { field: x, label: X, input: number }
           - { field: y, label: Y, input: number }
       - fields:
-          - { field: w, label: W, input: number, min: 1 }
-          - { field: h, label: H, input: number, min: 1 }
+          - { field: w, label: W, input: number }
+          - { field: h, label: H, input: number }
 
   Color:
     description: Fill colour, 0-255 per channel.
@@ -36,7 +36,7 @@ components:
     description: Move the object with the keyboard.
     rows:
       - fields:
-          - { field: speed, label: Speed, input: number, min: 0 }
+          - { field: speed, label: Speed, input: number }
 
       - fields:
           # The engine validates the flag and its keys together, so switching

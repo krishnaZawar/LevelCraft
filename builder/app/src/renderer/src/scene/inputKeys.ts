@@ -6,7 +6,18 @@
 // regular enough to derive rather than tabulate — and the backend's mapping
 // decides which of those names actually exist (see runtimeStore).
 
-// The codes whose engine name cannot be derived from their shape.
+// The irregular remainder: codes whose engine name cannot be worked out from
+// the shape of the code itself.
+//
+// Letters, digits and function keys are derived below rather than listed,
+// because `KeyA` -> `KEY_A` and `Digit0` -> `KEY_0` are rules. These are not:
+// the browser says `ArrowLeft` where the engine says `KEY_LEFT`, and
+// `ShiftLeft` where it says `KEY_LEFT_SHIFT`. There is no rule to apply, so
+// the 24 exceptions are spelled out and everything else is computed.
+//
+// Matching on the numeric code instead would be worse, not better: the
+// engine's codes are GLFW's, so Enter is 257 and ArrowLeft is 263, which
+// collide with nothing the browser reports.
 const NAMED_KEYS: Record<string, string> = {
   Space: 'KEY_SPACE',
   Escape: 'KEY_ESCAPE',

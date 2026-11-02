@@ -6,7 +6,21 @@
 import { useEditorStore } from '@/store/editorStore'
 import { resolveRows } from './config'
 import { CheckboxField, NumberField, SelectField, SliderField, TextField } from './fields'
-import type { Condition, FieldConfig, SelectOption } from './types'
+import type { Condition, FieldConfig, InputType, SelectOption } from './types'
+
+// The narrowest each widget stays usable at, in rem. A row pairs its fields
+// while they all clear their own minimum and stacks them once they do not, so
+// a pair of number boxes still sits side by side in a panel too narrow for a
+// pair of sliders.
+const MIN_FIELD_WIDTH: Record<InputType, number> = {
+  number: 5,
+  text: 5,
+  select: 6,
+  // a label, a track worth dragging, and the value it is showing
+  slider: 7.5,
+  // the label is a sentence rather than a letter
+  checkbox: 7
+}
 
 interface CardBodyProps {
   componentName: string
@@ -102,11 +116,20 @@ export function CardBody({
         const fields = row.fields.filter((field) => isVisible(field.visibleIf, details))
         if (fields.length === 0) return null
 
+        const minWidth = Math.max(...fields.map((field) => MIN_FIELD_WIDTH[field.input]))
+
         return (
           <div
             key={rowIndex}
             className="grid gap-x-3 gap-y-1.5"
-            style={{ gridTemplateColumns: `repeat(${fields.length}, minmax(0, 1fr))` }}
+            // Fields sit side by side while they fit and stack once they do
+            // not, rather than being squeezed into a fixed number of columns
+            // until their controls have no width left. The min() keeps the
+            // track from exceeding a panel narrower than the minimum itself,
+            // which would push the card past its own edge.
+            style={{
+              gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${minWidth}rem), 1fr))`
+            }}
           >
             {fields.map((field) => renderField(field, details, optionsFor, onCommit))}
           </div>
