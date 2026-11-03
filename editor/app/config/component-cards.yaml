@@ -19,8 +19,8 @@ components:
           - { field: x, label: X, input: number }
           - { field: y, label: Y, input: number }
       - fields:
-          - { field: w, label: W, input: number }
-          - { field: h, label: H, input: number }
+          - { field: w, label: W, input: number, min: 0 }
+          - { field: h, label: H, input: number, min: 0 }
 
   Color:
     description: Fill colour, 0-255 per channel.
