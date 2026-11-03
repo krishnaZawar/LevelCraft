@@ -16,7 +16,12 @@ function ScrollArea({
     >
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
+        // Radix renders the viewport's content in a `display: table` wrapper,
+        // which shrink-wraps to its content and so grows past a narrow panel
+        // instead of letting the content reflow inside it. Forcing it back to
+        // a block is what lets responsive children actually see the panel's
+        // width.
+        className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 [&>div]:!block"
       >
         {children}
       </ScrollAreaPrimitive.Viewport>

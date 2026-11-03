@@ -130,6 +130,27 @@ export async function loadGame(filepath: string): Promise<LoadGameResponse> {
   return { success: res.success, gameState: toGameState(res.gameState) }
 }
 
+interface InputKey {
+  name: string
+  code: number
+  label: string
+}
+
+interface GetInputMappingResponse {
+  success: boolean
+  mapping: { keyboard: InputKey[] | null; mouse: InputKey[] | null }
+}
+
+// Flattened to the shape a select wants, so the engine's key list is stated
+// once in the backend rather than copied into the card config.
+export async function getInputKeys(): Promise<{ value: string; label: string }[]> {
+  const res = await request<GetInputMappingResponse>('GET', '/inputmapping')
+  return [...(res.mapping.keyboard ?? []), ...(res.mapping.mouse ?? [])].map((key) => ({
+    value: key.name,
+    label: key.label
+  }))
+}
+
 export function getComponents(): Promise<GetComponentsResponse> {
   return request<GetComponentsResponse>('GET', '/components/')
 }

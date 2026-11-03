@@ -1,0 +1,140 @@
+// The generator: turns a component's config rows into its card body.
+//
+// This is the only place that decides how a field is edited, which is what
+// keeps every card consistent no matter who adds the next component.
+
+import { useEditorStore } from '@/store/editorStore'
+import { resolveRows } from './config'
+import { CheckboxField, NumberField, SelectField, SliderField, TextField } from './fields'
+import type { Condition, FieldConfig, InputType, SelectOption } from './types'
+
+// The narrowest each widget stays usable at, in rem. A row pairs its fields
+// while they all clear their own minimum and stacks them once they do not, so
+// a pair of number boxes still sits side by side in a panel too narrow for a
+// pair of sliders.
+const MIN_FIELD_WIDTH: Record<InputType, number> = {
+  number: 5,
+  text: 5,
+  select: 6,
+  // a label, a track worth dragging, and the value it is showing
+  slider: 7.5,
+  // the label is a sentence rather than a letter
+  checkbox: 7
+}
+
+interface CardBodyProps {
+  componentName: string
+  details: Record<string, unknown>
+  // Takes a patch rather than one field, because switching a flag on can need
+  // its dependent fields set in the same update to pass engine validation.
+  onCommit: (patch: Record<string, unknown>) => void
+}
+
+function isVisible(condition: Condition | undefined, details: Record<string, unknown>): boolean {
+  if (!condition) return true
+  return details[condition.field] === condition.equals
+}
+
+function renderField(
+  config: FieldConfig,
+  details: Record<string, unknown>,
+  optionsFor: (config: FieldConfig) => SelectOption[],
+  onCommit: CardBodyProps['onCommit']
+): React.JSX.Element {
+  const value = details[config.field]
+  // Text-like inputs are remounted whenever the stored value changes, so they
+  // always start from what the component holds rather than a stale draft. The
+  // slider syncs itself instead, because remounting it would drop focus
+  // mid-adjustment.
+  // JSON rather than String(): a value can be any shape, and String() on an
+  // object yields "[object Object]" for every one of them.
+  const key = config.input === 'slider' ? config.field : `${config.field}:${JSON.stringify(value)}`
+  const commit = (next: unknown): void => onCommit({ [config.field]: next })
+
+  switch (config.input) {
+    case 'checkbox':
+      return (
+        <CheckboxField
+          key={key}
+          config={config}
+          value={value === true}
+          onCommit={(checked) =>
+            onCommit(
+              checked && config.enables
+                ? { [config.field]: true, ...config.enables }
+                : { [config.field]: checked }
+            )
+          }
+        />
+      )
+    case 'select':
+      return (
+        <SelectField
+          key={key}
+          config={config}
+          value={typeof value === 'string' ? value : ''}
+          options={optionsFor(config)}
+          onCommit={commit}
+        />
+      )
+    case 'slider':
+      return <SliderField key={key} config={config} value={Number(value ?? 0)} onCommit={commit} />
+    case 'text':
+      return (
+        <TextField
+          key={key}
+          config={config}
+          value={typeof value === 'string' ? value : ''}
+          onCommit={commit}
+        />
+      )
+    case 'number':
+      return <NumberField key={key} config={config} value={Number(value ?? 0)} onCommit={commit} />
+  }
+}
+
+export function CardBody({
+  componentName,
+  details,
+  onCommit
+}: CardBodyProps): React.JSX.Element | null {
+  const inputKeys = useEditorStore((state) => state.inputKeys)
+
+  const { rows } = resolveRows(componentName, details)
+  if (rows.length === 0) return null
+
+  // Dynamic lists come from the engine rather than the config, so the key
+  // mapping is stated once in the backend and never copied into YAML.
+  const optionsFor = (config: FieldConfig): SelectOption[] =>
+    config.optionsFrom === 'inputKeys' ? inputKeys : (config.options ?? [])
+
+  return (
+    <div className="space-y-2 px-2.5 pt-0.5 pb-2.5">
+      {rows.map((row, rowIndex) => {
+        if (!isVisible(row.visibleIf, details)) return null
+
+        const fields = row.fields.filter((field) => isVisible(field.visibleIf, details))
+        if (fields.length === 0) return null
+
+        const minWidth = Math.max(...fields.map((field) => MIN_FIELD_WIDTH[field.input]))
+
+        return (
+          <div
+            key={rowIndex}
+            className="grid gap-x-3 gap-y-1.5"
+            // Fields sit side by side while they fit and stack once they do
+            // not, rather than being squeezed into a fixed number of columns
+            // until their controls have no width left. The min() keeps the
+            // track from exceeding a panel narrower than the minimum itself,
+            // which would push the card past its own edge.
+            style={{
+              gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${minWidth}rem), 1fr))`
+            }}
+          >
+            {fields.map((field) => renderField(field, details, optionsFor, onCommit))}
+          </div>
+        )
+      })}
+    </div>
+  )
+}

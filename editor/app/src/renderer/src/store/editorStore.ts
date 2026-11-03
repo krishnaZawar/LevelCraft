@@ -9,6 +9,7 @@ import {
   updateComponent as apiUpdateComponent,
   updateGameobject as apiUpdateGameobject,
   getComponents,
+  getInputKeys,
   getGameState,
   type GameState
 } from '../api/gameApi'
@@ -66,9 +67,12 @@ interface EditorStoreState {
   loadError: string | null
   selectedObjectId: string | null
   availableComponents: string[]
+  // Option list for any card field declaring `optionsFrom: inputKeys`.
+  inputKeys: { value: string; label: string }[]
 
   fetchGameState: () => Promise<void>
   fetchAvailableComponents: () => Promise<void>
+  fetchInputKeys: () => Promise<void>
   selectObject: (id: string | null) => void
   reorderObjects: (draggedId: string, targetId: string) => void
   reorderComponents: (objectId: string, draggedName: string, targetName: string) => void
@@ -102,6 +106,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
   loadError: null,
   selectedObjectId: null,
   availableComponents: [],
+  inputKeys: [],
 
   fetchGameState: async () => {
     set({ isLoading: true, loadError: null })
@@ -123,6 +128,14 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       set({ availableComponents: components })
     } catch {
       // Non-critical: the add-component dropdown just stays empty.
+    }
+  },
+
+  fetchInputKeys: async () => {
+    try {
+      set({ inputKeys: await getInputKeys() })
+    } catch {
+      // Non-critical: key dropdowns stay empty rather than blocking the panel.
     }
   },
 

@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/gamestatemanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/handler"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
@@ -22,6 +23,16 @@ func main() {
 	fileName := flag.String("file-name", "", "name of the game file (should be json)")
 
 	flag.Parse()
+
+	// The only consumer of this API is our own player client running locally
+	// (dev server origin or a file:// packaged build), never a public caller,
+	// so a permissive CORS policy is appropriate here. The websocket needed
+	// none of this; the input-mapping request is the first plain HTTP call the
+	// player makes, and a browser holds that to the same-origin policy.
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "GET",
+	}))
 
 	err := inputmanager.LoadMapping()
 	if err != nil {
