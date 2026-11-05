@@ -5,7 +5,7 @@ import (
 	"github.com/krishnaZawar/LevelCraft/utils/models"
 )
 
-// Indicates that some kind of collision occured between the given pair of objects
+// Indicates that some kind of collision occurred between the given pair of objects
 type CollisionOccuredEvent struct {
 	Obj1_ID string // objID of the first object in the pair
 	Obj2_ID string // objID of the second object in the pair

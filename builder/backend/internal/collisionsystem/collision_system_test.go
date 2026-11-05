@@ -85,7 +85,7 @@ func Test_CalculateOverlap(t *testing.T) {
 			},
 		},
 		{
-			name:                   "a border of both the trasnforms touch",
+			name:                   "a border of both the transforms touch",
 			primaryObj_Transform:   component.NewTransform(100, 100, 100, 100),
 			secondaryObj_Transform: component.NewTransform(200, 100, 100, 100),
 			expectedOverlap: collisionOverlap{

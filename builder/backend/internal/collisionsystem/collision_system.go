@@ -13,7 +13,7 @@ import (
 )
 
 // Stores the overlap detected between the 2 objects
-// all 4 positive 					-> collision occured
+// all 4 positive 					-> collision occurred
 // atleast 1 zero rest positive		-> edge touching
 // atleast 1 negative 				-> no collision
 type collisionOverlap struct {
@@ -93,7 +93,7 @@ func (cs *CollisionSystem) DetectCollision(obj1, obj2 *gameobject.Gameobject) bo
 		return false
 	}
 
-	// detect if the collision occured between them or not
+	// detect if the collision occurred between them or not
 	overlap := calculateOverlap(obj1_transformComp, obj2_transformComp)
 
 	xOverlap := min(overlap.Left, overlap.Right)
@@ -198,12 +198,13 @@ func (cs *CollisionSystem) Handle(evt models.Event, _ float64) *models.EventResp
 				and as it is frame dependent there is no need for dt smoothening here
 	*/
 
-	if primary_movable && secondary_movable {
+	switch {
+	case primary_movable && secondary_movable:
 		primary_transformComp.UpdatePosition(xPrimary+dx/2, yPrimary+dy/2)
 		secondary_transformComp.UpdatePosition(xSecondary-dx/2, ySecondary-dy/2)
-	} else if primary_movable {
+	case primary_movable:
 		primary_transformComp.UpdatePosition(xPrimary+dx, yPrimary+dy)
-	} else {
+	case secondary_movable:
 		secondary_transformComp.UpdatePosition(xSecondary-dx, ySecondary-dy)
 	}
 
