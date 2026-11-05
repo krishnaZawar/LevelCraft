@@ -22,6 +22,10 @@ var cmdQueue = queue.NewCommandQueue(initCommandFactoryDecoder(inputmanager.Get(
 
 var evtQueue = queue.NewEventQueue()
 
+// The hard cap on processing of events in a frame can sometimes cause restriction of completing the resolution events hence we should have the separate event queue for Collision resolution events
+// This is separate from the standard eventQueue because collisions should be resolved for each frame completely else they would lag and defer in the next frame.
+var collisionEvtQueue = queue.NewEventQueue()
+
 var respQueue = helper.NewQueue[models.EventResponse]()
 
 func GetCommandQueue() *queue.CommandQueue {
@@ -34,4 +38,8 @@ func GetEventQueue() *queue.EventQueue {
 
 func GetRespQueue() *helper.Queue[models.EventResponse] {
 	return respQueue
+}
+
+func GetCollisionEventQueue() *queue.EventQueue {
+	return collisionEvtQueue
 }

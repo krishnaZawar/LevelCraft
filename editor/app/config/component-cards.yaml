@@ -33,7 +33,7 @@ components:
           - { field: a, label: A, input: slider, min: 0, max: 255 }
 
   InputMovement:
-    description: Move the object with the keyboard.
+    description: Move the object with the input.
     rows:
       - fields:
           - { field: speed, label: Speed, input: number }
@@ -61,3 +61,11 @@ components:
         fields:
           - { field: upKey, label: Up, input: select, optionsFrom: inputKeys }
           - { field: downKey, label: Down, input: select, optionsFrom: inputKeys }
+
+  Collider:
+    description: Enable collision detection and handling for that object.
+    rows:
+      - fields:
+          - field: immovable
+            label: Immovable
+            input: checkbox

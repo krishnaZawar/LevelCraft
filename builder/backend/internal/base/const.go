@@ -10,7 +10,8 @@ const (
 
 // Event names
 const (
-	Event_MoveEvent = "MoveEvent"
+	Event_MoveEvent             = "MoveEvent"
+	Event_CollisionOccuredEvent = "CollisionOccuredEvent"
 )
 
 const (
