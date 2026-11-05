@@ -3,6 +3,7 @@ package component
 import (
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/basecomp"
+	"github.com/krishnaZawar/LevelCraft/utils/component/internal/collision"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/models"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/movement"
 	"github.com/krishnaZawar/LevelCraft/utils/input"
@@ -21,6 +22,9 @@ func NewComponentRegistry(inputMapping *input.InputMapping) *models.ComponentReg
 	})
 	compRegistry.Register(base.ComponentName_InputMovement, func() models.Component {
 		return movement.NewBaseInputMovement(inputMapping)
+	})
+	compRegistry.Register(base.ComponentName_Collider, func() models.Component {
+		return collision.NewBaseCollider()
 	})
 
 	return compRegistry

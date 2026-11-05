@@ -3,6 +3,7 @@ package component
 import (
 	"github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/basecomp"
+	"github.com/krishnaZawar/LevelCraft/utils/component/internal/collision"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/models"
 	"github.com/krishnaZawar/LevelCraft/utils/component/internal/movement"
 	"github.com/krishnaZawar/LevelCraft/utils/input"
@@ -14,6 +15,7 @@ var (
 		base.ComponentName_Transform,
 		base.ComponentName_Color,
 		base.ComponentName_InputMovement,
+		base.ComponentName_Collider,
 	}
 )
 
@@ -36,4 +38,10 @@ type InputMovement = movement.InputMovement
 
 func NewInputMovement(inputmapping *input.InputMapping, speed float64) *movement.InputMovement {
 	return movement.NewInputMovement(inputmapping, speed)
+}
+
+type Collider = collision.Collider
+
+func NewCollider(immovable bool) *Collider {
+	return collision.NewCollider(immovable)
 }

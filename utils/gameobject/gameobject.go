@@ -3,6 +3,7 @@ package gameobject
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/google/uuid"
 	"github.com/krishnaZawar/LevelCraft/utils/component"
@@ -70,6 +71,9 @@ func NewGameobjectWithID(id string, registry *component.ComponentRegistry) *Game
 //
 // Rejects the addition if already a Component of that type resides with the gameobject
 func (g *Gameobject) AddComponent(comp component.Component) bool {
+	if comp == nil || reflect.ValueOf(comp).IsNil() {
+		return false
+	}
 	_, ok := g.components[comp.GetComponentName()]
 	if ok {
 		return false
