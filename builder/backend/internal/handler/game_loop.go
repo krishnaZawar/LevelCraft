@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/base"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/collisionsystem"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/event"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/eventgenerator"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/eventmanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/gamestatemanager"
@@ -22,6 +24,9 @@ func GameLoop() {
 	gamestateManager := gamestatemanager.Get()
 
 	evtGeneratorRegistry := eventgenerator.GetEventGeneratorRegistry()
+
+	collisionEvtQueue := queue.GetCollisionEventQueue()
+	collisionSystem := collisionsystem.Get()
 
 	const FPS = 60
 	frameStep := 1.0 / FPS
@@ -101,6 +106,43 @@ func GameLoop() {
 		}
 
 		// perform simulations
+
+		// detect collisions
+		gameobjects = gamestateManager.ListGameobjects()
+		for outerIdx := 0; outerIdx < len(gameobjects); outerIdx++ {
+			for innerIdx := outerIdx + 1; innerIdx < len(gameobjects); innerIdx++ {
+				if collisionSystem.DetectCollision(gameobjects[innerIdx], gameobjects[outerIdx]) {
+					/*
+						Ingest the event in both the queues so that the resolution can be done on priority without hindrance of maxProcessing from a separate queue.
+						While the main eventQueue can listen for the CollisionOccuredEvent and trigger the respective component handlers.
+						This will enable collision resolution as priority while still unblocking the events that would be triggered from this Event
+					*/
+					collisionEvtQueue.Ingest(&event.CollisionOccuredEvent{
+						Obj1_ID: gameobjects[innerIdx].GetID(),
+						Obj2_ID: gameobjects[outerIdx].GetID(),
+					})
+					// evtQueue.Ingest(&event.CollisionOccuredEvent{
+					// 	Obj1_ID: gameobjects[innerIdx].GetID(),
+					// 	Obj2_ID: gameobjects[outerIdx].GetID(),
+					// })
+				}
+			}
+		}
+
+		// resolve collisions
+		for collisionEvtQueue.Length() > 0 {
+			event, err := collisionEvtQueue.ConsumeEvent()
+			if err != nil {
+				continue
+			}
+			resp := collisionSystem.Handle(event, dt)
+			if !resp.Success {
+				ls.Warn().Msgf("collision resolution failed, event: %+v, resp: %+v", event, resp)
+			}
+		}
+
+		// process pending events
+
 		resp := models.EventResponse{
 			Success: true,
 			Msg:     "gamestate",

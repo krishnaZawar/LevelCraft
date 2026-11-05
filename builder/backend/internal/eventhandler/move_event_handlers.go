@@ -40,7 +40,7 @@ func (meh *MoveEventHandler) Handle(evt models.Event, dt float64) *models.EventR
 
 	transformComp, ok := comp.(*component.Transform)
 	if !ok {
-		return event.NewEmittableResponse(false, base.MsgComponentNotFound, base.NewErrComponentNotFound(compbase.ComponentName_Transform, moveEvt.GameobjectID))
+		return event.NewEmittableResponse(false, base.MsgComponentNotFound, base.NewErrComponentTypeMisMatch(compbase.ComponentName_Transform, comp.GetComponentName()))
 	}
 
 	x, y := transformComp.GetPosition()
