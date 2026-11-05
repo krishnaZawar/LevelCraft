@@ -87,6 +87,11 @@ func Test_NewGameobjectWithID(t *testing.T) {
 func Test_AddComponent(t *testing.T) {
 	obj := NewGameobject(registry)
 
+	t.Run("when nil component is passed", func(t *testing.T) {
+		ok := obj.AddComponent(nil)
+		assert.Equal(t, false, ok)
+	})
+
 	t.Run("when component does not exist", func(t *testing.T) {
 		ok := obj.AddComponent(comp)
 		assert.Equal(t, true, ok)

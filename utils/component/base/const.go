@@ -5,6 +5,7 @@ const (
 	ComponentName_Transform     = "Transform"
 	ComponentName_Color         = "Color"
 	ComponentName_InputMovement = "InputMovement"
+	ComponentName_Collider      = "Collider"
 )
 
 // Indicates the bounds of color value ranges

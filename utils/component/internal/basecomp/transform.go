@@ -13,6 +13,7 @@ const (
 )
 
 // Transform is used to determine the position and dimension of any object in the game scene
+// (x, y) indicate the position of the top-left corner of the object
 type Transform struct {
 	x float64 // x coordinate of the object
 	y float64 // y coordinate of the object
