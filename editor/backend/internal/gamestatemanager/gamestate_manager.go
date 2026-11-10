@@ -62,7 +62,7 @@ func (gsm *GameStateManager) GetGameState() []gameobject.GameobjectDetails {
 //
 // Used before loading a new scene so gameobjects from a previously
 // loaded project don't linger alongside the newly loaded ones
-func (gsm *GameStateManager) Reset() {
+func (gsm *GameStateManager) reset() {
 	gsm.mu.Lock()
 	defer gsm.mu.Unlock()
 	gsm.gameobjects = map[string]*gameobject.Gameobject{}
@@ -73,6 +73,7 @@ func (gsm *GameStateManager) Reset() {
 // Resets the current scene first, so this replaces rather than merges
 // with whatever was previously loaded
 func (gsm *GameStateManager) BuildFromDetails(data []byte) error {
+	gsm.reset()
 	var scene []gameobject.GameobjectDetails
 	err := json.Unmarshal(data, &scene)
 	if err != nil {
