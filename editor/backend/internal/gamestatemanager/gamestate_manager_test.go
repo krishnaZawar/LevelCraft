@@ -90,7 +90,7 @@ func Test_Reset(t *testing.T) {
 	gsm.AddGameobject(gameobject.NewGameobject(registry))
 	gsm.AddGameobject(gameobject.NewGameobject(registry))
 
-	gsm.Reset()
+	gsm.reset()
 
 	assert.Equal(t, 0, len(gsm.GetGameState()))
 }
@@ -172,5 +172,60 @@ func Test_buildFromDetails(t *testing.T) {
 		err := gsm.BuildFromDetails(sceneData)
 		assert.NotNil(t, err)
 		assert.Equal(t, 0, len(gsm.gameobjects))
+	})
+
+	t.Run("validate reset of game scene", func(t *testing.T) {
+		gsm := NewGameStateManager()
+		registry := component.NewComponentRegistry(&input.InputMapping{})
+		gsm.AddGameobject(gameobject.NewGameobject(registry))
+		gsm.AddGameobject(gameobject.NewGameobject(registry))
+
+		id, name, group := "obj123", "name", "group"
+
+		sceneData := []byte(`[
+			{
+				"id": "obj123",
+				"name": "name",
+				"group": "group",
+				"components": [
+					{
+						"name": "Transform",
+						"data": {
+							"x": 100,
+							"y": 100,
+							"w": 100,
+							"h": 100
+						}
+					}
+				]
+			}
+		]`)
+
+		compData := component.ComponentDetails{
+			Name: base.ComponentName_Transform,
+			Data: json.RawMessage(`{
+				"x": 100,
+				"y": 100,
+				"w": 100,
+				"h": 100
+			}`),
+		}
+
+		err := gsm.BuildFromDetails(sceneData)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(gsm.gameobjects))
+
+		obj, found := gsm.GetGameobject(id)
+		assert.Equal(t, true, found)
+		assert.Equal(t, id, obj.GetID())
+		assert.Equal(t, name, obj.GetName())
+		assert.Equal(t, group, obj.GetGroup())
+
+		comp, found := obj.GetComponent(base.ComponentName_Transform)
+		assert.Equal(t, true, found)
+
+		actualDetails := comp.GetComponentDetails()
+		assert.JSONEq(t, string(compData.Data), string(actualDetails.Data))
+		assert.Equal(t, compData.Name, actualDetails.Name)
 	})
 }
