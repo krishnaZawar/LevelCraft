@@ -1,20 +1,42 @@
-#  <p align = "center">LevelCraft</p>
+<h1 align="center">LevelCraft</h1>
 
-LevelCraft is a **no-code game engine for creating games without having to build the engine yourself**.
+<p align="center">
+  A no code game engine for creating games without having to build the engine yourself.
+  <br />
+  <strong>Create. Compose. Play.</strong>
+</p>
 
-It is being built around a simple idea: creators should be able to define games through **entities, components, interactions, rules, and state**, while LevelCraft handles the underlying systems required to build and run them.
+<p align="center">
+  <a href="https://github.com/krishnaZawar/LevelCraft/actions/workflows/ci.yaml"><img alt="CI" src="https://github.com/krishnaZawar/LevelCraft/actions/workflows/ci.yaml/badge.svg?branch=master" /></a>
+  <img alt="Status" src="https://img.shields.io/badge/status-early_development-orange?style=flat" />
+  <a href="https://go.dev/"><img alt="Go" src="https://img.shields.io/badge/Go-1.26-00ADD8?style=flat&logo=go&logoColor=white" /></a>
+  <a href="https://www.typescriptlang.org/"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white" /></a>
+  <a href="https://react.dev/"><img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black" /></a>
+  <a href="https://www.electronjs.org/"><img alt="Electron" src="https://img.shields.io/badge/Electron-47848F?style=flat&logo=electron&logoColor=white" /></a>
+  <a href="https://github.com/krishnaZawar/LevelCraft"><img alt="Star this repo" src="https://img.shields.io/badge/⭐_Star-This_repo-lightgrey?style=flat" /></a>
+</p>
 
-The goal is to shorten the distance between **an idea and a playable game** — giving creators more time to design, experiment, and iterate, and less time engineering the machinery underneath.
+<p align="center">
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#what-you-can-build-today">Components</a> ·
+  <a href="#usage-docs">Usage docs</a> ·
+  <a href="#how-it-works">Architecture</a> ·
+  <a href="#where-it-stands-today">Status</a>
+</p>
 
-**Create. Compose. Play.**
+---
+
+LevelCraft is built around a simple idea: creators should define games through **entities, components, interactions, rules, and state**, while the engine handles the systems required to build and run them.
+
+The goal is to shorten the distance between an idea and a playable game, giving creators more time to design and iterate and less time engineering the machinery underneath.
 
 ## Why LevelCraft?
 
 Creating a game shouldn't begin with building the technology needed to create one.
 
-A simple game idea can quickly turn into engineering work — managing entities, state, events, persistence, runtime systems, and the countless pieces of infrastructure that sit between an idea and something playable.
+A simple idea turns into engineering work fast: entities, state, events, persistence, runtime systems, and the infrastructure sitting between an idea and something playable.
 
-LevelCraft is built to move that complexity **from the creator to the engine**.
+LevelCraft moves that complexity **from the creator to the engine**.
 
 The creator should think about:
 
@@ -32,19 +54,101 @@ The goal is to make the path from `idea → game → play` shorter, simpler, and
 Less time building the engine. More time building the game.
 ```
 
- ## How it works
+## What you can build today
 
- LevelCraft is built as a set of cooperating systems with clear responsibilities.
+A game in LevelCraft is a scene of **gameobjects**, each one a name and a set of **components** that give it presence and behaviour.
 
- The **Orchestrator is the application entry point**. It starts LevelCraft and manages the lifecycle of the processes that make up the application, including the Editor.
+Four components ship today:
 
- The **Editor** is where the game is authored.
+| Component | What it gives an object |
+| --- | --- |
+| **Transform** | A position and a size in the world. Everything visible needs one. |
+| **Color** | A fill colour, so the object can be seen. |
+| **InputMovement** | Movement driven by the keys you choose, per axis. |
+| **Collider** | A body that collides with other bodies, optionally immovable. |
 
- The **Builder** prepares the authored game for execution.
+Compose them and the behaviour follows: a Transform and a Color is scenery, add InputMovement and it is a player, add a Collider to both and they stop passing through each other.
 
- The **Runtime** executes the game.
+Everything in the editor works against this set, from placing objects on the canvas to editing their attributes and running the game. The set grows as the engine does.
 
- The goal is for these systems to feel like one application while remaining clearly separated underneath:
+## Getting started
+
+### Prerequisites
+
+| | Version |
+| --- | --- |
+| [Go](https://go.dev/dl/) | 1.26.1 |
+| [Node.js](https://nodejs.org/) | 22 |
+
+### Install
+
+```bash
+git clone https://github.com/krishnaZawar/LevelCraft.git
+cd LevelCraft
+
+# the editor and player clients
+(cd editor/app && npm install)
+(cd builder/app && npm install)
+```
+
+### Run
+
+The orchestrator is the entry point. It starts every process LevelCraft needs, so this is the only command to run:
+
+```bash
+cd orchestrator
+go run ./cmd
+```
+
+The editor window opens on its own. Closing it shuts the rest down with it.
+
+> The orchestrator resolves the other services by relative path, so run it from the `orchestrator` directory rather than the repository root.
+
+### Run the tests
+
+```bash
+# Go services
+for mod in $(find . -name go.mod); do (cd $(dirname $mod) && go test ./...); done
+
+# clients
+(cd editor/app && npm test)
+(cd builder/app && npm test)
+```
+
+## See it in action
+
+<!--
+  TODO: record a short walkthrough that builds and plays a small game, and
+  embed it here. It should cover: create a project, add an object, give it
+  Transform, Color and InputMovement, press Run, move the object with the keys.
+-->
+
+_A walkthrough video is being recorded and will be linked here._
+
+## Usage docs
+
+Guides for using the engine, covering the editor panels, projects, gameobjects and each component, live in **[user-guide](./user-guide/)**.
+
+| Guide | What it covers |
+| --- | --- |
+| [Editor](./user-guide/editor.md) | The panels, how to use them, and how to run your game |
+| [Projects](./user-guide/projects.md) | Creating a project and what lives inside one |
+| [Gameobjects](./user-guide/gameobjects.md) | What they are, their lifecycle, and worked examples |
+| [Components](./user-guide/components.md) | Each component, its attributes, and how to use it |
+
+## How it works
+
+LevelCraft is built as a set of cooperating systems with clear responsibilities.
+
+The **Orchestrator is the application entry point**. It starts LevelCraft and manages the lifecycle of the processes that make up the application, including the Editor.
+
+The **Editor** is where the game is authored.
+
+The **Builder** prepares the authored game for execution.
+
+The **Runtime** executes the game.
+
+The goal is for these systems to feel like one application while remaining clearly separated underneath:
 
 ```
 Create → Build → Play → Iterate
@@ -54,7 +158,7 @@ Create → Build → Play → Iterate
 
 ![builder architecture](./docs/builder/builder-flow.drawio.png)
 
- ### Complete Application Flow
+### Complete Application Flow
 
 ```mermaid
 sequenceDiagram
@@ -65,7 +169,7 @@ sequenceDiagram
     participant E as Editor
     participant B as Builder
 
-    rect rgb(235, 245, 255)
+    rect rgb(246, 246, 246)
         Note over User,E: 1. Application Start
 
         User->>O: Start LevelCraft
@@ -73,7 +177,7 @@ sequenceDiagram
         E-->>O: Editor ready
     end
 
-    rect rgb(235, 255, 240)
+    rect rgb(238, 238, 238)
         Note over User,B: 2. Run Game
 
         User->>E: Run Game
@@ -86,7 +190,7 @@ sequenceDiagram
         Note over B: Builder is running and ready
     end
 
-    rect rgb(255, 242, 235)
+    rect rgb(246, 246, 246)
         Note over User,B: 3. Exit Game
 
         User->>E: Exit Game
@@ -98,7 +202,7 @@ sequenceDiagram
         Note over E: Editor remains running
     end
 
-    rect rgb(255, 235, 235)
+    rect rgb(238, 238, 238)
         Note over User,O: 4. Exit Application
 
         User->>E: Exit Application
@@ -124,43 +228,21 @@ sequenceDiagram
 
 **Early development**
 
-LevelCraft is currently focused on connecting its core systems into a working game creation pipeline.
+The four application flows above are connected and working: the orchestrator starts the editor, a game runs on request, stopping it leaves the editor alone, and quitting shuts everything down together.
 
-The foundation is being built around four application flows:
+On top of that foundation, the parts a creator actually touches are taking shape:
 
-```text
-Application Start
-      ↓
-Orchestrator
-      ↓
-Editor Processes
-
-
-Run Game
-      ↓
-Builder Processes
-      ↓
-Runtime Ready
-
-
-Exit Game
-      ↓
-Builder Processes Stop
-
-
-Exit Application
-      ↓
-All Running Processes Stop
-```
-
-The individual pieces are taking shape. The current focus is making these flows reliable, predictable, and work together as one application.
+- **Authoring:** create and open projects, add, duplicate and delete gameobjects, attach and remove components, and edit their attributes
+- **Canvas:** an infinite pan and zoom workspace with the game screen marked out, with objects dragged and resized directly on it
+- **Running:** Run launches the game in its own player window and Stop returns to the editor, with the scene running from a throwaway copy so playing never overwrites your project
+- **Runtime:** a game loop with frame pacing, keyboard input driving movement, and collision detection between bodies
 
 LevelCraft is not production-ready yet. The architecture, APIs, and internal abstractions are expected to evolve as the engine is built and exercised.
 
 What to Expect
 - Core systems are actively being developed
-- End-to-end application flows are being connected
 - APIs and architecture may change
+- The component set is small and growing
 - Some functionality is incomplete or experimental
 - Documentation will evolve alongside the implementation
 
