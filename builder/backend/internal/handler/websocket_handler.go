@@ -5,10 +5,9 @@ import (
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/logger"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/queue"
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
-	utilqueue "github.com/krishnaZawar/LevelCraft/utils/queue"
 )
 
 var ls = logger.Get()
@@ -49,7 +48,7 @@ func readLoop(c *websocket.Conn, errCh chan<- error) {
 // returns error on read failures only.
 // Unmarshalling is ignored as a failure because
 // this is due to a faulty request, not a connection issue
-func readLoopIter(c *websocket.Conn, cmdQueue *utilqueue.CommandQueue) error {
+func readLoopIter(c *websocket.Conn, cmdQueue *queue.CommandQueue) error {
 	messageType, msg, err := c.ReadMessage()
 	if err != nil {
 		return err

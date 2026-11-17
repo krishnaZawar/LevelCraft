@@ -1,6 +1,8 @@
 package event
 
-import "github.com/krishnaZawar/LevelCraft/utils/models"
+import (
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
+)
 
 // To create an EventResponse that is sent to the frontend
 func NewEmittableResponse(success bool, msg string, data interface{}) *models.EventResponse {

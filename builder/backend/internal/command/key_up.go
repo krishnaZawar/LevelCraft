@@ -5,7 +5,7 @@ import (
 
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/base"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 )
 
 // KeyUpCommand indicates that a keyboard key was released and inputManager needs to be updated

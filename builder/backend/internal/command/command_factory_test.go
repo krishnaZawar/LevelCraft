@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/stretchr/testify/assert"
 )
 

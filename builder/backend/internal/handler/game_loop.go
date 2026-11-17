@@ -10,8 +10,8 @@ import (
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/eventmanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/gamestatemanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/queue"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
 )
 
 // The game loop is where all the command and event processing happens
