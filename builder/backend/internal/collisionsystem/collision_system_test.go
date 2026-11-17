@@ -6,11 +6,11 @@ import (
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/base"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/event"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/gamestatemanager"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/krishnaZawar/LevelCraft/utils/component"
 	compbase "github.com/krishnaZawar/LevelCraft/utils/component/base"
 	"github.com/krishnaZawar/LevelCraft/utils/gameobject"
 	"github.com/krishnaZawar/LevelCraft/utils/input"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
 	"github.com/stretchr/testify/assert"
 )
 

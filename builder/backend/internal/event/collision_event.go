@@ -2,7 +2,7 @@ package event
 
 import (
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/base"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 )
 
 // Indicates that some kind of collision occurred between the given pair of objects

@@ -1,8 +1,8 @@
 package eventgenerator
 
 import (
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/krishnaZawar/LevelCraft/utils/component"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
 )
 
 // Holds the details required for the event generation from context

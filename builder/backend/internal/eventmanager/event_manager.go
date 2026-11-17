@@ -4,7 +4,7 @@ import (
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/base"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/eventhandler"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/gamestatemanager"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 )
 
 // EventManager routes the event to their respective handlers

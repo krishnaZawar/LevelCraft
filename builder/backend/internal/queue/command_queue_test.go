@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/krishnaZawar/LevelCraft/utils/helper"
-	"github.com/krishnaZawar/LevelCraft/utils/models"
 	"github.com/stretchr/testify/assert"
 )
 
