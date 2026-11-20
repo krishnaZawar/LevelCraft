@@ -21,6 +21,10 @@ func Test_CommandNames(t *testing.T) {
 			command:      &KeyUpCommand{},
 			expectedName: base.Command_KeyUp,
 		},
+		{
+			command:      &SetExecutionStateCommand{},
+			expectedName: base.Command_SetExecutionState,
+		},
 	}
 
 	for _, tt := range tests {

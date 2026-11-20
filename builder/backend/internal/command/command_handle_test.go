@@ -3,6 +3,7 @@ package command
 import (
 	"testing"
 
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/controlmanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/krishnaZawar/LevelCraft/utils/input"
@@ -62,7 +63,7 @@ var (
 	}
 )
 
-func Test_CommandHandles(t *testing.T) {
+func Test_KeyCommandHandles(t *testing.T) {
 	tests := []struct {
 		name                        string
 		keyName                     string
@@ -161,6 +162,56 @@ func Test_CommandHandles(t *testing.T) {
 				assert.Nil(t, err)
 			}
 			assert.Equal(t, tt.expectedFinalKeyState, val)
+		})
+	}
+}
+
+func Test_ExecutionStateCommandHandles(t *testing.T) {
+	defaultExecutionState := controlmanager.ExecutionState_Inactive
+	tests := []struct {
+		name                        string
+		createComm                  func(cm *controlmanager.ControlManager) models.Command
+		expectedHandleErr           bool
+		expectedFinalExecutionState controlmanager.ExecutionState
+	}{
+		{
+			name: "SetExecutionStateCommandTest valid data to handle function",
+			createComm: func(cm *controlmanager.ControlManager) models.Command {
+				return &SetExecutionStateCommand{
+					ExecutionState: controlmanager.ExecutionState_Active,
+					controlManager: cm,
+				}
+			},
+			expectedHandleErr:           false,
+			expectedFinalExecutionState: controlmanager.ExecutionState_Active,
+		},
+		{
+			name: "SetExecutionStateCommandTest invalid data to handle function",
+			createComm: func(cm *controlmanager.ControlManager) models.Command {
+				return &SetExecutionStateCommand{
+					ExecutionState: controlmanager.ExecutionState("invalid type"),
+					controlManager: cm,
+				}
+			},
+			expectedHandleErr:           true,
+			expectedFinalExecutionState: defaultExecutionState,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cm := &controlmanager.ControlManager{}
+			cm.SetExecutionState(defaultExecutionState)
+
+			comm := tt.createComm(cm)
+
+			err := comm.Handle()
+			if tt.expectedHandleErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+
+			assert.Equal(t, tt.expectedFinalExecutionState, cm.GetExecutionState())
 		})
 	}
 }

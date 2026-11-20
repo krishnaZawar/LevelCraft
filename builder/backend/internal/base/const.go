@@ -4,6 +4,8 @@ const ServiceName = "game-builder"
 
 // Command names
 const (
+	Command_SetExecutionState = "SetExecutionStateCommand"
+
 	Command_KeyDown = "KeyDownCommand"
 	Command_KeyUp   = "KeyUpCommand"
 )

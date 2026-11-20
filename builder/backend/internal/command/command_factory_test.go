@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/controlmanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/inputmanager"
 	"github.com/krishnaZawar/LevelCraft/builder/backend/internal/models"
 	"github.com/stretchr/testify/assert"
@@ -11,6 +12,7 @@ import (
 
 func Test_CommandFactory(t *testing.T) {
 	inputManager := &inputmanager.InputManager{}
+	controlManager := &controlmanager.ControlManager{}
 	tests := []struct {
 		name          string
 		factory       models.CommandFactory
@@ -78,6 +80,38 @@ func Test_CommandFactory(t *testing.T) {
 			factory: NewKeyUpCommandFactory(inputManager),
 			data: json.RawMessage(`{
 				"keyNam": "KEY_A
+			}`),
+			ExpectedErr:   true,
+			ExpectedValue: nil,
+		},
+		{
+			name:    "SetExecutionStateCommand valid marshal",
+			factory: NewSetExecutionStateCommandFactory(controlManager),
+			data: json.RawMessage(`{
+				"executionState": "state"
+			}`),
+			ExpectedErr: false,
+			ExpectedValue: &SetExecutionStateCommand{
+				controlManager: controlManager,
+				ExecutionState: controlmanager.ExecutionState("state"),
+			},
+		},
+		{
+			name:    "SetExecutionStateCommand valid marshal wrong payload",
+			factory: NewSetExecutionStateCommandFactory(controlManager),
+			data: json.RawMessage(`{
+				"executionStat": "KEY_A"
+			}`),
+			ExpectedErr: false,
+			ExpectedValue: &SetExecutionStateCommand{
+				controlManager: controlManager,
+			},
+		},
+		{
+			name:    "SetExecutionStateCommand invalid marshal",
+			factory: NewSetExecutionStateCommandFactory(controlManager),
+			data: json.RawMessage(`{
+				"executionState": "KEY_A
 			}`),
 			ExpectedErr:   true,
 			ExpectedValue: nil,

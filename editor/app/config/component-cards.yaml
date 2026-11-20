@@ -61,6 +61,16 @@ components:
         fields:
           - { field: upKey, label: Up, input: select, optionsFrom: inputKeys }
           - { field: downKey, label: Down, input: select, optionsFrom: inputKeys }
+  
+  ObjectFollow:
+    description: Move the object towards the target object
+    rows:
+      - fields:
+          - { field: speed, label: Speed, input: number }
+      - fields:
+          - { field: objectID, label: objectID, input: text }
+      - fields:
+          - { field: stopDistance, label: stopDistance, input: number, min: 0 }
 
   Collider:
     description: Enable collision detection and handling for that object.

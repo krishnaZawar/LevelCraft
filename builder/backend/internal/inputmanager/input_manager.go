@@ -86,6 +86,11 @@ func (im *InputManager) SetInputState(keyName string, state KeyState) error {
 	return nil
 }
 
+// resets all the key states to the initial state
+func (im *InputManager) ResetKeyStates() {
+	im.inputState = initKeyStates(im.mapping)
+}
+
 // get all the input states
 func (im *InputManager) GetAllStates() map[string]KeyState {
 	return im.inputState

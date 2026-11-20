@@ -1,0 +1,32 @@
+[
+    {
+        "name": "MoveEvent",
+        "description": "informs the consumers that a positional update should be processed for a particular gameobject",
+        "contextPassed": {
+            "gameobjectID": "<id of the gameobject whose position is to be updated>",
+            "moveX": "<distance by which the obejct should move in x-direction>",
+            "moveY": "<distance by which the obejct should move in y-direction>"
+        },
+        "producerComponents": [
+            "InputMovement",
+            "ObjectFollow"
+        ],
+        "consumerComponents": [
+            "Transform"
+        ]
+    },
+    {
+        "name": "CollisionOccuredEvent",
+        "description": "informs the game that a collision occured between 2 gameobjects",
+        "contextPassed": {
+            "object1_ID": "<id of the one object in the collision pair>",
+            "object2_ID": "<id of other object in the collision pair>"
+        },
+        "producerComponents": [
+            "Collider"
+        ],
+        "consumerComponents": [
+            "Transform  ->  for the resolution of the collision" 
+        ]
+    }
+]

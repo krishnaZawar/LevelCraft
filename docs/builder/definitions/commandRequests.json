@@ -12,5 +12,12 @@
         "payload": {
             "keyName": "<name of the key>"
         }
+    },
+    {
+        "name": "SetExecutionState",
+        "description": "control managers execution state updated to control frame processing",
+        "payload": {
+            "executionState": "<state-value>"
+        }
     }
 ]
