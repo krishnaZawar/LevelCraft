@@ -16,6 +16,7 @@ var (
 		base.ComponentName_Color,
 		base.ComponentName_InputMovement,
 		base.ComponentName_Collider,
+		base.ComponentName_ObjectFollow,
 	}
 )
 
@@ -38,6 +39,12 @@ type InputMovement = movement.InputMovement
 
 func NewInputMovement(inputmapping *input.InputMapping, speed float64) *movement.InputMovement {
 	return movement.NewInputMovement(inputmapping, speed)
+}
+
+type ObjectFollow = movement.ObjectFollow
+
+func NewObjectFollow(speed float64, objectID string, stopDist float64) *movement.ObjectFollow {
+	return movement.NewObjectFollow(speed, objectID, stopDist)
 }
 
 type Collider = collision.Collider

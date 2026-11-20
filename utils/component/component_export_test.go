@@ -44,6 +44,10 @@ func Test_GetComponentName(t *testing.T) {
 			comp:         collision.NewBaseCollider(),
 			expectedName: base.ComponentName_Collider,
 		},
+		{
+			comp:         movement.NewBaseObjectFollow(),
+			expectedName: base.ComponentName_ObjectFollow,
+		},
 	}
 
 	for _, tt := range tests {
@@ -53,11 +57,12 @@ func Test_GetComponentName(t *testing.T) {
 }
 
 func Test_ComponentList(t *testing.T) {
-	listLen := 4
+	listLen := 5
 	assert.Equal(t, listLen, len(ComponentList))
 
 	assert.Equal(t, true, contains(ComponentList, base.ComponentName_InputMovement))
 	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Transform))
 	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Color))
 	assert.Equal(t, true, contains(ComponentList, base.ComponentName_Collider))
+	assert.Equal(t, true, contains(ComponentList, base.ComponentName_ObjectFollow))
 }
