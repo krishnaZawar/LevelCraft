@@ -124,7 +124,7 @@ func GameLoop() {
 			}
 
 			// process the simulation events
-			eventsProcessed = processEvents(evtQueue, evtManager, eventsProcessed, dt)
+			eventsProcessed = processEvents(evtQueue, evtManager, eventsProcessed, dt) //nolint:staticcheck
 
 			// detect collisions
 			gameobjects = gamestateManager.ListGameobjects()

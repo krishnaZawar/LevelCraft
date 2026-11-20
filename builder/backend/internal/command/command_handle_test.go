@@ -200,7 +200,7 @@ func Test_ExecutionStateCommandHandles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cm := &controlmanager.ControlManager{}
-			cm.SetExecutionState(defaultExecutionState)
+			_ = cm.SetExecutionState(defaultExecutionState)
 
 			comm := tt.createComm(cm)
 

@@ -33,11 +33,11 @@ func newControlManager() *ControlManager {
 }
 
 // validates and sets the execution state of the control manager
-func (cm *ControlManager) SetExecutionState(ExecutionState ExecutionState) error {
-	if !ExecutionState.isValid() {
-		return fmt.Errorf("error: Invalid ExecutionState value passed: %s", ExecutionState)
+func (cm *ControlManager) SetExecutionState(executionState ExecutionState) error {
+	if !executionState.isValid() {
+		return fmt.Errorf("error: Invalid ExecutionState value passed: %s", executionState)
 	}
-	cm.ExecutionState = ExecutionState
+	cm.ExecutionState = executionState
 	return nil
 }
 

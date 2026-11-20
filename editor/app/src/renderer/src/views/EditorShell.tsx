@@ -377,12 +377,7 @@ function AttributesPanel(): React.JSX.Element {
         />
         <label className="col-span-full flex flex-col gap-1">
           <span className="text-muted-foreground text-[10px] tracking-wide uppercase"> ID </span>
-          <Input
-            key={selected.id}
-            value={selected.id}
-            readOnly
-            className="h-7 text-xs font-mono"
-          />
+          <Input key={selected.id} value={selected.id} readOnly className="h-7 text-xs font-mono" />
         </label>
       </div>
 
