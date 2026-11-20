@@ -375,6 +375,10 @@ function AttributesPanel(): React.JSX.Element {
           placeholder="None"
           onCommit={(group) => updateMetadata(selected.id, { group })}
         />
+        <label className="col-span-full flex flex-col gap-1">
+          <span className="text-muted-foreground text-[10px] tracking-wide uppercase"> ID </span>
+          <Input key={selected.id} value={selected.id} readOnly className="h-7 text-xs font-mono" />
+        </label>
       </div>
 
       <ScrollArea className="min-h-0 flex-1">

@@ -135,3 +135,24 @@ func Test_GetAllStates(t *testing.T) {
 
 	assert.Equal(t, expectedKeyState, state)
 }
+
+func Test_ResetKeyStates(t *testing.T) {
+	inputManager := NewInputManager(&testMapping)
+
+	err := inputManager.SetInputState(Name_KeyA, KeyState_Down)
+	assert.Nil(t, err)
+	state, err := inputManager.GetInputState(Name_KeyA)
+	assert.Nil(t, err)
+	assert.Equal(t, KeyState_Down, state)
+
+	inputManager.ResetKeyStates()
+
+	expectedKeyState := map[string]KeyState{
+		Name_KeyA:   KeyState_Up,
+		Name_Digit1: KeyState_Up,
+		Name_LMB:    KeyState_Up,
+		Name_RMB:    KeyState_Up,
+	}
+
+	assert.Equal(t, expectedKeyState, inputManager.GetAllStates())
+}

@@ -86,6 +86,16 @@ export const useRuntimeStore = create<RuntimeStoreState>((set, get) => ({
 
     ws.onopen = () => {
       if (socket === ws) set({ status: 'connected' })
+
+      // Activate the game execution state on initialization
+      ws.send(
+        JSON.stringify({
+          requestType: 'SetExecutionStateCommand',
+          requestDetails: {
+            executionState: 'active'
+          }
+        })
+      )
     }
 
     ws.onmessage = (event) => {
